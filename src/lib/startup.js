@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-async function getEBibleTranslations() {
+async function getEBibleTranslationsCatalog() {
 
     const axiosInstance = axios.create({});
     axiosInstance.defaults.headers = {
@@ -22,10 +22,12 @@ async function getEBibleTranslations() {
         .map(r => r.split(/", ?"/));
 
     const headers = catalogRows[0];
-    const catalog = catalogRows.slice(1).map(
+    const catalog = catalogRows.slice(1)
+        .map(
         r => {
             const ret = {};
-            headers.map((h, n) => ret[h] = r[n]);
+            headers.forEach((h, n) => ret[h] = r[n]);
+            ret.downloadURL = `https://eBible.org/Scriptures/${ret.translationId}_usfm.zip`;
             return ret;
         }
     )
@@ -33,4 +35,27 @@ async function getEBibleTranslations() {
     return catalog;
 }
 
-export { getEBibleTranslations }
+async function getEBibleContent(url) {
+    const axiosInstance = axios.create({});
+    axiosInstance.defaults.headers = {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+    };
+    const contentResponse = await axiosInstance.request({
+        method: "get",
+        responseType: 'text',
+        "url": url,
+        "validateStatus": false,
+    });
+    if (contentResponse.status === 200) {
+        console.log(`${url} downloaded`)
+        return contentResponse.data;
+    } else {
+        console.log(`${url} returned status code ${contentResponse.status}`);
+        return null;
+    }
+
+}
+
+export { getEBibleTranslationsCatalog, getEBibleContent }
