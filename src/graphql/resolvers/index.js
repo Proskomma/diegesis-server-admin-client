@@ -77,7 +77,7 @@ export default ({
         copyright: trans => trans.Copyright || '',
     },
     TranslationContent: {
-        nScriptureBooks: (trans, arg, context) => {
+        nScriptureBooks: (trans, args, context) => {
             const booksPath = path.resolve(
                 '..',
                 'static',
@@ -92,7 +92,7 @@ export default ({
                 return 0;
             }
         },
-        scriptureBookCodes: (trans, arg, context) => {
+        bookCodes: (trans, args, context) => {
             const booksPath = path.resolve(
                 '..',
                 'static',
@@ -105,6 +105,37 @@ export default ({
                 return fse.readdirSync(booksPath).map(p => p.split('.')[0]);
             } else {
                 return [];
+            }
+        },
+        hasBookCode: (trans, args, context) => {
+            const booksPath = path.resolve(
+                '..',
+                'static',
+                context.org.translationDir,
+                'translations',
+                trans.translationId,
+                'usfmBooks'
+            );
+            if (fse.pathExistsSync(booksPath)) {
+                return fse.readdirSync(booksPath).map(p => p.split('.')[0]).includes(args.code);
+            } else {
+                return false;
+            }
+        },
+        usfmForBookCode: (trans, args, context) => {
+            const bookPath = path.resolve(
+                '..',
+                'static',
+                context.org.translationDir,
+                'translations',
+                trans.translationId,
+                'usfmBooks',
+                `${args.code}.usfm`
+            );
+            if (fse.pathExistsSync(bookPath)) {
+                return fse.readFileSync(bookPath).toString();
+            } else {
+                return null;
             }
         },
     }

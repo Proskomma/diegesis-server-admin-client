@@ -45,8 +45,19 @@ export default gql`
     }
     """Content for a translation"""
     type TranslationContent {
-      """The number of Scripture books in the translation"""
+      """The number of Scripture books in this translation"""
       nScriptureBooks: Int!
-      scriptureBookCodes: [String!]!
+      """The bookCodes of Scripture books in this translation"""
+      bookCodes: [String!]!
+      """Whether or not the bookCode is present for this translation"""
+      hasBookCode(
+        """The bookCode (3-char upper-case Paratext format)"""
+        code: String!
+      ): Boolean!
+      """The USFM for this translation"""
+      usfmForBookCode(
+        """The USFM for a given bookCode"""
+        code: String!
+      ): String
     }
   `;
