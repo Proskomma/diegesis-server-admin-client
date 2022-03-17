@@ -19,7 +19,7 @@ async function getEBibleTranslationsCatalog() {
 
     const catalogRows = catalogResponse.data.split('\n')
         .map(r => r.slice(1, r.length - 1))
-        .map(r => r.split(/", ?"/));
+        .map(r => r.split(/", ?"/))
 
     const headers = catalogRows[0];
     const catalog = catalogRows.slice(1)
@@ -30,7 +30,7 @@ async function getEBibleTranslationsCatalog() {
             ret.downloadURL = `https://eBible.org/Scriptures/${ret.translationId}_usfm.zip`;
             return ret;
         }
-    )
+    ).filter(t => t.languageCode);
 
     return catalog;
 }

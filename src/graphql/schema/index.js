@@ -15,49 +15,71 @@ export default gql`
       """A short name for the organization"""
       name: String!
       """The number of translations for this organization"""
-      nCatalogEntries: Int!
+      nTranslations: Int!
       """The translations that are available from this organization"""
-      catalogEntries: [TranslationCatalogEntry!]!
+      translations: [Translation!]!
       """Content for the translation of this organization with the given id, if found"""
-      translationContent(
+      translation(
         """The id of the translation"""
         id: String!
-      ): TranslationContent
+      ): Translation
     }
-    """A catalog entry for a Scripture translation"""
-    type TranslationCatalogEntry {
+    """A Scripture translation"""
+    type Translation {
       """An id for the translation which is unique within the organization"""
       id: String!
       """The language code"""
       languageCode: String!
-      """The autonym of the language (ie the name of the language in that language)"""
-      languageLocalName: String!
-      """The name of the language in English"""
-      languageEnglishName: String!
-      """A long title for the translation"""
-      longTitle: String!
-      """A short title for the translation"""
-      shortTitle: String!
+      """A name of the language"""
+      languageName: String!
+      """a title of the translation"""
+      title: String!
       """A description of the translation"""
       description: String!
-      """The copyright notice for the translation"""
+      """The copyright notice or owner of the translation"""
       copyright: String!
-    }
-    """Content for a translation"""
-    type TranslationContent {
       """The number of Scripture books in this translation"""
-      nScriptureBooks: Int!
-      """The bookCodes of Scripture books in this translation"""
-      bookCodes: [String!]!
-      """Whether or not the bookCode is present for this translation"""
-      hasBookCode(
+      nUsfmBooks: Int
+      """The bookCodes of Scripture books as USFM in this translation"""
+      usfmBookCodes: [String!]
+      """Whether or not USFM for this bookCode is present for this translation"""
+      hasUsfmBookCode(
         """The bookCode (3-char upper-case Paratext format)"""
         code: String!
-      ): Boolean!
+      ): Boolean
+      """Is USFM available?"""
+      hasUsfm: Boolean!
       """The USFM for this translation"""
       usfmForBookCode(
-        """The USFM for a given bookCode"""
+        """The bookCode"""
         code: String!
       ): String
+      """Is USX available?"""
+      hasUsx: Boolean!
+      """The USX for this translation"""
+      usxForBookCode(
+        """The bookCode"""
+        code: String!
+      ): String
+      """Is Proskomma succinct docSet available?"""
+      hasSuccinct: Boolean!
+      """The Proskomma succinct docSet for this translation"""
+      succinct: String
+    }
+    type Mutation {
+      """Fetches and processes the specified USFM content from a remote server"""
+      fetchUsfm(
+        """The name of the organization"""
+        org: String!
+        """The organization-specific identifier of the translation"""
+        translationId: String!
+      ) : Boolean! 
+      """Fetches and processes the specified USX content from a remote server"""
+      fetchUsx(
+        """The name of the organization"""
+        org: String!
+        """The organization-specific identifier of the translation"""
+        translationId: String!
+      ) : Boolean! 
     }
   `;
