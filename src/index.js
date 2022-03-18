@@ -6,7 +6,7 @@ import cors from 'cors';
 
 import gqlSchema from './graphql/schema/index.js';
 import gqlResolvers from './graphql/resolvers/index.js';
-import {getEBibleTranslationsCatalog, getEBibleContent} from "./lib/startup.js";
+import {getEBibleTranslationsCatalog, getEBibleContent} from "./orgHandlers/eBible/startup.js";
 
 // Config Constants
 const SERVERLABEL = "Diegesis Server"

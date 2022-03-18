@@ -4,7 +4,10 @@ import axios from 'axios';
 import jszip from 'jszip';
 import {ptBookArray} from 'proskomma-utils'
 
-const orgsJson = fse.readJsonSync(path.resolve('..', 'static', 'orgs.json'));
+const orgsJson = {};
+for (const org of fse.readdirSync(path.resolve('orgHandlers'))) {
+    orgsJson[org] = fse.readJsonSync(path.resolve('orgHandlers', org, 'org.json'));
+}
 
 const getCatalog = orgPath => fse.readJsonSync(path.resolve('..', 'static', orgPath, 'catalog.json'));
 
