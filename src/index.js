@@ -6,6 +6,8 @@ import cors from 'cors';
 
 import gqlSchema from './graphql/schema/index.js';
 import gqlResolvers from './graphql/resolvers/index.js';
+import appRootPath from "app-root-path";
+const appRoot = appRootPath.toString();
 
 // Config Constants
 const SERVERLABEL = "Diegesis Server"
@@ -20,7 +22,7 @@ if (USECORS) {
 }
 
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve('html', 'index.xhtml'));
+    res.sendFile(path.resolve(appRoot, 'src', 'html', 'index.xhtml'));
 })
 
 // Apollo Server

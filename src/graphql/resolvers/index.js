@@ -4,8 +4,8 @@ import appRootPath from "app-root-path";
 const appRoot = appRootPath.toString();
 
 const orgHandlers = {};
-for (const org of fse.readdirSync(path.resolve('orgHandlers'))) {
-    const translations = await import(path.resolve('orgHandlers', org, 'translations.js'));
+for (const org of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
+    const translations = await import(path.resolve(appRoot, 'src', 'orgHandlers', org, 'translations.js'));
     orgHandlers[org] = {
         getTranslationsCatalog: translations.getTranslationsCatalog,
         fetchUsfm: translations.fetchUsfm,
@@ -14,7 +14,7 @@ for (const org of fse.readdirSync(path.resolve('orgHandlers'))) {
 
 const orgsData = {};
 for (const org of Object.keys(orgHandlers)) {
-    const orgRecord = fse.readJsonSync(path.resolve('orgHandlers', org, 'org.json'));
+    const orgRecord = fse.readJsonSync(path.resolve(appRoot, 'src', 'orgHandlers', org, 'org.json'));
     orgsData[org] = {
         id: org,
         name: orgRecord.name,
