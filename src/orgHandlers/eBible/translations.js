@@ -25,7 +25,15 @@ async function getTranslationsCatalog() {
             ret.downloadURL = `https://eBible.org/Scriptures/${ret.translationId}_usfm.zip`;
             return ret;
         }
-    ).filter(t => t.languageCode);
+    ).filter(t => t.languageCode)
+    .map(t => ({
+        id: t.translationId,
+        languageCode: t.languageCode,
+        languageName: t.languageName,
+        title: t.title,
+        description: t.description,
+        copyright: t.Copyright,
+    }));
     return catalog;
 }
 

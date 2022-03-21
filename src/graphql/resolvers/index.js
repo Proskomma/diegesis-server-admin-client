@@ -49,18 +49,12 @@ export default ({
         translation: (org, args, context) => {
             context.orgData = org;
             context.orgHandler = orgHandlers[org.id];
-            return org.translations.filter(t => t.translationId === args.id)[0];
+            return org.translations.filter(t => t.id === args.id)[0];
         },
     },
     Translation: {
-        id: trans => trans.translationId || '',
-        languageCode: trans => trans.languageCode || '',
-        languageName: trans => trans.languageName || '',
-        title: trans => trans.title || '',
-        description: trans => trans.description || '',
-        copyright: trans => trans.Copyright || '',
         nUsfmBooks: (trans, args, context) => {
-            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
            if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).length;
             } else {
@@ -68,7 +62,7 @@ export default ({
             }
         },
         usfmBookCodes: (trans, args, context) => {
-            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
             if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]);
             } else {
@@ -76,7 +70,7 @@ export default ({
             }
         },
         hasUsfmBookCode: (trans, args, context) => {
-            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
             if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]).includes(args.code);
             } else {
@@ -84,11 +78,11 @@ export default ({
             }
         },
         hasUsfm: (trans, args, context) => {
-            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
             return fse.pathExistsSync(usfmDirPath);
         },
         usfmForBookCode: (trans, args, context) => {
-            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
             const bookPath = path.join(usfmDirPath, `${args.code}.usfm`);
              if (fse.pathExistsSync(bookPath)) {
                 return fse.readFileSync(bookPath).toString();
@@ -103,7 +97,7 @@ export default ({
             if (!orgOb) {
                 return false;
             }
-            const transOb = orgOb.translations.filter(t => t.translationId === args.translationId)[0];
+            const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
             if (!transOb) {
                 return false;
             }
