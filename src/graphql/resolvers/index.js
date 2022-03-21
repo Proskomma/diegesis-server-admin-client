@@ -1,66 +1,55 @@
 import path from 'path';
 import fse from 'fs-extra';
-import axios from 'axios';
-import jszip from 'jszip';
-import {ptBookArray} from 'proskomma-utils'
+import appRootPath from "app-root-path";
+const appRoot = appRootPath.toString();
 
-const orgsJson = {};
+const orgHandlers = {};
 for (const org of fse.readdirSync(path.resolve('orgHandlers'))) {
-    orgsJson[org] = fse.readJsonSync(path.resolve('orgHandlers', org, 'org.json'));
+    const translations = await import(path.resolve('orgHandlers', org, 'translations.js'));
+    orgHandlers[org] = {
+        getTranslationsCatalog: translations.getTranslationsCatalog,
+        fetchUsfm: translations.fetchUsfm,
+    }
 }
 
-const getCatalog = orgPath => fse.readJsonSync(path.resolve('..', 'static', orgPath, 'catalog.json'));
-
-const fetchUsfm = async (org, trans) => {
-    const transPath = path.resolve('..', 'static', org.translationDir, 'translations', trans.translationId);
-    if (!fse.pathExistsSync(transPath)) {
-        fse.mkdirsSync(transPath);
-    }
-    const axiosInstance = axios.create({});
-    axiosInstance.defaults.headers = {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+const orgsData = {};
+for (const org of Object.keys(orgHandlers)) {
+    const orgRecord = fse.readJsonSync(path.resolve('orgHandlers', org, 'org.json'));
+    orgsData[org] = {
+        id: org,
+        name: orgRecord.name,
+        translationDir: orgRecord.translationDir,
+        translations: await orgHandlers[org].getTranslationsCatalog(),
     };
-    const downloadResponse = await axiosInstance.request(
-        {
-            method: "get",
-            responseType: 'arraybuffer',
-            "url": trans.downloadURL,
-            "validateStatus": false,
-        }
-    );
-    if (downloadResponse.status !== 200) {
-        throw new Error(`Translation download URL ${trans.downloadURL} returned status ${downloadResponse.status}`);
-    }
-    fse.writeFileSync(path.join(transPath, 'archive.zip'), downloadResponse.data);
-    const usfmBooksPath = path.join(transPath, 'usfmBooks');
-    fse.mkdirsSync(usfmBooksPath);
-    const zip = new jszip();
-    await zip.loadAsync(downloadResponse.data);
-    for (const bookName of ptBookArray) {
-        const foundFiles = zip.file(new RegExp(`${bookName.code}[^/]*.usfm$`, 'g'));
-        if (foundFiles.length === 1) {
-            const fileContent = await foundFiles[0].async('text');
-            fse.writeFileSync(path.join(usfmBooksPath, `${bookName.code}.usfm`), fileContent);
-        }
-    }
-};
+}
+
+const usfmDir =
+    (translationDir, translationId) =>
+        path.resolve(
+            appRoot,
+            'data',
+            translationDir,
+            'translations',
+            translationId,
+            'usfmBooks'
+        );
 
 export default ({
     Query: {
-        orgs: () => Object.values(orgsJson),
-        org: (root, args) => orgsJson[args.name]
+        orgs: () => Object.values(orgsData),
+        org: (root, args) => orgsData[args.name],
     },
     Org: {
-        nTranslations: (org) => getCatalog(org.translationDir).length,
+        nTranslations: (org) => org.translations.length,
         translations: (org, args, context) => {
-            context.org = org;
-            return getCatalog(org.translationDir);
+            context.orgData = org;
+            context.orgHandler = orgHandlers[org.id];
+            return org.translations;
         },
         translation: (org, args, context) => {
-            context.org = org;
-            return getCatalog(org.translationDir).filter(t => t.translationId === args.id)[0];
+            context.orgData = org;
+            context.orgHandler = orgHandlers[org.id];
+            return org.translations.filter(t => t.translationId === args.id)[0];
         },
     },
     Translation: {
@@ -71,44 +60,23 @@ export default ({
         description: trans => trans.description || '',
         copyright: trans => trans.Copyright || '',
         nUsfmBooks: (trans, args, context) => {
-            const usfmDirPath = path.resolve(
-                '..',
-                'static',
-                context.org.translationDir,
-                'translations',
-                trans.translationId,
-                'usfmBooks'
-            );
-            if (fse.pathExistsSync(usfmDirPath)) {
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+           if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).length;
             } else {
                 return 0;
             }
         },
         usfmBookCodes: (trans, args, context) => {
-            const usfmDirPath = path.resolve(
-                '..',
-                'static',
-                context.org.translationDir,
-                'translations',
-                trans.translationId,
-                'usfmBooks'
-            );
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
             if (fse.pathExistsSync(usfmDirPath)) {
-                return fse.readdirSync(booksPath).map(p => p.split('.')[0]);
+                return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]);
             } else {
                 return [];
             }
         },
         hasUsfmBookCode: (trans, args, context) => {
-            const usfmDirPath = path.resolve(
-                '..',
-                'static',
-                context.org.translationDir,
-                'translations',
-                trans.translationId,
-                'usfmBooks'
-            );
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
             if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]).includes(args.code);
             } else {
@@ -116,27 +84,13 @@ export default ({
             }
         },
         hasUsfm: (trans, args, context) => {
-            const usfmDirPath = path.resolve(
-                '..',
-                'static',
-                context.org.translationDir,
-                'translations',
-                trans.translationId,
-                'usfmBooks'
-            );
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
             return fse.pathExistsSync(usfmDirPath);
         },
         usfmForBookCode: (trans, args, context) => {
-            const bookPath = path.resolve(
-                '..',
-                'static',
-                context.org.translationDir,
-                'translations',
-                trans.translationId,
-                'usfmBooks',
-                `${args.code}.usfm`
-            );
-            if (fse.pathExistsSync(bookPath)) {
+            const usfmDirPath = usfmDir(context.orgData.translationDir, trans.translationId);
+            const bookPath = path.join(usfmDirPath, `${args.code}.usfm`);
+             if (fse.pathExistsSync(bookPath)) {
                 return fse.readFileSync(bookPath).toString();
             } else {
                 return null;
@@ -145,19 +99,18 @@ export default ({
     },
     Mutation: {
         fetchUsfm: async (root, args) => {
-            const orgOb = orgsJson[args.org];
+            const orgOb = orgsData[args.org];
             if (!orgOb) {
                 return false;
             }
-            const transOb = getCatalog(orgOb.translationDir).filter(t => t.translationId === args.translationId)[0];
+            const transOb = orgOb.translations.filter(t => t.translationId === args.translationId)[0];
             if (!transOb) {
                 return false;
             }
             try {
-                await fetchUsfm(orgOb, transOb);
+                await orgHandlers[args.org].fetchUsfm(orgOb, transOb);
                 return true;
             } catch (err) {
-                console.log(err);
                 return false;
             }
         },

@@ -6,25 +6,11 @@ import cors from 'cors';
 
 import gqlSchema from './graphql/schema/index.js';
 import gqlResolvers from './graphql/resolvers/index.js';
-import {getEBibleTranslationsCatalog, getEBibleContent} from "./orgHandlers/eBible/startup.js";
 
 // Config Constants
 const SERVERLABEL = "Diegesis Server"
 const PORT = process.env.PORT || 2468;
 const USECORS = true;
-
-// Get EBible Translations Info
-const translations = await getEBibleTranslationsCatalog();
-fse.writeJsonSync(
-    path.resolve('..', 'static', 'ebible', 'catalog.json'),
-    translations
-);
-
-/*
-for (const translation of translations) {
-    await getEBibleContent(translation.downloadURL);
-}
-*/
 
 // Express
 const app = express();

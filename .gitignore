@@ -1,5 +1,5 @@
 .idea/
-static/*
+data/*
 
 # Logs
 logs
