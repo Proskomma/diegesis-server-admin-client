@@ -35,5 +35,11 @@ server.applyMiddleware({ app });
 
 // Listen
 app.listen(PORT, () => {
-  console.log(`${SERVERLABEL}\n   Listening on port ${PORT}\n   CORS ${USECORS? "en" : "dis"}abled`);
+  console.log(
+      `${SERVERLABEL}
+  Listening on port ${PORT}
+  CORS ${USECORS? "en" : "dis"}abled
+  Handlers:`
+  );
+  fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers')).forEach(h => console.log(`    ${h}`));
 })
