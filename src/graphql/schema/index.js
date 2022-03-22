@@ -17,7 +17,19 @@ export default gql`
       """The number of translations for this organization"""
       nTranslations: Int!
       """The translations that are available from this organization"""
-      translations: [Translation!]!
+      translations(
+          """The ids of the translations"""
+          withId: [String!]
+          """Filter according to presence or absence of USFM"""
+          withUsfm: Boolean
+          """Filter by language codes"""
+          withLanguageCode: [String!]
+          """Filter by text matches in title or description"""
+          withMatchingMetadata: [String!]
+          """Sort by id, languageCode, languageName or title"""
+          sortedBy: String
+          reverse: Boolean
+      ): [Translation!]!
       """Content for the translation of this organization with the given id, if found"""
       translation(
         """The id of the translation"""

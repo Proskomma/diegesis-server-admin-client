@@ -44,7 +44,44 @@ export default ({
         translations: (org, args, context) => {
             context.orgData = org;
             context.orgHandler = orgHandlers[org.id];
-            return org.translations;
+            let ret = org.translations;
+            if (args.withId) {
+                ret = ret.filter(t => args.withId.includes(t.id));
+            }
+            if (args.withLanguageCode) {
+                ret = ret.filter(t => args.withLanguageCode.includes(t.languageCode));
+            }
+            if (args.withMatchingMetadata) {
+                ret = ret.filter(
+                    t =>
+                        t.title.includes(args.withMatchingMetadata) ||
+                        t.description.includes(args.withMatchingMetadata)
+                );
+            }
+            if (args.sortedBy) {
+                if (!['id', 'languageCode', 'languageName', 'title'].includes(args.sortedBy)) {
+                    throw new Error(`Invalid sortedBy option '${args.sortedBy}'`);
+                }
+                ret.sort(function(a, b) {
+                    const lca = a[args.sortedBy].toLowerCase();
+                    const lcb = b[args.sortedBy].toLowerCase();
+                    if (lca > lcb) {
+                        return args.reverse ? -1 : 1;
+                    } else if (lcb > lca) {
+                        return args.reverse ? 1 : -1;
+                    } else {
+                        return 0;
+                    }
+                });
+            }
+            if ('withUsfm' in args) {
+                if (args.withUsfm) {
+                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+                } else {
+                    ret = ret.filter(t => !fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+                }
+            }
+            return ret;
         },
         translation: (org, args, context) => {
             context.orgData = org;

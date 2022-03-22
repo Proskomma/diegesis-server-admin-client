@@ -32,6 +32,14 @@ node index.js
   }
 }
 
+# translations(withUsfm: true)
+# translations(withLanguageCode: "fra" withUsfm: false)
+# translations(withId: ["aak", "fraLSG"])
+# translations(withLanguageCode: ["fra", "deu"])
+# translations(withMatchingMetadata: "King")
+# translations(sortedBy: "id")
+# translations(sortedBy: "languageCode" reverse: true)
+
 mutation Mutation {
   fetchUsfm(org: "eBible", translationId: "fraLSG")
 }
