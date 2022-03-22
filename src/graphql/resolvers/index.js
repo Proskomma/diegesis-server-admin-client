@@ -105,6 +105,7 @@ export default ({
                 await orgHandlers[args.org].fetchUsfm(orgOb, transOb);
                 return true;
             } catch (err) {
+                throw new Error(err);
                 return false;
             }
         },

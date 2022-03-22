@@ -8,6 +8,38 @@ cd src
 node index.js
 ```
 
+## Some GraphQL to try
+```
+{orgs { name } }
+
+{org(name:"eBible") { nTranslations } }
+
+{
+  org(name: "eBible") {
+    name
+    nTranslations
+    translation(id:"fraLSG") {
+      id
+      languageCode
+      languageName
+      title
+      description
+      copyright
+      nUsfmBooks
+      hasUsfm
+      usfmForBookCode(code:"MAT")
+     }
+  }
+}
+
+mutation Mutation {
+  fetchUsfm(org: "eBible", translationId: "fraLSG")
+}
+
+# Then try org query again to see USFM
+
+```
+
 ## Configuration
 - There are few constants at the top of `src/index.js`
 - New org handlers go in `orgHandlers`

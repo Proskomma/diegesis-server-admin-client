@@ -33,6 +33,7 @@ async function getTranslationsCatalog() {
         title: t.title,
         description: t.description,
         copyright: t.Copyright,
+        downloadURL: `https://eBible.org/Scriptures/${t.translationId}_usfm.zip`,
     }));
     return catalog;
 }
@@ -40,8 +41,7 @@ async function getTranslationsCatalog() {
 const fetchUsfm = async (org, trans) => {
 
     const http = await import(`${appRoot}/src/lib/http.js`);
-
-    const transPath = path.resolve('..', 'data', org.translationDir, 'translations', trans.translationId);
+    const transPath = path.resolve(appRoot, 'data', org.translationDir, 'translations', trans.id);
     if (!fse.pathExistsSync(transPath)) {
         fse.mkdirsSync(transPath);
     }
