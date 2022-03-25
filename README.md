@@ -1,11 +1,45 @@
 # diegesis-server
-An Apollo-based server that caches Scripture from remote sources and serves them via a Unified GraphQL Interface.
+An Apollo-based server that caches Scripture from remote sources and serves them via a unified GraphQL interface.
 
 ## Installation
+### Locally
 ```
 npm install
 cd src
 node index.js
+```
+
+### Using Docker
+#### Building
+```
+docker build -t proskomma/diegesis-server .
+```
+*Don't forget the final dot*
+
+#### Running
+```
+docker run --rm -d -p 3060:2468 --name=diegesis-server proskomma/diegesis-server
+```
+
+* `--rm` removes container after use
+* `-d` runs as daemon
+* `-p 2468:2468` exposes container port 2468 on local port 3060
+
+
+#### Stopping
+```
+docker stop diegesis-server
+```
+
+#### Monitoring
+Overview
+```
+docker ps
+```
+
+Resource usage
+```
+docker stats
 ```
 
 ## Some GraphQL to try
