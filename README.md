@@ -1,5 +1,5 @@
 # diegesis-server
-An Apollo-based server that caches Scripture from remote sources and serves them via a unified GraphQL Interface.
+An Apollo-based server that caches Scripture from remote sources and serves them via a unified GraphQL interface.
 
 ## Installation
 ### Locally
