@@ -9,43 +9,27 @@ async function getTranslationsCatalog() {
 
     const http = await import(`${appRoot}/src/lib/http.js`);
 
-    const catalogResponse = await http.getText('https://ebible.org/Scriptures/translations.csv');
-    const catalogData = catalogResponse.data;
-    const catalogRows = catalogData.split('\n')
-        .map(r => r.slice(1, r.length - 1))
-        .map(r => r.split(/", ?"/))
-
-    const headers = catalogRows[0];
-    const catalog = catalogRows
-        .map(
-        r => {
-            const ret = {};
-            headers.forEach((h, n) => ret[h] = r[n]);
-            ret.downloadURL = `https://eBible.org/Scriptures/${ret.translationId}_usfm.zip`;
-            return ret;
-        }
-    ).filter(t => t.languageCode)
-    .map(t => ({
-        id: t.translationId,
-        languageCode: t.languageCode,
-        languageName: t.languageName,
-        title: t.title,
-        description: t.description,
-        copyright: t.Copyright,
-        downloadURL: `https://eBible.org/Scriptures/${t.translationId}_usfm.zip`,
+    const catalogResponse = await http.getText('https://git.door43.org/api/v1/repos/search?owner=unfoldingWord&subject=Aligned%20Bible,Bible');
+    const catalogData = catalogResponse.data.data;
+    const catalog = catalogData.map(t => ({
+        id: `${t.id}`,
+        languageCode: t.language,
+        languageName: t.language,
+        title: t.title.trim(),
+        description: t.description.replace(/\n[\s\S]*/, "").trim() || t.title.trim(),
+        copyright: null,
+        downloadURL: `https://git.door43.org/api/v1/repos/${t.full_name}`,
     }));
     return catalog;
 }
 
 const fetchUsfm = async (org, trans) => {
-
     const http = await import(`${appRoot}/src/lib/http.js`);
     const transPath = path.resolve(appRoot, 'data', org.translationDir, 'translations', trans.id);
-    if (!fse.pathExistsSync(transPath)) {
-        fse.mkdirsSync(transPath);
-    }
-    const downloadResponse = await http.getBuffer(trans.downloadURL);
-    // fse.writeFileSync(path.join(transPath, 'archive.zip'), downloadResponse.data);
+    const repoDetailsResponse = await http.getText(trans.downloadURL);
+    const responseJson = repoDetailsResponse.data;
+    const zipUrl = responseJson.catalog.latest.zipball_url;
+    const downloadResponse = await http.getBuffer(zipUrl);
     const usfmBooksPath = path.join(transPath, 'usfmBooks');
     if (!fse.pathExistsSync(usfmBooksPath)) {
         fse.mkdirsSync(usfmBooksPath);

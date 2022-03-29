@@ -1,8 +1,5 @@
-import axios from 'axios';
 import path from "path";
 import fse from "fs-extra";
-import jszip from "jszip";
-import {ptBookArray} from "proskomma-utils";
 import appRootPath from "app-root-path";
 const appRoot = appRootPath.toString();
 

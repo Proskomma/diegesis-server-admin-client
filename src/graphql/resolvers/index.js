@@ -4,7 +4,9 @@ import appRootPath from "app-root-path";
 const appRoot = appRootPath.toString();
 
 const orgHandlers = {};
+console.log("  Loading org handlers:");
 for (const org of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
+    console.log(`    ${org}`);
     const translations = await import(path.resolve(appRoot, 'src', 'orgHandlers', org, 'translations.js'));
     orgHandlers[org] = {
         getTranslationsCatalog: translations.getTranslationsCatalog,

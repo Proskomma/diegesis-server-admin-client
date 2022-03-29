@@ -38,8 +38,5 @@ app.listen(PORT, () => {
   console.log(
       `${SERVERLABEL}
   Listening on port ${PORT}
-  CORS ${USECORS? "en" : "dis"}abled
-  Handlers:`
-  );
-  fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers')).forEach(h => console.log(`    ${h}`));
+  CORS ${USECORS? "en" : "dis"}abled`);
 })
