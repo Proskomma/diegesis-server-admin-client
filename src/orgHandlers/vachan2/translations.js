@@ -36,4 +36,6 @@ const fetchUsfm = async (org, trans) => {
     }
 };
 
-export { getTranslationsCatalog, fetchUsfm }
+const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};
+
+export { getTranslationsCatalog, fetchUsfm, fetchUsx }

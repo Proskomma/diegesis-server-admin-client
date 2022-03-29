@@ -4,6 +4,7 @@ import appRootPath from "app-root-path";
 const appRoot = appRootPath.toString();
 
 const orgHandlers = {};
+console.log("Diegesis Server");
 console.log("  Loading org handlers:");
 for (const org of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
     console.log(`    ${org}`);
@@ -11,6 +12,7 @@ for (const org of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) 
     orgHandlers[org] = {
         getTranslationsCatalog: translations.getTranslationsCatalog,
         fetchUsfm: translations.fetchUsfm,
+        fetchUsx: translations.fetchUsx,
     }
 }
 
@@ -34,6 +36,17 @@ const usfmDir =
             'translations',
             translationId,
             'usfmBooks'
+        );
+
+const usxDir =
+    (translationDir, translationId) =>
+        path.resolve(
+            appRoot,
+            'data',
+            translationDir,
+            'translations',
+            translationId,
+            'usxBooks'
         );
 
 export default ({
@@ -123,7 +136,20 @@ export default ({
         usfmForBookCode: (trans, args, context) => {
             const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
             const bookPath = path.join(usfmDirPath, `${args.code}.usfm`);
-             if (fse.pathExistsSync(bookPath)) {
+            if (fse.pathExistsSync(bookPath)) {
+                return fse.readFileSync(bookPath).toString();
+            } else {
+                return null;
+            }
+        },
+        hasUsx: (trans, args, context) => {
+            const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+            return fse.pathExistsSync(usxDirPath);
+        },
+        usxForBookCode: (trans, args, context) => {
+            const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+            const bookPath = path.join(usxDirPath, `${args.code}.usx`);
+            if (fse.pathExistsSync(bookPath)) {
                 return fse.readFileSync(bookPath).toString();
             } else {
                 return null;
@@ -148,6 +174,22 @@ export default ({
                 return false;
             }
         },
-        fetchUsx: (root, args) => true,
-    }
+        fetchUsx: async (root, args) => {
+            const orgOb = orgsData[args.org];
+            if (!orgOb) {
+                return false;
+            }
+            const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
+            if (!transOb) {
+                return false;
+            }
+            try {
+                await orgHandlers[args.org].fetchUsx(orgOb, transOb);
+                return true;
+            } catch (err) {
+                throw new Error(err);
+                return false;
+            }
+        },
+    },
 });

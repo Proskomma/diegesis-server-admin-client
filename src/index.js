@@ -10,7 +10,6 @@ import appRootPath from "app-root-path";
 const appRoot = appRootPath.toString();
 
 // Config Constants
-const SERVERLABEL = "Diegesis Server"
 const PORT = process.env.PORT || 2468;
 const USECORS = true;
 
@@ -36,7 +35,6 @@ server.applyMiddleware({ app });
 // Listen
 app.listen(PORT, () => {
   console.log(
-      `${SERVERLABEL}
-  Listening on port ${PORT}
+      `  Listening on port ${PORT}
   CORS ${USECORS? "en" : "dis"}abled`);
 })
