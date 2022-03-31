@@ -1,8 +1,8 @@
 import path from 'path';
-import fse from 'fs-extra';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express'
 import cors from 'cors';
+import helmet from "helmet";
 
 import gqlSchema from './graphql/schema/index.js';
 import gqlResolvers from './graphql/resolvers/index.js';
@@ -15,6 +15,7 @@ const USECORS = true;
 
 // Express
 const app = express();
+app.use(helmet());
 app.use(express.static('../static'));
 if (USECORS) {
     app.use(cors());
