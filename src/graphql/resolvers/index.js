@@ -50,7 +50,9 @@ const usxDir =
         );
 
 const scalarRegexes = {
-    OrgName: new RegExp(/^[A-Za-z0-9]+$/),
+    OrgName: new RegExp(/^[A-Za-z0-9]{2,64}$/),
+    TranslationId: new RegExp(/^[A-Za-z0-9_-]{1,64}$/),
+    BookCode: new RegExp(/^[A-Z0-9]{3}$/),
 }
 
 const orgNameScalar = new GraphQLScalarType({
@@ -73,7 +75,59 @@ const orgNameScalar = new GraphQLScalarType({
             throw new Error(`Must be a string, not ${ast.kind}`);
         }
         if (!scalarRegexes.OrgName.test(ast.value)) {
-            throw new Error(`One or more characters does not match [A-Za-z0-9]`);
+            throw new Error(`One or more characters is not allowed`);
+        }
+        return ast.value
+    },
+});
+
+const translationIdScalar = new GraphQLScalarType({
+    name: 'TranslationId',
+    description: 'Identifier for a translation',
+    serialize(value) {
+        if (typeof value !== 'string') {
+            return null;
+        }
+        if (!scalarRegexes.TranslationId.test(value)) {
+            return null;
+        }
+        return value;
+    },
+    parseValue(value) {
+        return value;
+    },
+    parseLiteral(ast) {
+        if (ast.kind !== Kind.STRING) {
+            throw new Error(`Must be a string, not ${ast.kind}`);
+        }
+        if (!scalarRegexes.TranslationId.test(ast.value)) {
+            throw new Error(`One or more characters is not allowed`);
+        }
+        return ast.value
+    },
+});
+
+const bookCodeScalar = new GraphQLScalarType({
+    name: 'BookCode',
+    description: 'Paratext-like code for a Scripture book',
+    serialize(value) {
+        if (typeof value !== 'string') {
+            return null;
+        }
+        if (!scalarRegexes.BookCode.test(value)) {
+            return null;
+        }
+        return value;
+    },
+    parseValue(value) {
+        return value;
+    },
+    parseLiteral(ast) {
+        if (ast.kind !== Kind.STRING) {
+            throw new Error(`Must be a string, not ${ast.kind}`);
+        }
+        if (!scalarRegexes.BookCode.test(ast.value)) {
+            throw new Error(`One or more characters is not allowed`);
         }
         return ast.value
     },
@@ -81,6 +135,8 @@ const orgNameScalar = new GraphQLScalarType({
 
 export default ({
     OrgName: orgNameScalar,
+    TranslationId: translationIdScalar,
+    BookCode: bookCodeScalar,
     Query: {
         orgs: () => Object.values(orgsData),
         org: (root, args) => orgsData[args.name],
@@ -136,6 +192,13 @@ export default ({
                     ret = ret.filter(t => !fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
                 }
             }
+            if ('withUsx' in args) {
+                if (args.withUsx) {
+                    ret = ret.filter(t => fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+                } else {
+                    ret = ret.filter(t => !fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+                }
+            }
             return ret;
         },
         translation: (org, args, context) => {
@@ -180,6 +243,30 @@ export default ({
                 return fse.readFileSync(bookPath).toString();
             } else {
                 return null;
+            }
+        },
+        nUsxBooks: (trans, args, context) => {
+            const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+            if (fse.pathExistsSync(usxDirPath)) {
+                return fse.readdirSync(usxDirPath).length;
+            } else {
+                return 0;
+            }
+        },
+        usxBookCodes: (trans, args, context) => {
+            const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+            if (fse.pathExistsSync(usxDirPath)) {
+                return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]);
+            } else {
+                return [];
+            }
+        },
+        hasUsxBookCode: (trans, args, context) => {
+            const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+            if (fse.pathExistsSync(usxDirPath)) {
+                return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]).includes(args.code);
+            } else {
+                return false;
             }
         },
         hasUsx: (trans, args, context) => {
