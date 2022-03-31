@@ -1,29 +1,27 @@
 import path from 'path';
 import fse from 'fs-extra';
 import appRootPath from "app-root-path";
+
 const appRoot = appRootPath.toString();
 
 const orgHandlers = {};
+const orgsData = {};
 console.log("Diegesis Server");
 console.log("  Loading org handlers:");
-for (const org of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
-    console.log(`    ${org}`);
-    const translations = await import(path.resolve(appRoot, 'src', 'orgHandlers', org, 'translations.js'));
-    orgHandlers[org] = {
+for (const orgDir of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
+    const orgRecord = fse.readJsonSync(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
+    console.log(`    ${orgRecord.name}`);
+    const translations = await import(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'translations.js'));
+    orgHandlers[orgRecord.name] = {
         getTranslationsCatalog: translations.getTranslationsCatalog,
         fetchUsfm: translations.fetchUsfm,
         fetchUsx: translations.fetchUsx,
-    }
-}
-
-const orgsData = {};
-for (const org of Object.keys(orgHandlers)) {
-    const orgRecord = fse.readJsonSync(path.resolve(appRoot, 'src', 'orgHandlers', org, 'org.json'));
-    orgsData[org] = {
-        id: org,
+    };
+    orgsData[orgRecord.name] = {
+        orgDir: orgDir,
         name: orgRecord.name,
         translationDir: orgRecord.translationDir,
-        translations: await orgHandlers[org].getTranslationsCatalog(),
+        translations: await orgHandlers[orgRecord.name].getTranslationsCatalog(),
     };
 }
 
@@ -55,10 +53,19 @@ export default ({
         org: (root, args) => orgsData[args.name],
     },
     Org: {
-        nTranslations: (org) => org.translations.length,
+        nTranslations: (org, args, context) => {
+            let ret = org.translations;
+            if (args.withUsfm) {
+                ret = ret.filter(t => fse.pathExistsSync(usfmDir(org.orgDir, t.id)));
+            }
+            if (args.withUsx) {
+                ret = ret.filter(t => fse.pathExistsSync(usxDir(org.orgDir, t.id)));
+            }
+            return ret.length;
+        },
         translations: (org, args, context) => {
             context.orgData = org;
-            context.orgHandler = orgHandlers[org.id];
+            context.orgHandler = orgHandlers[org.name];
             let ret = org.translations;
             if (args.withId) {
                 ret = ret.filter(t => args.withId.includes(t.id));
@@ -77,7 +84,7 @@ export default ({
                 if (!['id', 'languageCode', 'languageName', 'title'].includes(args.sortedBy)) {
                     throw new Error(`Invalid sortedBy option '${args.sortedBy}'`);
                 }
-                ret.sort(function(a, b) {
+                ret.sort(function (a, b) {
                     const lca = a[args.sortedBy].toLowerCase();
                     const lcb = b[args.sortedBy].toLowerCase();
                     if (lca > lcb) {
@@ -100,14 +107,14 @@ export default ({
         },
         translation: (org, args, context) => {
             context.orgData = org;
-            context.orgHandler = orgHandlers[org.id];
+            context.orgHandler = orgHandlers[org.name];
             return org.translations.filter(t => t.id === args.id)[0];
         },
     },
     Translation: {
         nUsfmBooks: (trans, args, context) => {
             const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
-           if (fse.pathExistsSync(usfmDirPath)) {
+            if (fse.pathExistsSync(usfmDirPath)) {
                 return fse.readdirSync(usfmDirPath).length;
             } else {
                 return 0;

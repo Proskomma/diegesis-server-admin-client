@@ -15,8 +15,14 @@ export default gql`
       """A short name for the organization"""
       name: String!
       """The number of translations for this organization"""
-      nTranslations: Int!
-      """The translations that are available from this organization"""
+      nTranslations(
+          """Only count translations with USFM"""
+          withUsfm: Boolean
+          """Only count translations with USX"""
+          withUsx: Boolean
+      )
+      : Int!
+        """The translations that are available from this organization"""
       translations(
           """The ids of the translations"""
           withId: [String!]
