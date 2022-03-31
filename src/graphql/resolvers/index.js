@@ -1,5 +1,7 @@
 import path from 'path';
 import fse from 'fs-extra';
+import {GraphQLScalarType, Kind} from 'graphql';
+
 import appRootPath from "app-root-path";
 
 const appRoot = appRootPath.toString();
@@ -47,7 +49,38 @@ const usxDir =
             'usxBooks'
         );
 
+const scalarRegexes = {
+    OrgName: new RegExp(/^[A-Za-z0-9]+$/),
+}
+
+const orgNameScalar = new GraphQLScalarType({
+    name: 'OrgName',
+    description: 'Name of a data source',
+    serialize(value) {
+        if (typeof value !== 'string') {
+            return null;
+        }
+        if (!scalarRegexes.OrgName.test(value)) {
+            return null;
+        }
+        return value;
+    },
+    parseValue(value) {
+        return value;
+    },
+    parseLiteral(ast) {
+        if (ast.kind !== Kind.STRING) {
+            throw new Error(`Must be a string, not ${ast.kind}`);
+        }
+        if (!scalarRegexes.OrgName.test(ast.value)) {
+            throw new Error(`One or more characters does not match [A-Za-z0-9]`);
+        }
+        return ast.value
+    },
+});
+
 export default ({
+    OrgName: orgNameScalar,
     Query: {
         orgs: () => Object.values(orgsData),
         org: (root, args) => orgsData[args.name],

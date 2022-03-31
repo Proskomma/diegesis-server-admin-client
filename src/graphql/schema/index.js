@@ -1,19 +1,20 @@
 import { gql } from "apollo-server-express";
 
 export default gql`
+    scalar OrgName
     type Query {
       """A list of organizations from which this server can serve data"""
       orgs: [Org!]!
       """The organization with the given name, if found"""
       org(
           """The name of the organization"""
-          name: String!
+          name: OrgName!
         ): Org
     }
     """An organization from which this server can serve data"""
     type Org {
       """A short name for the organization"""
-      name: String!
+      name: OrgName!
       """The number of translations for this organization"""
       nTranslations(
           """Only count translations with USFM"""

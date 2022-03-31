@@ -12,6 +12,7 @@ const appRoot = appRootPath.toString();
 // Config Constants
 const PORT = process.env.PORT || 2468;
 const USECORS = true;
+const DEBUG = true;
 
 // Express
 const app = express();
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 const server = new ApolloServer({
     typeDefs: gqlSchema,
     resolvers: gqlResolvers,
+    debug: DEBUG,
 })
 await server.start();
 server.applyMiddleware({ app });
