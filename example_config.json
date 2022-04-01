@@ -1,0 +1,6 @@
+{
+  "port": 1234,
+  "debug": false,
+  "useCors": false,
+  "orgs": ["eBible"]
+}
