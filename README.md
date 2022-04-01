@@ -5,8 +5,8 @@ An Apollo-based server that caches Scripture from remote sources and serves them
 ### Locally
 ```
 npm install
-cd src
-node index.js
+node src/index.js // OR
+node src/index.js example_config.json
 ```
 
 ### Using Docker
@@ -24,7 +24,6 @@ docker run --rm -d -p 3060:2468 --name=diegesis-server proskomma/diegesis-server
 * `--rm` removes container after use
 * `-d` runs as daemon
 * `-p 2468:2468` exposes container port 2468 on local port 3060
-
 
 #### Stopping
 ```
@@ -67,6 +66,7 @@ docker stats
 }
 
 # translations(withUsfm: true)
+# translations(withUsx: true)
 # translations(withLanguageCode: "fra" withUsfm: false)
 # translations(withId: ["aak", "fraLSG"])
 # translations(withLanguageCode: ["fra", "deu"])
@@ -75,7 +75,7 @@ docker stats
 # translations(sortedBy: "languageCode" reverse: true)
 
 mutation Mutation {
-  fetchUsfm(org: "eBible", translationId: "fraLSG")
+  fetchUsfm(org: "eBible", translationId: "fraLSG") # or fetchUsx for DBL
 }
 
 # Then try org query again to see USFM
@@ -83,10 +83,11 @@ mutation Mutation {
 ```
 
 ## Configuration
-- There are few constants at the top of `src/index.js`
-- New org handlers go in `orgHandlers`
+- See `example_config.json`
 
 ## Writing a new org handler
+New org handlers go in `orgHandlers`
+
 Look at the `eBible` example. Your org handler directory should include
 - JSON called `org.json` containing a unique `name` and `translationDir`.
 - a module called `translations.js` that returns `getTranslationsCatalog` and `fetchUsfm`
