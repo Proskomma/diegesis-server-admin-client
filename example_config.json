@@ -2,5 +2,6 @@
   "port": 1234,
   "debug": false,
   "useCors": false,
-  "orgs": ["eBible"]
+  "orgs": ["eBible"],
+  "cronFrequency": "1 min"
 }
