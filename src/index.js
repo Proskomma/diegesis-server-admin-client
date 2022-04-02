@@ -1,17 +1,16 @@
 import path from 'path';
-import fse from 'fs-extra';
 import express from 'express';
 import {ApolloServer} from 'apollo-server-express'
 import cors from 'cors';
 import helmet from "helmet";
-import cron from 'node-cron';
 import appRootPath from "app-root-path";
 
 const appRoot = appRootPath.toString();
 import gqlSchema from './graphql/schema/index.js';
 import makeResolvers from './graphql/resolvers/index.js';
-import {makeConfig, cronOptions} from "./lib/makeConfig.js";
+import {makeConfig} from "./lib/makeConfig.js";
 import checkCli from "./lib/checkCli.js";
+import doCron from './lib/cron.js';
 
 // Build config object
 const providedConfig = checkCli();
@@ -39,12 +38,7 @@ const server = new ApolloServer({
 
 // Maybe start cron
 if (config.cronFrequency !== 'never') {
-    cron.schedule(
-        cronOptions[config.cronFrequency],
-        () => {
-            console.log('tick');
-        }
-    );
+    doCron(config);
 }
 
 // Start server
