@@ -14,10 +14,7 @@ async function getTranslationsCatalog() {
     const catalog = catalogData.map(t => ({
         id: t[0],
         languageCode: t[2],
-        languageName: t[1],
         title: t[4],
-        description: t[4],
-        copyright: t[5],
         downloadURL: `https://app.thedigitalbiblelibrary.org/entry?id=${t[0]}`,
     }));
     return catalog;

@@ -29,12 +29,18 @@ app.get('/', (req, res) => {
     res.sendFile(path.resolve(appRoot, 'src', 'html', 'index.xhtml'));
 })
 
+// DIY GraphQL form
+app.get('/gql_form', (req, res) => {
+    res.sendFile(path.resolve(appRoot, 'src', 'html', 'gql_form.xhtml'));
+})
+
 // Apollo Server
+const resolvers = await makeResolvers(config.orgs);
 const server = new ApolloServer({
     typeDefs: gqlSchema,
-    resolvers: await makeResolvers(config.orgs),
+    resolvers,
     debug: config.debug,
-})
+});
 
 // Maybe start cron
 if (config.cronFrequency !== 'never') {

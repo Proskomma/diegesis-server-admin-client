@@ -12,10 +12,7 @@ async function getTranslationsCatalog() {
     const catalog = catalogData.map(t => ({
         id: t.sourceName,
         languageCode: t.language.code,
-        languageName: t.language.language,
         title: t.version.versionName,
-        description: t.version.versionName,
-        copyright: t.license.name,
         downloadURL: `https://api.vachanengine.org/v2/bibles/${t.sourceName}/books?content_type=usfm`,
     }));
     return catalog;

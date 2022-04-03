@@ -17,16 +17,40 @@ export default gql`
     type Org {
         """A short name for the organization"""
         name: OrgName!
-        """The number of translations for this organization"""
-        nTranslations(
-            """Only count translations with USFM"""
+        """The number of catalog entries for this organization"""
+        nCatalogEntries: Int!
+        """The number of local translations for this organization"""
+        nLocalTranslations(
+            """Only count translations with local USFM"""
             withUsfm: Boolean
-            """Only count translations with USX"""
+            """Only count translations with local USX"""
             withUsx: Boolean
         )
         : Int!
-        """The translations that are available from this organization"""
-        translations(
+        """The catalog entries that are available from this organization"""
+        catalogEntries(
+            """The ids of the catalogEntries"""
+            withId: [TranslationId!]
+            """Filter according to presence or absence of USFM"""
+            withUsfm: Boolean
+            """Filter according to presence or absence of USX"""
+            withUsx: Boolean
+            """Filter by language codes"""
+            withLanguageCode: [String!]
+            """Filter by text matches in title"""
+            withMatchingMetadata: [String!]
+            """Sort by id, languageCode or title"""
+            sortedBy: String
+            """Sort in reverse order"""
+            reverse: Boolean
+        ): [CatalogEntry!]!
+        """Catalog entry of this organization with the given id, if found"""
+        catalogEntry(
+            """The id of the catalog entry"""
+            id: TranslationId!
+        ): CatalogEntry
+        """The translations that are available locally from this organization"""
+        localTranslations(
             """The ids of the translations"""
             withId: [TranslationId!]
             """Filter according to presence or absence of USFM"""
@@ -35,32 +59,41 @@ export default gql`
             withUsx: Boolean
             """Filter by language codes"""
             withLanguageCode: [String!]
-            """Filter by text matches in title or description"""
+            """Filter by text matches in title"""
             withMatchingMetadata: [String!]
-            """Sort by id, languageCode, languageName or title"""
+            """Sort by id, languageCode or title"""
             sortedBy: String
+            """Sort in reverse order"""
             reverse: Boolean
         ): [Translation!]!
-        """Content for the translation of this organization with the given id, if found"""
-        translation(
+        """Translation of this organization with the given id, if found locally"""
+        localTranslation(
             """The id of the translation"""
             id: TranslationId!
         ): Translation
     }
-    """A Scripture translation"""
+    """A Catalog Entry"""
+    type CatalogEntry {
+        """An id for the translation which is unique within the organization"""
+        id: TranslationId!
+        """The language code"""
+        languageCode: String!
+        """a title of the translation"""
+        title: String!
+        """Is USFM available locally?"""
+        hasLocalUsfm: Boolean!
+        """Is USX available locally?"""
+        hasLocalUsx: Boolean!
+        """Is Proskomma succinct docSet available locally?"""
+        hasLocalSuccinct: Boolean!
+    }
     type Translation {
         """An id for the translation which is unique within the organization"""
         id: TranslationId!
         """The language code"""
         languageCode: String!
-        """A name of the language"""
-        languageName: String!
         """a title of the translation"""
         title: String!
-        """A description of the translation"""
-        description: String!
-        """The copyright notice or owner of the translation"""
-        copyright: String!
         """The number of Scripture books as USFM in this translation"""
         nUsfmBooks: Int
         """The bookCodes of Scripture books as USFM in this translation"""

@@ -28,10 +28,7 @@ async function getTranslationsCatalog() {
     .map(t => ({
         id: t.translationId,
         languageCode: t.languageCode,
-        languageName: t.languageName,
         title: t.title,
-        description: t.description,
-        copyright: t.Copyright,
         downloadURL: `https://eBible.org/Scriptures/${t.translationId}_usfm.zip`,
     }));
     return catalog;

@@ -14,10 +14,7 @@ async function getTranslationsCatalog() {
     const catalog = catalogData.map(t => ({
         id: `${t.id}`,
         languageCode: t.language,
-        languageName: t.language,
         title: t.title.trim(),
-        description: t.description.replace(/\n[\s\S]*/, "").trim() || t.title.trim(),
-        copyright: null,
         downloadURL: `https://git.door43.org/api/v1/repos/${t.full_name}`,
     }));
     return catalog;

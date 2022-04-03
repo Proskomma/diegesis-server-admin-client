@@ -37,7 +37,7 @@ const makeResolvers = async (orgs) => {
         process.exit(1);
     }
 
-    const usfmDir =
+    const transPath =
         (translationDir, translationId) =>
             path.resolve(
                 appRoot,
@@ -45,17 +45,19 @@ const makeResolvers = async (orgs) => {
                 translationDir,
                 'translations',
                 translationId,
+            );
+
+    const usfmDir =
+        (translationDir, translationId) =>
+            path.join(
+                transPath(translationDir, translationId),
                 'usfmBooks'
             );
 
     const usxDir =
         (translationDir, translationId) =>
-            path.resolve(
-                appRoot,
-                'data',
-                translationDir,
-                'translations',
-                translationId,
+            path.join(
+                transPath(translationDir, translationId),
                 'usxBooks'
             );
 
@@ -143,6 +145,54 @@ const makeResolvers = async (orgs) => {
         },
     });
 
+    const filteredCatalog= (org, args, context, translations) => {
+        let ret = translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)));
+        if (args.withId) {
+            ret = ret.filter(t => args.withId.includes(t.id));
+        }
+        if (args.withLanguageCode) {
+            ret = ret.filter(t => args.withLanguageCode.includes(t.languageCode));
+        }
+        if (args.withMatchingMetadata) {
+            ret = ret.filter(
+                t =>
+                    t.title.includes(args.withMatchingMetadata) ||
+                    t.description.includes(args.withMatchingMetadata)
+            );
+        }
+        if (args.sortedBy) {
+            if (!['id', 'languageCode', 'languageName', 'title'].includes(args.sortedBy)) {
+                throw new Error(`Invalid sortedBy option '${args.sortedBy}'`);
+            }
+            ret.sort(function (a, b) {
+                const lca = a[args.sortedBy].toLowerCase();
+                const lcb = b[args.sortedBy].toLowerCase();
+                if (lca > lcb) {
+                    return args.reverse ? -1 : 1;
+                } else if (lcb > lca) {
+                    return args.reverse ? 1 : -1;
+                } else {
+                    return 0;
+                }
+            });
+        }
+        if ('withUsfm' in args) {
+            if (args.withUsfm) {
+                ret = ret.filter(t => fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+            } else {
+                ret = ret.filter(t => !fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+            }
+        }
+        if ('withUsx' in args) {
+            if (args.withUsx) {
+                ret = ret.filter(t => fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+            } else {
+                ret = ret.filter(t => !fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+            }
+        }
+        return ret;
+    }
+
     return {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
@@ -152,8 +202,9 @@ const makeResolvers = async (orgs) => {
             org: (root, args) => orgsData[args.name],
         },
         Org: {
-            nTranslations: (org, args, context) => {
-                let ret = org.translations;
+            nCatalogEntries: org => org.translations.length,
+            nLocalTranslations: (org, args, context) => {
+                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)));
                 if (args.withUsfm) {
                     ret = ret.filter(t => fse.pathExistsSync(usfmDir(org.orgDir, t.id)));
                 }
@@ -162,59 +213,38 @@ const makeResolvers = async (orgs) => {
                 }
                 return ret.length;
             },
-            translations: (org, args, context) => {
+            catalogEntries: (org, args, context) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
-                let ret = org.translations;
-                if (args.withId) {
-                    ret = ret.filter(t => args.withId.includes(t.id));
-                }
-                if (args.withLanguageCode) {
-                    ret = ret.filter(t => args.withLanguageCode.includes(t.languageCode));
-                }
-                if (args.withMatchingMetadata) {
-                    ret = ret.filter(
-                        t =>
-                            t.title.includes(args.withMatchingMetadata) ||
-                            t.description.includes(args.withMatchingMetadata)
-                    );
-                }
-                if (args.sortedBy) {
-                    if (!['id', 'languageCode', 'languageName', 'title'].includes(args.sortedBy)) {
-                        throw new Error(`Invalid sortedBy option '${args.sortedBy}'`);
-                    }
-                    ret.sort(function (a, b) {
-                        const lca = a[args.sortedBy].toLowerCase();
-                        const lcb = b[args.sortedBy].toLowerCase();
-                        if (lca > lcb) {
-                            return args.reverse ? -1 : 1;
-                        } else if (lcb > lca) {
-                            return args.reverse ? 1 : -1;
-                        } else {
-                            return 0;
-                        }
-                    });
-                }
-                if ('withUsfm' in args) {
-                    if (args.withUsfm) {
-                        ret = ret.filter(t => fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
-                    } else {
-                        ret = ret.filter(t => !fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
-                    }
-                }
-                if ('withUsx' in args) {
-                    if (args.withUsx) {
-                        ret = ret.filter(t => fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
-                    } else {
-                        ret = ret.filter(t => !fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
-                    }
-                }
-                return ret;
+                return filteredCatalog(org, args, context, org.translations);
             },
-            translation: (org, args, context) => {
+            localTranslations: (org, args, context) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
-                return org.translations.filter(t => t.id === args.id)[0];
+                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id))));
+            },
+            catalogEntry: (org, args, context) => {
+                context.orgData = org;
+                context.orgHandler = orgHandlers[org.name];
+                return org.translations
+                    .filter(t => t.id === args.id)[0];
+            },
+            localTranslation: (org, args, context) => {
+                context.orgData = org;
+                context.orgHandler = orgHandlers[org.name];
+                return org.translations
+                    .filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)))
+                    .filter(t => t.id === args.id)[0];
+            },
+        },
+        CatalogEntry: {
+            hasLocalUsfm: (trans, args, context) => {
+                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                return fse.pathExistsSync(usfmDirPath);
+            },
+            hasLocalUsx: (trans, args, context) => {
+                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                return fse.pathExistsSync(usxDirPath);
             },
         },
         Translation: {
