@@ -18,7 +18,10 @@ const config = makeConfig(providedConfig);
 
 // Express
 const app = express();
-app.use(helmet());
+app.use(helmet({
+    crossOriginEmbedderPolicy: !config.debug,
+    contentSecurityPolicy: !config.debug,
+}));
 app.use(express.static('../static'));
 if (config.useCors) {
     app.use(cors());

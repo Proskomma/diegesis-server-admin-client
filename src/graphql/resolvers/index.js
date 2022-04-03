@@ -146,7 +146,9 @@ const makeResolvers = async (orgs) => {
     });
 
     const filteredCatalog= (org, args, context, translations) => {
-        let ret = translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)));
+        context.orgData = org;
+        context.orgHandler = orgHandlers[org.name];
+        let ret = translations;
         if (args.withId) {
             ret = ret.filter(t => args.withId.includes(t.id));
         }
@@ -214,13 +216,9 @@ const makeResolvers = async (orgs) => {
                 return ret.length;
             },
             catalogEntries: (org, args, context) => {
-                context.orgData = org;
-                context.orgHandler = orgHandlers[org.name];
-                return filteredCatalog(org, args, context, org.translations);
+                 return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
-                context.orgData = org;
-                context.orgHandler = orgHandlers[org.name];
                 return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id))));
             },
             catalogEntry: (org, args, context) => {
