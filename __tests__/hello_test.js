@@ -68,20 +68,19 @@ describe('Org', () => {
 
 })
 
-    describe('CatalogEntries', () => {
+describe('CatalogEntries', () => {
 
-        it('Returns Entries', async () => {
-            const res = await doQuery(
-                '{ org(name:"eBible") { nCatalogEntries catalogEntries { id languageCode title hasLocalUsfm hasLocalUsx hasLocalSuccinct } } }'
-            );
-            const org = res.org;
-            expect(org.catalogEntries.length).toStrictEqual(org.nCatalogEntries);
-            expect(org.catalogEntries[1]).toHaveProperty('languageCode');
-            expect(org.catalogEntries[1]).toHaveProperty('title');
-            expect(org.catalogEntries[1]).toHaveProperty('hasLocalUsfm');
-            expect(org.catalogEntries[1]).toHaveProperty('hasLocalUsx');
-            expect(org.catalogEntries[1]).toHaveProperty('hasLocalSuccinct');
-        });
+    it('Returns Entries', async () => {
+        const res = await doQuery(
+            '{ org(name:"eBible") { nCatalogEntries catalogEntries { id languageCode title hasLocalUsfm hasLocalUsx hasLocalSuccinct } } }'
+        );
+        const org = res.org;
+        expect(org.catalogEntries.length).toStrictEqual(org.nCatalogEntries);
+        expect(org.catalogEntries[1]).toHaveProperty('languageCode');
+        expect(org.catalogEntries[1]).toHaveProperty('title');
+        expect(org.catalogEntries[1]).toHaveProperty('hasLocalUsfm');
+        expect(org.catalogEntries[1]).toHaveProperty('hasLocalUsx');
+        expect(org.catalogEntries[1]).toHaveProperty('hasLocalSuccinct');
+    });
 
-    })
-
+})
