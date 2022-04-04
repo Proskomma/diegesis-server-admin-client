@@ -35,4 +35,15 @@ const usxDir =
         );
     }
 
-module.exports = {transPath, usfmDir, usxDir};
+const succinctPath =
+    (dataPath, translationDir, translationId) => {
+        if (!translationId) {
+            throw new Error("succinctPath now requires 3 arguments");
+        }
+        return path.join(
+            transPath(dataPath, translationDir, translationId),
+            'succinct.json'
+        );
+    }
+
+module.exports = {transPath, usfmDir, usxDir, succinctPath};
