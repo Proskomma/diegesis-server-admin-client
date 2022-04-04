@@ -1,23 +1,23 @@
 const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
-
+const {transPath, usfmDir, usxDir} = require('../../lib/dataPaths');
 const appRootPath = require("app-root-path");
 
 const appRoot = appRootPath.toString();
 
-const makeResolvers = async (orgs) => {
+const makeResolvers = async (config) => {
     const orgHandlers = {};
     const orgsData = {};
-    console.log("Diegesis Server");
-    console.log("  Loading org handlers");
+    config.verbose && console.log("Diegesis Server");
+    config.verbose && console.log("  Loading org handlers");
     let loadedSomething = false;
     for (const orgDir of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
         const orgRecord = fse.readJsonSync(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
-        if (orgs.length > 0 && !orgs.includes(orgRecord.name)) {
+        if (config.orgs.length > 0 && !config.orgs.includes(orgRecord.name)) {
             continue;
         }
-        console.log(`    ${orgRecord.name}`);
+        config.verbose && console.log(`    ${orgRecord.name}`);
         const translations = require(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'translations.js'));
         orgHandlers[orgRecord.name] = {
             getTranslationsCatalog: translations.getTranslationsCatalog,
@@ -36,30 +36,6 @@ const makeResolvers = async (orgs) => {
         console.log('Error: no org handlers loaded: check or remove orgs array in config file');
         process.exit(1);
     }
-
-    const transPath =
-        (translationDir, translationId) =>
-            path.resolve(
-                appRoot,
-                'data',
-                translationDir,
-                'translations',
-                translationId,
-            );
-
-    const usfmDir =
-        (translationDir, translationId) =>
-            path.join(
-                transPath(translationDir, translationId),
-                'usfmBooks'
-            );
-
-    const usxDir =
-        (translationDir, translationId) =>
-            path.join(
-                transPath(translationDir, translationId),
-                'usxBooks'
-            );
 
     const scalarRegexes = {
         OrgName: new RegExp(/^[A-Za-z0-9]{2,64}$/),
@@ -180,16 +156,16 @@ const makeResolvers = async (orgs) => {
         }
         if ('withUsfm' in args) {
             if (args.withUsfm) {
-                ret = ret.filter(t => fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.id)));
             } else {
-                ret = ret.filter(t => !fse.pathExistsSync(usfmDir(context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => !fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.id)));
             }
         }
         if ('withUsx' in args) {
             if (args.withUsx) {
-                ret = ret.filter(t => fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.id)));
             } else {
-                ret = ret.filter(t => !fse.pathExistsSync(usxDir(context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => !fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.id)));
             }
         }
         return ret;
@@ -206,12 +182,12 @@ const makeResolvers = async (orgs) => {
         Org: {
             nCatalogEntries: org => org.translations.length,
             nLocalTranslations: (org, args, context) => {
-                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id)));
+                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)));
                 if (args.withUsfm) {
-                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(org.translationDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, org.translationDir, t.id)));
                 }
                 if (args.withUsx) {
-                    ret = ret.filter(t => fse.pathExistsSync(usxDir(org.translationDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, org.translationDir, t.id)));
                 }
                 return ret.length;
             },
@@ -219,7 +195,7 @@ const makeResolvers = async (orgs) => {
                  return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
-                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id))));
+                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id))));
             },
             catalogEntry: (org, args, context) => {
                 context.orgData = org;
@@ -231,23 +207,23 @@ const makeResolvers = async (orgs) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
                 return org.translations
-                    .filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id)))
+                    .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
                     .filter(t => t.id === args.id)[0];
             },
         },
         CatalogEntry: {
             hasLocalUsfm: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(usfmDirPath);
             },
             hasLocalUsx: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(usxDirPath);
             },
         },
         Translation: {
             nUsfmBooks: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).length;
                 } else {
@@ -255,7 +231,7 @@ const makeResolvers = async (orgs) => {
                 }
             },
             usfmBookCodes: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]);
                 } else {
@@ -263,7 +239,7 @@ const makeResolvers = async (orgs) => {
                 }
             },
             hasUsfmBookCode: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]).includes(args.code);
                 } else {
@@ -271,11 +247,11 @@ const makeResolvers = async (orgs) => {
                 }
             },
             hasUsfm: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(usfmDirPath);
             },
             usfmForBookCode: (trans, args, context) => {
-                const usfmDirPath = usfmDir(context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
                 const bookPath = path.join(usfmDirPath, `${args.code}.usfm`);
                 if (fse.pathExistsSync(bookPath)) {
                     return fse.readFileSync(bookPath).toString();
@@ -284,7 +260,7 @@ const makeResolvers = async (orgs) => {
                 }
             },
             nUsxBooks: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).length;
                 } else {
@@ -292,7 +268,7 @@ const makeResolvers = async (orgs) => {
                 }
             },
             usxBookCodes: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]);
                 } else {
@@ -300,7 +276,7 @@ const makeResolvers = async (orgs) => {
                 }
             },
             hasUsxBookCode: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]).includes(args.code);
                 } else {
@@ -308,11 +284,11 @@ const makeResolvers = async (orgs) => {
                 }
             },
             hasUsx: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(usxDirPath);
             },
             usxForBookCode: (trans, args, context) => {
-                const usxDirPath = usxDir(context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
                 const bookPath = path.join(usxDirPath, `${args.code}.usx`);
                 if (fse.pathExistsSync(bookPath)) {
                     return fse.readFileSync(bookPath).toString();
@@ -332,7 +308,7 @@ const makeResolvers = async (orgs) => {
                     return false;
                 }
                 try {
-                    await orgHandlers[args.org].fetchUsfm(orgOb, transOb);
+                    await orgHandlers[args.org].fetchUsfm(orgOb, transOb, config);
                     return true;
                 } catch (err) {
                     throw new Error(err);
@@ -349,7 +325,7 @@ const makeResolvers = async (orgs) => {
                     return false;
                 }
                 try {
-                    await orgHandlers[args.org].fetchUsx(orgOb, transOb);
+                    await orgHandlers[args.org].fetchUsx(orgOb, transOb, config);
                     return true;
                 } catch (err) {
                     throw new Error(err);

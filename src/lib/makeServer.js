@@ -17,9 +17,12 @@ async function makeServer (config) {
     if (config.useCors) {
         app.use(cors());
     }
+    // Maybe static
+    if (config.staticPath) {
+        app.use(express.static(config.staticPath));
+    }
     // Maybe HTML endpoints
     if (config.debug) {
-        app.use(express.static('../static'));
         // Hello world index
         app.get('/', (req, res) => {
             res.sendFile(path.resolve(appRoot, 'src', 'html', 'index.xhtml'));
@@ -32,7 +35,7 @@ async function makeServer (config) {
     }
 
     // Apollo server
-    const resolvers = await makeResolvers(config.orgs);
+    const resolvers = await makeResolvers(config);
     const server = new ApolloServer({
         typeDefs: gqlSchema,
         resolvers,

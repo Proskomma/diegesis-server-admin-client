@@ -3,6 +3,7 @@ const fse  = require("fs-extra");
 const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
 const appRootPath = require("app-root-path");
+const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = appRootPath.toString();
 
 async function getTranslationsCatalog() {
@@ -34,16 +35,15 @@ async function getTranslationsCatalog() {
     return catalog;
 }
 
-const fetchUsfm = async (org, trans) => {
+const fetchUsfm = async (org, trans, config) => {
 
     const http = require(`${appRoot}/src/lib/http.js`);
-    const transPath = path.resolve(appRoot, 'data', org.translationDir, 'translations', trans.id);
-    if (!fse.pathExistsSync(transPath)) {
-        fse.mkdirsSync(transPath);
+    const tp = transPath(config.dataPath, org.translationDir, trans.id);
+    if (!fse.pathExistsSync(tp)) {
+        fse.mkdirsSync(tp);
     }
     const downloadResponse = await http.getBuffer(trans.downloadURL);
-    // fse.writeFileSync(path.join(transPath, 'archive.zip'), downloadResponse.data);
-    const usfmBooksPath = path.join(transPath, 'usfmBooks');
+    const usfmBooksPath = path.join(tp, 'usfmBooks');
     if (!fse.pathExistsSync(usfmBooksPath)) {
         fse.mkdirsSync(usfmBooksPath);
     }

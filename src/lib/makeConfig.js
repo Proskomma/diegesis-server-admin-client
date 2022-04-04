@@ -1,4 +1,9 @@
+const fse = require('fs-extra');
+const appRootPath = require("app-root-path");
+const appRoot = appRootPath.toString();
+
 // CLI error helper function
+const path = require("path");
 const croak = msg => {
     const usageMessage = `%msg%\nUSAGE: node src/index.js [configFilePath]`
     console.log(usageMessage.replace('%msg%', msg));
@@ -8,10 +13,12 @@ const croak = msg => {
 // Default config - override by passing config JSON file
 const defaultConfig = {
     port: 2468,
+    dataPath: path.resolve(appRoot, 'data'),
     useCors: false,
     debug: false,
     cronFrequency: 'never',
-    orgs: [] // Empty array means 'all'
+    orgs: [], // Empty array means 'all',
+    verbose: false
 }
 
 const cronOptions = {
@@ -39,6 +46,28 @@ function makeConfig(providedConfig) {
         }
         config.port = providedConfig.port;
     }
+    if (providedConfig.dataPath) {
+        if (
+            typeof providedConfig.dataPath !== 'string') {
+            croak(`ERROR: dataPath should be a string, not '${providedConfig.dataPath}'`);
+        }
+        const fqPath = path.resolve(providedConfig.dataPath);
+        if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
+            croak(`ERROR: dataPath '${fqPath}' does not exist or is not a directory`);
+        }
+        config.dataPath = fqPath;
+    }
+    if (providedConfig.staticPath) {
+        if (
+            typeof providedConfig.staticPath !== 'string') {
+            croak(`ERROR: staticPath, if present, should be a string, not '${providedConfig.staticPath}'`);
+        }
+        const fqPath = path.resolve(providedConfig.staticPath);
+        if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
+            croak(`ERROR: staticPath '${fqPath}' does not exist or is not a directory`);
+        }
+        config.staticPath = fqPath;
+    }
     if ('debug' in providedConfig) {
         if (typeof providedConfig.debug !== 'boolean') {
             croak(`ERROR: debug should be boolean, not ${typeof providedConfig.debug}`);
@@ -63,11 +92,20 @@ function makeConfig(providedConfig) {
         }
         config.orgs = providedConfig.orgs;
     }
+    if ('verbose' in providedConfig) {
+        if (typeof providedConfig.verbose !== 'boolean') {
+            croak(`ERROR: verbose should be boolean, not ${typeof providedConfig.verbose}`);
+        }
+        config.verbose = providedConfig.verbose;
+    }
     return config;
 }
 
 const configSummary = config => `  Listening on port ${config.port}
+    Data directory is ${config.dataPath}
+    ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
     Debug ${config.debug ? "en" : "dis"}abled
+    Verbose ${config.verbose ? "en" : "dis"}abled
     CORS ${config.useCors ? "en" : "dis"}abled
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}`}`
 

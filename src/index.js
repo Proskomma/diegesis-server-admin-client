@@ -10,6 +10,6 @@ config = makeConfig(providedConfig);
 // Start listening
 makeServer(config).then(app => {
     app.listen(config.port, () => {
-        console.log(configSummary(config));
+        config.verbose && console.log(configSummary(config));
     })
 });
