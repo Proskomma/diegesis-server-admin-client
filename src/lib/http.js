@@ -42,4 +42,35 @@ const getText = async url => {
     return downloadResponse;
 }
 
-module.exports = { getBuffer, getText };
+// For tests
+async function doQuery(port, query) {
+    const res = await getText(`http://localhost:${port}/graphql?query=${query}`);
+    if (res.data.errors) {
+        console.log(`GQL returned errors: ${JSON.stringify(res.data.errors, null, 2)}`);
+    }
+    return res.data.data;
+}
+
+async function doMutation(port, query) {
+    const axiosInstance = axios.create({});
+    axiosInstance.defaults.headers = {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Content-Type': 'application/json',
+    };
+    const downloadResponse = await axiosInstance.post(
+        `http://localhost:${port}/graphql`,
+        {query: `mutation ${query}`},
+        {
+            responseType: 'text',
+            "validateStatus": false,
+        }
+    );
+    if (downloadResponse.status !== 200) {
+        throw new Error(`GQL mutation POST returned status ${downloadResponse.status}`);
+    }
+    return downloadResponse.data.data;
+}
+
+module.exports = { getBuffer, getText, doQuery, doMutation };

@@ -1,17 +1,17 @@
 const makeServer = require('../src/lib/makeServer.js');
 const {makeConfig} = require("../src/lib/makeConfig.js");
-const {getText} = require("../src/lib/http.js");
+const {doQuery, doMutation} = require("../src/lib/http.js");
 const path = require('path');
 const os = require('os');
 const fse = require('fs-extra');
 
-beforeAll(async () => {
+beforeEach(async () => {
     global.__dataDir__ = fse.mkdtempSync(path.join(os.tmpdir(), 'dgsServerTest'));
     global.__app__ = await makeServer(makeConfig({dataPath: global.__dataDir__, debug: true}));
     global.__server__ = await global.__app__.listen(2468);
 })
 
-afterAll(async () => {
+afterEach(async () => {
     try {
         await global.__server__.close();
     } finally {
@@ -19,18 +19,10 @@ afterAll(async () => {
     }
 })
 
-async function doQuery(query) {
-    const res = await getText(`http://localhost:2468/graphql?query=${query}`);
-    if (res.data.errors) {
-        console.log(`GQL returned errors: ${JSON.stringify(res.data.errors, null, 2)}`);
-    }
-    return res.data.data;
-}
-
-describe('Orgs', () => {
+describe('Read-only', () => {
 
     it('Returns Name', async () => {
-        const res = await doQuery('{ orgs { name } }');
+        const res = await doQuery(2468, '{ orgs { name } }');
         const names = res.orgs.map(o => o.name);
         expect(names).toContain("DBL");
         expect(names).toContain("DCS");
@@ -38,40 +30,33 @@ describe('Orgs', () => {
         expect(names).toContain("Vachan");
     })
 
-})
-
-describe('Org', () => {
-
     it('Returns Name for eBible', async () => {
-        const res = await doQuery('{ org(name:"eBible") { name } }');
+        const res = await doQuery(2468, '{ org(name:"eBible") { name } }');
         const org = res.org;
         expect(org.name).toEqual("eBible");
     });
 
     it('Returns null for unknown org', async () => {
-        const res = await doQuery('{ org(name:"fBible") { name } }');
+        const res = await doQuery(2468, '{ org(name:"fBible") { name } }');
         const org = res.org;
         expect(org).toBeNull();
     })
 
     it('Returns nCatalogEntries', async () => {
-        const res = await doQuery('{ org(name:"eBible") { nCatalogEntries } }');
+        const res = await doQuery(2468, '{ org(name:"eBible") { nCatalogEntries } }');
         const org = res.org;
         expect(org.nCatalogEntries).toBeGreaterThan(0);
     })
 
     it('Returns nLocalTranslations', async () => {
-        const res = await doQuery('{ org(name:"eBible") { nLocalTranslations } }');
+        const res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
         const org = res.org;
         expect(org.nLocalTranslations).toStrictEqual(0);
     })
 
-})
-
-describe('CatalogEntries', () => {
-
-    it('Returns Entries', async () => {
+    it('Returns catalogEntries', async () => {
         const res = await doQuery(
+            2468,
             '{ org(name:"eBible") { nCatalogEntries catalogEntries { id languageCode title hasLocalUsfm hasLocalUsx hasLocalSuccinct } } }'
         );
         const org = res.org;
@@ -84,3 +69,23 @@ describe('CatalogEntries', () => {
     });
 
 })
+
+describe('eBible translations', () => {
+
+    it('Does Fetch', async () => {
+        let res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
+        let org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(0);
+        res = await doMutation(2468, '{fetchUsfm(org:"eBible" translationId:"fraLSG")}');
+        expect(res.fetchUsfm).toStrictEqual(true);
+        res = await doQuery(
+            2468,
+            '{ org(name:"eBible") { nLocalTranslations localTranslation(id:"fraLSG") {hasUsfm hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+        org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(1);
+        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
+        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
+        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+    })
+
+});
