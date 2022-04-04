@@ -1,14 +1,22 @@
 const makeServer = require('../src/lib/makeServer.js');
 const {makeConfig} = require("../src/lib/makeConfig.js");
 const {getText} = require("../src/lib/http.js");
+const path = require('path');
+const os = require('os');
+const fse = require('fs-extra');
 
 beforeAll(async () => {
-    global.__app__ = await makeServer(makeConfig({}));
+    global.__dataDir__ = fse.mkdtempSync(path.join(os.tmpdir(), 'dgsServerTest'));
+    global.__app__ = await makeServer(makeConfig({dataPath: global.__dataDir__}));
     global.__server__ = await global.__app__.listen(2468);
 })
 
 afterAll(async () => {
-    await global.__server__.close();
+    try {
+        await global.__server__.close();
+    } finally {
+        fse.rmSync(global.__dataDir__, {recursive: true});
+    }
 })
 
 async function doQuery(query) {
