@@ -4,7 +4,7 @@
   "description": "A New Apollo-based Server for Diegesis",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest --watchAll"
+    "test": "cross-env NODE_ENV=test jest --testTimeout=10000"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,10 @@
   },
   "homepage": "https://github.com/Proskomma/diegesis-server#readme",
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "cross-env": "^7.0.3",
+    "jest": "^27.5.1",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "apollo-server-express": "^3.6.4",
@@ -38,5 +41,16 @@
     "node-cron": "^3.0.0",
     "path": "^0.12.7",
     "proskomma-utils": "^0.4.28"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "globals": {
+      "__app__": null,
+      "__server__": null
+    }
   }
 }
+
