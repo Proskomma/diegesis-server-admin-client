@@ -1,8 +1,8 @@
-import path from 'path';
-import fse from 'fs-extra';
-import {GraphQLScalarType, Kind} from 'graphql';
+const path = require('path');
+const fse = require('fs-extra');
+const {GraphQLScalarType, Kind} = require('graphql');
 
-import appRootPath from "app-root-path";
+const appRootPath = require("app-root-path");
 
 const appRoot = appRootPath.toString();
 
@@ -18,7 +18,7 @@ const makeResolvers = async (orgs) => {
             continue;
         }
         console.log(`    ${orgRecord.name}`);
-        const translations = await import(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'translations.js'));
+        const translations = require(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'translations.js'));
         orgHandlers[orgRecord.name] = {
             getTranslationsCatalog: translations.getTranslationsCatalog,
             fetchUsfm: translations.fetchUsfm,
@@ -206,12 +206,12 @@ const makeResolvers = async (orgs) => {
         Org: {
             nCatalogEntries: org => org.translations.length,
             nLocalTranslations: (org, args, context) => {
-                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)));
+                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id)));
                 if (args.withUsfm) {
-                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(org.orgDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(org.translationDir, t.id)));
                 }
                 if (args.withUsx) {
-                    ret = ret.filter(t => fse.pathExistsSync(usxDir(org.orgDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usxDir(org.translationDir, t.id)));
                 }
                 return ret.length;
             },
@@ -219,7 +219,7 @@ const makeResolvers = async (orgs) => {
                  return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
-                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id))));
+                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id))));
             },
             catalogEntry: (org, args, context) => {
                 context.orgData = org;
@@ -231,7 +231,7 @@ const makeResolvers = async (orgs) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
                 return org.translations
-                    .filter(t => fse.pathExistsSync(transPath(org.orgDir, t.id)))
+                    .filter(t => fse.pathExistsSync(transPath(org.translationDir, t.id)))
                     .filter(t => t.id === args.id)[0];
             },
         },
@@ -360,4 +360,4 @@ const makeResolvers = async (orgs) => {
     };
 };
 
-export default makeResolvers;
+module.exports = makeResolvers;

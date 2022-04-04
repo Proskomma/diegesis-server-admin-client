@@ -1,4 +1,4 @@
-import axios from "axios";
+const axios = require("axios");
 
 const getBuffer = async url => {
     const axiosInstance = axios.create({});
@@ -42,4 +42,4 @@ const getText = async url => {
     return downloadResponse;
 }
 
-export { getBuffer, getText };
+module.exports = { getBuffer, getText };

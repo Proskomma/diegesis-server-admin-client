@@ -1,5 +1,5 @@
-import path from "path";
-import fse from "fs-extra";
+const path = require("path");
+const fse = require("fs-extra");
 
 // CLI error helper function
 const croak = msg => {
@@ -7,7 +7,8 @@ const croak = msg => {
     console.log(usageMessage.replace('%msg%', msg));
     process.exit(1);
 }
-export default function checkCli() {
+
+function checkCli() {
 // Check CLI invocation
     if (process.argv.length < 2 || process.argv.length > 3) {
         croak('ERROR: Wrong number of arguments');
@@ -29,3 +30,5 @@ export default function checkCli() {
     }
     return {};
 }
+
+module.exports = checkCli;

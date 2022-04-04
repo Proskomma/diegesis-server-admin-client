@@ -1,12 +1,12 @@
-import cron from "node-cron";
-import {cronOptions} from "./makeConfig.js";
-import path from "path";
-import fse from 'fs-extra';
+const cron = require("node-cron");
+const {cronOptions} = require("./makeConfig.js");
+const path = require("path");
+const fse = require('fs-extra');
 
-import appRootPath from "app-root-path";
+const appRootPath = require("app-root-path");
 const appRoot = appRootPath.toString();
 
-export default function doCron(config) {
+function doCron(config) {
     cron.schedule(
         cronOptions[config.cronFrequency],
         config => {
@@ -38,3 +38,5 @@ export default function doCron(config) {
         }
     );
 }
+
+module.exports = doCron;

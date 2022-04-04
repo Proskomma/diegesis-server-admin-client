@@ -8,8 +8,8 @@ const croak = msg => {
 // Default config - override by passing config JSON file
 const defaultConfig = {
     port: 2468,
-    useCors: true,
-    debug: true,
+    useCors: false,
+    debug: false,
     cronFrequency: 'never',
     orgs: [] // Empty array means 'all'
 }
@@ -66,4 +66,9 @@ function makeConfig(providedConfig) {
     return config;
 }
 
-export {makeConfig, cronOptions};
+const configSummary = config => `  Listening on port ${config.port}
+    Debug ${config.debug ? "en" : "dis"}abled
+    CORS ${config.useCors ? "en" : "dis"}abled
+    Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}`}`
+
+module.exports = {makeConfig, cronOptions, configSummary};

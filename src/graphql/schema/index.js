@@ -1,6 +1,6 @@
-import {gql} from "apollo-server-express";
+const {gql} = require("apollo-server-express");
 
-export default gql`
+const schema = gql`
     scalar OrgName
     scalar TranslationId
     scalar BookCode
@@ -147,3 +147,5 @@ export default gql`
         ) : Boolean!
     }
 `;
+
+module.exports = schema;

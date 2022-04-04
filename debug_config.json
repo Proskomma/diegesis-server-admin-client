@@ -1,7 +1,7 @@
 {
   "port": 1234,
-  "debug": false,
-  "useCors": false,
+  "debug": true,
+  "useCors": true,
   "orgs": ["eBible"],
   "cronFrequency": "1 min"
 }

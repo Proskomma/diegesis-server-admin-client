@@ -1,13 +1,13 @@
-import path from "path";
-import fse from "fs-extra";
-import jszip from "jszip";
-import {ptBookArray} from "proskomma-utils";
-import appRootPath from "app-root-path";
+const path = require("path");
+const fse = require("fs-extra");
+const jszip = require("jszip");
+const {ptBookArray} = require("proskomma-utils");
+const appRootPath = require("app-root-path");
 const appRoot = appRootPath.toString();
 
 async function getTranslationsCatalog() {
 
-    const http = await import(`${appRoot}/src/lib/http.js`);
+    const http = require(`${appRoot}/src/lib/http.js`);
 
     const catalogResponse = await http.getText('https://git.door43.org/api/v1/repos/search?owner=unfoldingWord&subject=Aligned%20Bible,Bible,Hebrew%20Old%20Testament,Greek%20New%20Testament');
     const catalogData = catalogResponse.data.data;
@@ -21,7 +21,7 @@ async function getTranslationsCatalog() {
 }
 
 const fetchUsfm = async (org, trans) => {
-    const http = await import(`${appRoot}/src/lib/http.js`);
+    const http = require(`${appRoot}/src/lib/http.js`);
     const transPath = path.resolve(appRoot, 'data', org.translationDir, 'translations', trans.id);
     const repoDetailsResponse = await http.getText(trans.downloadURL);
     const responseJson = repoDetailsResponse.data;
@@ -44,4 +44,4 @@ const fetchUsfm = async (org, trans) => {
 
 const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};
 
-export { getTranslationsCatalog, fetchUsfm, fetchUsx }
+module.exports = { getTranslationsCatalog, fetchUsfm, fetchUsx }

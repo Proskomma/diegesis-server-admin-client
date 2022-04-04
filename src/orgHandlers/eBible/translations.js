@@ -1,13 +1,13 @@
-import path from "path";
-import fse from "fs-extra";
-import jszip from "jszip";
-import {ptBookArray} from "proskomma-utils";
-import appRootPath from "app-root-path";
+const path = require("path");
+const fse  = require("fs-extra");
+const jszip = require("jszip");
+const {ptBookArray} = require("proskomma-utils");
+const appRootPath = require("app-root-path");
 const appRoot = appRootPath.toString();
 
 async function getTranslationsCatalog() {
 
-    const http = await import(`${appRoot}/src/lib/http.js`);
+    const http = require(`${appRoot}/src/lib/http.js`);
 
     const catalogResponse = await http.getText('https://ebible.org/Scriptures/translations.csv');
     const catalogData = catalogResponse.data;
@@ -36,7 +36,7 @@ async function getTranslationsCatalog() {
 
 const fetchUsfm = async (org, trans) => {
 
-    const http = await import(`${appRoot}/src/lib/http.js`);
+    const http = require(`${appRoot}/src/lib/http.js`);
     const transPath = path.resolve(appRoot, 'data', org.translationDir, 'translations', trans.id);
     if (!fse.pathExistsSync(transPath)) {
         fse.mkdirsSync(transPath);
@@ -60,4 +60,4 @@ const fetchUsfm = async (org, trans) => {
 
 const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};
 
-export { getTranslationsCatalog, fetchUsfm, fetchUsx }
+module.exports = { getTranslationsCatalog, fetchUsfm, fetchUsx }
