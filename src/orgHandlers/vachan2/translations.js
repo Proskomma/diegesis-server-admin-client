@@ -15,6 +15,11 @@ async function getTranslationsCatalog() {
         languageCode: t.language.code,
         title: t.version.versionName,
         downloadURL: `https://api.vachanengine.org/v2/bibles/${t.sourceName}/books?content_type=usfm`,
+        textDirection: t.language.scriptDirection.startsWith('right') ? 'rtl' : 'ltr',
+        script: null,
+        copyright: `${t.metaData['Copyright Holder'] || ''} ${t.license.code}`.trim(),
+        description: t.metaData['Version Name (in Eng)'] || null,
+        abbreviation: t.version.versionAbbreviation,
     }));
     return catalog;
 }
@@ -28,6 +33,7 @@ const fetchUsfm = async (org, trans, config) => {
     if (!fse.pathExistsSync(usfmBooksPath)) {
         fse.mkdirsSync(usfmBooksPath);
     }
+    fse.writeJsonSync(path.join(tp, 'metadata.json'), trans);
     for (const bookOb of responseJson) {
         const bookCode = bookOb.book.bookCode.toUpperCase();
         fse.writeFileSync(path.join(usfmBooksPath, `${bookCode}.usfm`), bookOb.USFM);

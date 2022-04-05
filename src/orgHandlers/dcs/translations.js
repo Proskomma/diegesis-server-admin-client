@@ -17,6 +17,11 @@ async function getTranslationsCatalog() {
         languageCode: t.language,
         title: t.title.trim(),
         downloadURL: `https://git.door43.org/api/v1/repos/${t.full_name}`,
+        textDirection: null,
+        script: null,
+        copyright: t.owner.full_name,
+        description: t.description,
+        abbreviation: t.name,
     }));
     return catalog;
 }
@@ -32,6 +37,7 @@ const fetchUsfm = async (org, trans, config) => {
     if (!fse.pathExistsSync(usfmBooksPath)) {
         fse.mkdirsSync(usfmBooksPath);
     }
+    fse.writeJsonSync(path.join(tp, 'metadata.json'), trans);
     const zip = new jszip();
     await zip.loadAsync(downloadResponse.data);
     for (const bookName of ptBookArray) {

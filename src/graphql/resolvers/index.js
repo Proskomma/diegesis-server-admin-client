@@ -317,6 +317,10 @@ const makeResolvers = async (config) => {
                 }
                 try {
                     await orgHandlers[args.org].fetchUsfm(orgOb, transOb, config);
+                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    if (fse.pathExistsSync(succinctP)) {
+                        fse.unlinkSync(succinctP);
+                    }
                     return true;
                 } catch (err) {
                     console.log(err);
@@ -334,6 +338,10 @@ const makeResolvers = async (config) => {
                 }
                 try {
                     await orgHandlers[args.org].fetchUsx(orgOb, transOb, config);
+                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    if (fse.pathExistsSync(succinctP)) {
+                        fse.unlinkSync(succinctP);
+                    }
                     return true;
                 } catch (err) {
                     console.log(err);

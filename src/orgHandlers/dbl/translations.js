@@ -40,17 +40,38 @@ const fetchUsx = async (org, trans, config) => {
     if (!fse.pathExistsSync(usxBooksPath)) {
         fse.mkdirsSync(usxBooksPath);
     }
+    const metadataRecord = {...trans};
     const zip = new jszip();
     await zip.loadAsync(downloadResponse.data);
-    /*const metadata = zip.file(new RegExp('metadata.xml'));
+    const metadata = zip.file(new RegExp('metadata.xml'));
     const metadataContent = await metadata[0].async('text');
     const parser = new DOMParser();
     const metadataRoot = parser.parseFromString(metadataContent, "application/xml").documentElement;
-    console.log(
+    metadataRecord.description =
         metadataRoot.getElementsByTagName('identification')['0']
             .getElementsByTagName('description')['0']
-            .childNodes[0].nodeValue
-    );*/
+            .childNodes[0].nodeValue;
+    metadataRecord.textDirection =
+        metadataRoot.getElementsByTagName('language')['0']
+            .getElementsByTagName('scriptDirection')['0']
+            .childNodes[0].nodeValue.toLowerCase();
+    metadataRecord.script =
+        metadataRoot.getElementsByTagName('language')['0']
+            .getElementsByTagName('scriptCode')['0']
+            .childNodes[0].nodeValue;
+    metadataRecord.abbreviation =
+        metadataRoot.getElementsByTagName('identification')['0']
+            .getElementsByTagName('abbreviation')['0']
+            .childNodes[0].nodeValue;
+    metadataRecord.copyright =
+        metadataRoot.getElementsByTagName('copyright')['0']
+            .getElementsByTagName('fullStatement')['0']
+            .getElementsByTagName('statementContent')['0']
+            .childNodes.toString()
+            .replace(/<[^>]+>/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    fse.writeJsonSync(path.join(tp, 'metadata.json'), metadataRecord);
     for (const bookName of ptBookArray) {
         const foundFiles = zip.file(new RegExp(`release/USX_1/${bookName.code}[^/]*.usx$`, 'g'));
         if (foundFiles.length === 1) {
