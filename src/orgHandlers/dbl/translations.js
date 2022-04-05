@@ -3,6 +3,7 @@ const fse = require("fs-extra");
 const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
 const appRootPath = require("app-root-path");
+const DOMParser = require('xmldom').DOMParser;
 const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = appRootPath.toString();
 
@@ -21,7 +22,9 @@ async function getTranslationsCatalog() {
     return catalog;
 }
 
-const fetchUsfm = async (org) => {throw new Error(`USFM fetching is not supported for ${org.name}`)};
+const fetchUsfm = async (org) => {
+    throw new Error(`USFM fetching is not supported for ${org.name}`)
+};
 
 const fetchUsx = async (org, trans, config) => {
 
@@ -39,6 +42,15 @@ const fetchUsx = async (org, trans, config) => {
     }
     const zip = new jszip();
     await zip.loadAsync(downloadResponse.data);
+    /*const metadata = zip.file(new RegExp('metadata.xml'));
+    const metadataContent = await metadata[0].async('text');
+    const parser = new DOMParser();
+    const metadataRoot = parser.parseFromString(metadataContent, "application/xml").documentElement;
+    console.log(
+        metadataRoot.getElementsByTagName('identification')['0']
+            .getElementsByTagName('description')['0']
+            .childNodes[0].nodeValue
+    );*/
     for (const bookName of ptBookArray) {
         const foundFiles = zip.file(new RegExp(`release/USX_1/${bookName.code}[^/]*.usx$`, 'g'));
         if (foundFiles.length === 1) {
@@ -48,4 +60,4 @@ const fetchUsx = async (org, trans, config) => {
     }
 };
 
-module.exports = { getTranslationsCatalog, fetchUsfm, fetchUsx }
+module.exports = {getTranslationsCatalog, fetchUsfm, fetchUsx}

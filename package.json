@@ -4,7 +4,7 @@
   "description": "A New Apollo-based Server for Diegesis",
   "main": "src/index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --testTimeout=10000"
+    "test": "cross-env NODE_ENV=test jest --testTimeout=30000"
   },
   "repository": {
     "type": "git",
@@ -41,7 +41,8 @@
     "node-cron": "^3.0.0",
     "os": "^0.1.2",
     "path": "^0.12.7",
-    "proskomma-utils": "^0.4.28"
+    "proskomma-utils": "^0.4.28",
+    "xmldom": "^0.6.0"
   },
   "jest": {
     "testEnvironment": "node",

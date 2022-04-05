@@ -17,7 +17,7 @@ async function getTranslationsCatalog() {
         .map(r => r.split(/", ?"/))
 
     const headers = catalogRows[0];
-    const catalog = catalogRows
+    const catalog = catalogRows.slice(1)
         .map(
         r => {
             const ret = {};

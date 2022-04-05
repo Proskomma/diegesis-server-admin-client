@@ -145,6 +145,13 @@ const schema = gql`
             """The organization-specific identifier of the translation"""
             translationId: TranslationId!
         ) : Boolean!
+        """Makes succinct JSON from USFM or USX for the specified translation"""
+        makeSuccinct(
+            """The name of the organization"""
+            org: OrgName!
+            """The organization-specific identifier of the translation"""
+            translationId: TranslationId!
+        ) : Boolean!
     }
 `;
 

@@ -80,12 +80,77 @@ describe('eBible translations', () => {
         expect(res.fetchUsfm).toStrictEqual(true);
         res = await doQuery(
             2468,
-            '{ org(name:"eBible") { nLocalTranslations localTranslation(id:"fraLSG") {hasUsfm hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+            '{ org(name:"eBible") { nLocalTranslations localTranslation(id:"fraLSG") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
         org = res.org;
         expect(org.nLocalTranslations).toStrictEqual(1);
         expect(org.localTranslation.hasUsfm).toStrictEqual(true);
+        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
         expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
         expect(org.localTranslation.usfmForBookCode).toContain("PHM");
     })
 
 });
+/*
+describe('DCS translations', () => {
+
+    it('Does Fetch', async () => {
+        let res = await doQuery(2468, '{ org(name:"DCS") { nLocalTranslations } }');
+        let org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(0);
+        res = await doMutation(2468, '{fetchUsfm(org:"DCS" translationId:"17717")}');
+        expect(res.fetchUsfm).toStrictEqual(true);
+        res = await doQuery(
+            2468,
+            '{ org(name:"DCS") { nLocalTranslations localTranslation(id:"17717") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+        org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(1);
+        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
+        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
+        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
+        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+    })
+
+});
+
+describe('DBL translations', () => {
+
+    it('Does Fetch', async () => {
+        let res = await doQuery(2468, '{ org(name:"DBL") { nLocalTranslations } }');
+        let org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(0);
+        res = await doMutation(2468, '{fetchUsx(org:"DBL" translationId:"de4e12af7f28f599")}');
+        expect(res.fetchUsx).toStrictEqual(true);
+        res = await doQuery(
+            2468,
+            '{ org(name:"DBL") { nLocalTranslations localTranslation(id:"de4e12af7f28f599") {hasUsx hasSuccinct hasUsxBookCode(code:"PHM") usxForBookCode(code:"PHM")} } }');
+        org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(1);
+        expect(org.localTranslation.hasUsx).toStrictEqual(true);
+        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
+        expect(org.localTranslation.hasUsxBookCode).toStrictEqual(true);
+        expect(org.localTranslation.usxForBookCode).toContain("PHM");
+    })
+
+});
+
+describe('Vachan translations', () => {
+
+    it('Does Fetch', async () => {
+        let res = await doQuery(2468, '{ org(name:"Vachan") { nLocalTranslations } }');
+        let org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(0);
+        res = await doMutation(2468, '{fetchUsfm(org:"Vachan" translationId:"pa_IRV_5_bible")}');
+        expect(res.fetchUsfm).toStrictEqual(true);
+        res = await doQuery(
+            2468,
+            '{ org(name:"Vachan") { nLocalTranslations localTranslation(id:"pa_IRV_5_bible") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+        org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(1);
+        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
+        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
+        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
+        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+    })
+
+});
+*/

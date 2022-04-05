@@ -300,6 +300,10 @@ const makeResolvers = async (config) => {
                     return null;
                 }
             },
+            hasSuccinct: (trans, args, context) => {
+                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
+                return fse.pathExistsSync(succinctP);
+            },
         },
         Mutation: {
             fetchUsfm: async (root, args) => {
@@ -315,7 +319,7 @@ const makeResolvers = async (config) => {
                     await orgHandlers[args.org].fetchUsfm(orgOb, transOb, config);
                     return true;
                 } catch (err) {
-                    throw new Error(err);
+                    console.log(err);
                     return false;
                 }
             },
@@ -332,9 +336,20 @@ const makeResolvers = async (config) => {
                     await orgHandlers[args.org].fetchUsx(orgOb, transOb, config);
                     return true;
                 } catch (err) {
-                    throw new Error(err);
+                    console.log(err);
                     return false;
                 }
+            },
+            makeSuccinct: async (root, args) => {
+                const orgOb = orgsData[args.org];
+                if (!orgOb) {
+                    return false;
+                }
+                const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
+                if (!transOb) {
+                    return false;
+                }
+                return true;
             },
         },
     };
