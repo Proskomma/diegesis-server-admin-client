@@ -327,6 +327,13 @@ const makeResolvers = async (config) => {
                 const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(succinctP);
             },
+            succinct: (trans, args, context) => {
+                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
+                if (fse.pathExistsSync(succinctP)) {
+                    return fse.readFileSync(succinctP).toString();
+                }
+                return null;
+            },
         },
         Mutation: {
             fetchUsfm: async (root, args) => {
