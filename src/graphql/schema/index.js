@@ -94,6 +94,14 @@ const schema = gql`
         languageCode: String!
         """a title of the translation"""
         title: String!
+        """The direction of the text"""
+        textDirection: String
+        """The script for the language"""
+        script: String
+        """A copyright message"""
+        copyright: String!
+        """An abbreviation"""
+        abbreviation: String!
         """The number of Scripture books as USFM in this translation"""
         nUsfmBooks: Int
         """The bookCodes of Scripture books as USFM in this translation"""

@@ -5,6 +5,50 @@ const path = require('path');
 const os = require('os');
 const fse = require('fs-extra');
 
+const translationQuery =(org, trans) => `{ org(name:"%org%") {
+            nLocalTranslations
+            localTranslation(id:"%trans%") {
+              languageCode
+              title
+              textDirection
+              script
+              copyright
+              abbreviation
+              hasUsfm
+              hasUsx
+              hasSuccinct
+              hasUsfmBookCode(code:"PHM")
+              hasUsxBookCode(code:"PHM")
+              usfmForBookCode(code:"PHM")
+              usxForBookCode(code:"PHM")
+            }
+        } }`.replace("%org%", org).replace("%trans%", trans)
+
+const checkTranslation = org => {
+    expect(org.nLocalTranslations).toStrictEqual(1);
+    expect(org.localTranslation).toHaveProperty('languageCode');
+    expect(org.localTranslation).toHaveProperty('title');
+    expect(org.localTranslation).toHaveProperty('textDirection');
+    expect(org.localTranslation).toHaveProperty('script');
+    expect(org.localTranslation).toHaveProperty('copyright');
+    expect(org.localTranslation).toHaveProperty('abbreviation');
+    expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
+}
+
+const checkUsfmTranslation = org => {
+    checkTranslation(org);
+    expect(org.localTranslation.hasUsfm).toStrictEqual(true);
+    expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
+    expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+}
+
+const checkUsxTranslation = org => {
+    checkTranslation(org);
+    expect(org.localTranslation.hasUsx).toStrictEqual(true);
+    expect(org.localTranslation.hasUsxBookCode).toStrictEqual(true);
+    expect(org.localTranslation.usxForBookCode).toContain("PHM");
+}
+
 beforeEach(async () => {
     global.__dataDir__ = fse.mkdtempSync(path.join(os.tmpdir(), 'dgsServerTest'));
     global.__app__ = await makeServer(makeConfig({dataPath: global.__dataDir__, debug: true}));
@@ -80,16 +124,14 @@ describe('eBible translations', () => {
         expect(res.fetchUsfm).toStrictEqual(true);
         res = await doQuery(
             2468,
-            '{ org(name:"eBible") { nLocalTranslations localTranslation(id:"fraLSG") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+            translationQuery("eBible", "fraLSG")
+        );
         org = res.org;
-        expect(org.nLocalTranslations).toStrictEqual(1);
-        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
-        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
-        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
-        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+        checkUsfmTranslation(org);
     })
 
 });
+
 /*
 describe('DCS translations', () => {
 
@@ -101,13 +143,10 @@ describe('DCS translations', () => {
         expect(res.fetchUsfm).toStrictEqual(true);
         res = await doQuery(
             2468,
-            '{ org(name:"DCS") { nLocalTranslations localTranslation(id:"17717") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+            translationQuery("DCS", "17717")
+        );
         org = res.org;
-        expect(org.nLocalTranslations).toStrictEqual(1);
-        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
-        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
-        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
-        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+        checkUsfmTranslation(org);
     })
 
 });
@@ -122,13 +161,10 @@ describe('DBL translations', () => {
         expect(res.fetchUsx).toStrictEqual(true);
         res = await doQuery(
             2468,
-            '{ org(name:"DBL") { nLocalTranslations localTranslation(id:"de4e12af7f28f599") {hasUsx hasSuccinct hasUsxBookCode(code:"PHM") usxForBookCode(code:"PHM")} } }');
+            translationQuery("DBL", "de4e12af7f28f599")
+        )
         org = res.org;
-        expect(org.nLocalTranslations).toStrictEqual(1);
-        expect(org.localTranslation.hasUsx).toStrictEqual(true);
-        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
-        expect(org.localTranslation.hasUsxBookCode).toStrictEqual(true);
-        expect(org.localTranslation.usxForBookCode).toContain("PHM");
+        checkUsxTranslation(org, 'usx');
     })
 
 });
@@ -143,14 +179,11 @@ describe('Vachan translations', () => {
         expect(res.fetchUsfm).toStrictEqual(true);
         res = await doQuery(
             2468,
-            '{ org(name:"Vachan") { nLocalTranslations localTranslation(id:"pa_IRV_5_bible") {hasUsfm hasSuccinct hasUsfmBookCode(code:"PHM") usfmForBookCode(code:"PHM")} } }');
+            translationQuery("Vachan", "pa_IRV_5_bible")
+        )
         org = res.org;
-        expect(org.nLocalTranslations).toStrictEqual(1);
-        expect(org.localTranslation.hasUsfm).toStrictEqual(true);
-        expect(org.localTranslation.hasSuccinct).toStrictEqual(false);
-        expect(org.localTranslation.hasUsfmBookCode).toStrictEqual(true);
-        expect(org.localTranslation.usfmForBookCode).toContain("PHM");
+        checkUsfmTranslation(org);
     })
 
 });
-*/
+ */

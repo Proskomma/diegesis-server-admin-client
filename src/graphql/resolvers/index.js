@@ -195,7 +195,19 @@ const makeResolvers = async (config) => {
                  return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
-                return filteredCatalog(org, args, context, org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id))));
+                return filteredCatalog(
+                    org,
+                    args,
+                    context,
+                    org.translations
+                        .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
+                ).map(
+                    t => fse.readJsonSync(
+                        path.join(
+                            transPath(config.dataPath, org.translationDir, t.id),
+                            'metadata.json'
+                        )
+                    ));
             },
             catalogEntry: (org, args, context) => {
                 context.orgData = org;
@@ -206,9 +218,19 @@ const makeResolvers = async (config) => {
             localTranslation: (org, args, context) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
-                return org.translations
+                const trans = org.translations
                     .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
                     .filter(t => t.id === args.id)[0];
+                if (trans) {
+                 return fse.readJsonSync(
+                     path.join(
+                         transPath(config.dataPath, org.translationDir, trans.id),
+                         'metadata.json'
+                     )
+                 );
+                } else {
+                    return null;
+                }
             },
         },
         CatalogEntry: {
