@@ -107,6 +107,7 @@ const configSummary = config => `  Listening on port ${config.port}
     Debug ${config.debug ? "en" : "dis"}abled
     Verbose ${config.verbose ? "en" : "dis"}abled
     CORS ${config.useCors ? "en" : "dis"}abled
-    Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}`}`
+    Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
+`}`
 
 module.exports = {makeConfig, cronOptions, configSummary};

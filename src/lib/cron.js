@@ -1,15 +1,17 @@
 const cron = require("node-cron");
-const {cronOptions} = require("./makeConfig.js");
 const path = require("path");
 const fse = require('fs-extra');
 
 const appRootPath = require("app-root-path");
+const {cronOptions} = require("./makeConfig.js");
+const makeSuccinct = require("./makeSuccinct.js");
+const {transPath, usfmDir, usxDir} = require("./dataPaths.js");
 const appRoot = appRootPath.toString();
 
 function doCron(config) {
     cron.schedule(
         cronOptions[config.cronFrequency],
-        config => {
+        () => {
             let taskSpec = null;
             for (const orgDir of fse.readdirSync(path.resolve(appRoot, 'data'))) {
                 if (taskSpec) {
@@ -32,8 +34,32 @@ function doCron(config) {
                 }
             }
             if (taskSpec) {
-                console.log(taskSpec.join('/'));
-                fse.writeJsonSync(path.resolve(appRoot, 'data', taskSpec[0], 'translations', taskSpec[1], 'succinct.json'), {});
+                const [orgDir, transId, contentType] = taskSpec;
+                const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
+                const org = orgJson.name;
+                const t = Date.now();
+                console.log('Making succinct for', `${org}/${transId} from ${contentType}`);
+                const metadataPath = path.join(
+                    transPath(config.dataPath, orgDir, transId),
+                    'metadata.json'
+                );
+                const metadata = fse.readJsonSync(metadataPath);
+                let contentDir = (contentType === 'usfm') ?
+                    usfmDir(config.dataPath, orgDir, transId) :
+                    usxDir(config.dataPath, orgDir, transId);
+                if (!fse.pathExistsSync(contentDir)) {
+                    throw new Error(`${contentType} content directory for ${org}/${transId} does not exist`);
+                }
+                const succinct = makeSuccinct(
+                    {
+                        org,
+                        lang: metadata.languageCode,
+                        abbr: metadata.abbreviation,
+                    },
+                    contentType,
+                    fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
+                fse.writeJsonSync(path.resolve(appRoot, 'data', orgDir, 'translations', transId, 'succinct.json'), succinct);
+                console.log(`  Made in ${(Date.now() - t) / 1000} sec`);
             }
         }
     );

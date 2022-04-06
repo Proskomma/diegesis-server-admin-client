@@ -2,6 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {transPath, usfmDir, usxDir, succinctPath} = require('../../lib/dataPaths');
+const makeSuccinct = require('../../lib/makeSuccinct');
 const appRootPath = require("app-root-path");
 
 const appRoot = appRootPath.toString();
@@ -379,7 +380,38 @@ const makeResolvers = async (config) => {
                 if (!transOb) {
                     return false;
                 }
-                return true;
+                try {
+                    const metadata = fse.readJsonSync(
+                        path.join(
+                            transPath(config.dataPath, orgOb.translationDir, transOb.id),
+                            'metadata.json'
+                        )
+                    );
+                    let contentDir = usfmDir(config.dataPath, orgOb.translationDir, transOb.id);
+                    let docType = 'usfm';
+                    if (!fse.pathExistsSync(contentDir)) {
+                        contentDir = usxDir(config.dataPath, orgOb.translationDir, transOb.id);
+                        docType = 'usx';
+                        if (!fse.pathExistsSync(contentDir)) {
+                            throw new Error(`Neither USFM nor USX directory exists for ${orgOb.name}/${transOb.id}`);
+                        }                    }
+                    const succinct = makeSuccinct(
+                        {
+                            org: orgOb.name,
+                            lang: metadata.languageCode,
+                            abbr: metadata.abbreviation,
+                        },
+                        docType,
+                        fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
+                    fse.writeJsonSync(
+                        succinctPath(config.dataPath, orgOb.translationDir, transOb.id),
+                        succinct,
+                    );
+                    return true;
+                } catch (err) {
+                    console.log(err);
+                    return false;
+                }
             },
         },
     };
