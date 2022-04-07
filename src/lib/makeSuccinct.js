@@ -1,13 +1,26 @@
 const {UWProskomma} = require('uw-proskomma');
 
-function makeSuccinct(selectors, docType, docs) {
+function makeSuccinct(org, metadata, docType, docs) {
     const pk = new UWProskomma();
     pk.importDocuments(
-        selectors,
+        {
+            org,
+            lang: metadata.languageCode,
+            abbr: metadata.abbreviation,
+        },
         docType,
         docs,
     )
-    return pk.serializeSuccinct(Object.keys(pk.docSets)[0]);
+    const docSetId =  pk.gqlQuerySync('{docSets { id } }').data.docSets[0].id;
+    let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}"`;
+    if (metadata.textDirection) {
+        metadataTags +=  ` "direction:${metadata.textDirection}"`;
+    }
+    if (metadata.script) {
+        metadataTags +=  ` "script:${metadata.script}"`;
+    }
+    pk.gqlQuerySync(`mutation { addDocSetTags(docSetId: "${docSetId}", tags: [${metadataTags}]) }`);
+    return pk.serializeSuccinct(docSetId);
 }
 
 module.exports = makeSuccinct;

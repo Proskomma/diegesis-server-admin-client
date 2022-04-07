@@ -13,11 +13,11 @@ function doCron(config) {
         cronOptions[config.cronFrequency],
         () => {
             let taskSpec = null;
-            for (const orgDir of fse.readdirSync(path.resolve(appRoot, 'data'))) {
+            for (const orgDir of fse.readdirSync(path.resolve(config.dataPath))) {
                 if (taskSpec) {
                     break;
                 }
-                const transDir = path.resolve(appRoot, 'data', orgDir, 'translations');
+                const transDir = path.resolve(config.dataPath, orgDir, 'translations');
                 if (fse.pathExistsSync(transDir)) {
                     for (const translationId of fse.readdirSync(transDir)) {
                         if (!fse.pathExistsSync(path.join(transDir, translationId, 'succinct.json'))) {
@@ -51,14 +51,11 @@ function doCron(config) {
                     throw new Error(`${contentType} content directory for ${org}/${transId} does not exist`);
                 }
                 const succinct = makeSuccinct(
-                    {
-                        org,
-                        lang: metadata.languageCode,
-                        abbr: metadata.abbreviation,
-                    },
+                    org,
+                    metadata,
                     contentType,
                     fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
-                fse.writeJsonSync(path.resolve(appRoot, 'data', orgDir, 'translations', transId, 'succinct.json'), succinct);
+                fse.writeJsonSync(path.resolve(config.dataPath, orgDir, 'translations', transId, 'succinct.json'), succinct);
                 console.log(`  Made in ${(Date.now() - t) / 1000} sec`);
             }
         }

@@ -122,7 +122,7 @@ const makeResolvers = async (config) => {
         },
     });
 
-    const filteredCatalog= (org, args, context, translations) => {
+    const filteredCatalog = (org, args, context, translations) => {
         context.orgData = org;
         context.orgHandler = orgHandlers[org.name];
         let ret = translations;
@@ -193,7 +193,7 @@ const makeResolvers = async (config) => {
                 return ret.length;
             },
             catalogEntries: (org, args, context) => {
-                 return filteredCatalog(org, args, context, org.translations);
+                return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
                 return filteredCatalog(
@@ -223,12 +223,12 @@ const makeResolvers = async (config) => {
                     .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
                     .filter(t => t.id === args.id)[0];
                 if (trans) {
-                 return fse.readJsonSync(
-                     path.join(
-                         transPath(config.dataPath, org.translationDir, trans.id),
-                         'metadata.json'
-                     )
-                 );
+                    return fse.readJsonSync(
+                        path.join(
+                            transPath(config.dataPath, org.translationDir, trans.id),
+                            'metadata.json'
+                        )
+                    );
                 } else {
                     return null;
                 }
@@ -401,13 +401,11 @@ const makeResolvers = async (config) => {
                         docType = 'usx';
                         if (!fse.pathExistsSync(contentDir)) {
                             throw new Error(`Neither USFM nor USX directory exists for ${orgOb.name}/${transOb.id}`);
-                        }                    }
+                        }
+                    }
                     const succinct = makeSuccinct(
-                        {
-                            org: orgOb.name,
-                            lang: metadata.languageCode,
-                            abbr: metadata.abbreviation,
-                        },
+                        orgOb.name,
+                        metadata,
                         docType,
                         fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
                     fse.writeJsonSync(
