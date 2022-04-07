@@ -8,12 +8,9 @@ COPY src/ src/
 COPY LICENSE .
 COPY package.json .
 COPY package-lock.json .
+COPY default_config.json config.json
 
-# Upgrade npm first
-RUN npm install -g npm
 # Install
 RUN npm install
 
-WORKDIR /app/src
-
-CMD [ "node", "index.js" ]
+CMD [ "node", "src/index.js", "config.json" ]
