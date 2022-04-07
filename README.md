@@ -1,12 +1,28 @@
 # diegesis-server
 An Apollo-based server that caches Scripture from remote sources and serves them via a unified GraphQL interface.
 
+Diegesis Server can
+currently interact with
+- DBL
+- DCS
+- eBible
+- Vachan2
+
+For these sources it provides
+- catalog information, with very basic metadata, about available content
+- a mechanism to download USFM or USX for a particular translation
+- conversion of USFM or USX to a Proskomma succinct JSON file for the entire docSet,
+  either via an optional cron process or via an explicit GraphQL mutation
+- augmented metadata for downloaded translations
+- per-book USFM/USX via GraphQL
+- per-translation succinct JSON via GraphQL
+
 ## Installation
 ### Locally
 ```
 npm install
-node src/index.js // OR
-node src/index.js example_config.json
+node src/index.js // most things disabled, listening on port 2468, OR
+node src/index.js debug_example_config.json // Most things enabled, listening on port 1234
 ```
 
 ### Using Docker
