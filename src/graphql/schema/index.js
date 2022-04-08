@@ -140,6 +140,10 @@ const querySchema = gql`
         hasSuccinct: Boolean!
         """The Proskomma succinct docSet for this translation"""
         succinct: String
+        """Is VRS file available?"""
+        hasVrs: Boolean!
+        """The VRS file for this translation"""
+        vrs: String
     }
     `;
 const mutationSchema = gql`
