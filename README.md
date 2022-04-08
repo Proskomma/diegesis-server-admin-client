@@ -10,7 +10,7 @@ currently interact with
 
 For these sources it provides
 - catalog information, with very basic metadata, about available content
-- a mechanism to download USFM or USX for a particular translation
+- a mechanism to download and cache USFM or USX for a particular translation
 - conversion of USFM or USX to a Proskomma succinct JSON file for the entire docSet,
   either via an optional cron process or via an explicit GraphQL mutation
 - augmented metadata for downloaded translations
@@ -26,6 +26,7 @@ node src/index.js debug_example_config.json // Most things enabled, listening on
 See also the Docker documentation at the end of this document
 
 ## Overview of the GraphQL
+Note that the Apollo sandbox will only work when `debug` is enabled, because the sandbox relies on cross-site scripting which is generally Not What We Want In Production.
 ### Queries
 #### Organizations
 The data sources from which Diegesis Server may cache content.
@@ -84,6 +85,8 @@ Translations for which Scripture content plus additional metadata has been cache
       usfmForBookCode(code:"PHM")
       hasSuccinct
       succinct
+      hasVrs
+      vrs
     }
   }
 }
@@ -98,6 +101,7 @@ Translations for which Scripture content plus additional metadata has been cache
 ```
 
 ### Mutations
+Note that `includeMutations` must be enabled for this to work...
 #### Fetch USFM/USX
 ```
 mutation {
@@ -118,13 +122,39 @@ mutation {
 
 ## Configuration
 See
-- `default_config.json` for the standard, prudent config
-- `debug_config.json` for an 'everything enabled' config for debugging
+- `default_config.json`: the standard, (excessively) prudent config
+- `debug_config.json`: an 'everything enabled' config for debugging
+
+### HTTP
+- `hostName`: default is 'localhost'.
+- `port`: default is 2468.
+
+### Directory usage
+-`dataPath`: the directory within which Scripture data will be stored. Default is 'data' within the repo.
+- `staticPath`: The directory from which static content will be stored. There is no default.
+
+### Security
+- `useCors`: whether to enable wildcard CORS. Default is false.
+- `debug`: Default is false. When enabled, this
+    - relaxes Helmet security settings to allow the Apollo sandbox to function
+    - enables some convenience HTML endpoints
+    - enables stack traces in GraphQL errors
+- `includeMutations`: whether to include mutations. Without this, the GraphQL becomes read-only, ie it is impossible to download or process new content. The default is false.
+
+### Data sources and processing
+- `orgs`: an array of organization names for which handlers should be loaded. Default is [] which means 'all'.
+- `cronFrequency`: Controls how often the cron job that generates succinct JSON is run. Default is 'never'.
+
+### Reporting
+- `logAccess`: whether to log HTTP access. Default is false.
+- `logFormat`: the Morgan format to use for HTTP logs, if enabled. Default is 'combined', ie combined Apache format.
+- `accessLogPath`: the path to which HTTP access logs should be written, if enabled. There is no default.
+- `verbose`: whether to output startup information. Default is false.
 
 ## Writing a new org handler
 New org handlers go in `orgHandlers`
 
-Look at the `eBible` example. Your org handler directory should include
+Look at the existing examples. Your org handler directory should include
 - JSON called `org.json` containing a unique `name` and `translationDir`.
 - a module called `translations.js` that returns `getTranslationsCatalog`, `fetchUsfm` and `fetchUsx`
 
