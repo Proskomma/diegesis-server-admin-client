@@ -4,5 +4,6 @@
   "useCors": true,
   "orgs": [],
   "cronFrequency": "1 min",
-  "verbose": true
+  "verbose": true,
+  "includeMutations": true
 }

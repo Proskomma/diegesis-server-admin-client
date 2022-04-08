@@ -19,7 +19,8 @@ const defaultConfig = {
     debug: false,
     cronFrequency: 'never',
     orgs: [], // Empty array means 'all',
-    verbose: false
+    verbose: false,
+    includeMutations: false,
 }
 
 const cronOptions = {
@@ -82,6 +83,12 @@ function makeConfig(providedConfig) {
         }
         config.debug = providedConfig.debug;
     }
+    if ('includeMutations' in providedConfig) {
+        if (typeof providedConfig.includeMutations !== 'boolean') {
+            croak(`ERROR: includeMutaitons should be boolean, not ${typeof providedConfig.includeMutations}`);
+        }
+        config.includeMutations = providedConfig.includeMutations;
+    }
     if ('useCors' in providedConfig) {
         if (typeof providedConfig.useCors !== 'boolean') {
             croak(`ERROR: useCors should be boolean, not ${typeof providedConfig.useCors}`);
@@ -115,6 +122,7 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     Debug ${config.debug ? "en" : "dis"}abled
     Verbose ${config.verbose ? "en" : "dis"}abled
     CORS ${config.useCors ? "en" : "dis"}abled
+    Mutations ${config.includeMutations ? "included" : "not included"}
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
 `}`
 

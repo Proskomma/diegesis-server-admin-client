@@ -28,6 +28,7 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
+    "@graphql-tools/merge": "^8.2.7",
     "apollo-server-express": "^3.6.4",
     "app-root-path": "^3.0.0",
     "axios": "^0.26.1",

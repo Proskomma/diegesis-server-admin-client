@@ -172,10 +172,12 @@ const makeResolvers = async (config) => {
         return ret;
     }
 
-    return {
+    const scalarResolvers = {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
         BookCode: bookCodeScalar,
+    }
+    const queryResolver = {
         Query: {
             orgs: () => Object.values(orgsData),
             org: (root, args) => orgsData[args.name],
@@ -334,7 +336,9 @@ const makeResolvers = async (config) => {
                 }
                 return null;
             },
-        },
+        }
+    };
+    const mutationResolver = {
         Mutation: {
             fetchUsfm: async (root, args) => {
                 const orgOb = orgsData[args.org];
@@ -420,6 +424,12 @@ const makeResolvers = async (config) => {
             },
         },
     };
+
+    if (config.includeMutations) {
+        return {...scalarResolvers, ...queryResolver, ...mutationResolver};
+    } else {
+        return {...scalarResolvers, ...queryResolver};
+    }
 };
 
 module.exports = makeResolvers;

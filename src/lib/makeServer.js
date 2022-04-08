@@ -1,13 +1,14 @@
+const path = require("path");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
-const path = require("path");
-const makeResolvers = require("../graphql/resolvers/index.js");
 const {ApolloServer} = require("apollo-server-express");
-const gqlSchema = require("../graphql/schema/index.js");
+const {mergeTypeDefs} = require('@graphql-tools/merge')
+const makeResolvers = require("../graphql/resolvers/index.js");
+const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
 
-async function makeServer (config) {
+async function makeServer(config) {
     // Express
     const app = express();
     app.use(helmet({
@@ -37,7 +38,11 @@ async function makeServer (config) {
     // Apollo server
     const resolvers = await makeResolvers(config);
     const server = new ApolloServer({
-        typeDefs: gqlSchema,
+        typeDefs: mergeTypeDefs(
+            config.includeMutations ?
+                [scalarSchema, querySchema, mutationSchema] :
+                [scalarSchema, querySchema]
+        ),
         resolvers,
         debug: config.debug,
     });

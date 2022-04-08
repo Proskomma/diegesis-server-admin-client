@@ -1,9 +1,12 @@
 const {gql} = require("apollo-server-express");
 
-const schema = gql`
+const scalarSchema = gql`
     scalar OrgName
     scalar TranslationId
     scalar BookCode
+    `;
+
+const querySchema = gql`
     type Query {
         """A list of organizations from which this server can serve data"""
         orgs: [Org!]!
@@ -138,6 +141,8 @@ const schema = gql`
         """The Proskomma succinct docSet for this translation"""
         succinct: String
     }
+    `;
+const mutationSchema = gql`
     type Mutation {
         """Fetches and processes the specified USFM content from a remote server"""
         fetchUsfm(
@@ -163,4 +168,4 @@ const schema = gql`
     }
 `;
 
-module.exports = schema;
+module.exports = {scalarSchema, querySchema, mutationSchema };
