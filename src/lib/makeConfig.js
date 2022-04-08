@@ -15,6 +15,8 @@ const defaultConfig = {
     hostName: 'localhost',
     port: 2468,
     dataPath: path.resolve(appRoot, 'data'),
+    logAccess: false,
+    logFormat: "combined",
     useCors: false,
     debug: false,
     cronFrequency: 'never',
@@ -35,6 +37,7 @@ const cronOptions = {
     '7 day': '*/7 * *',
 };
 
+const logFormatOptions = ["combined", "common", "dev", "short", "tiny"];
 
 function makeConfig(providedConfig) {
     const config = defaultConfig;
@@ -82,6 +85,25 @@ function makeConfig(providedConfig) {
             croak(`ERROR: debug should be boolean, not ${typeof providedConfig.debug}`);
         }
         config.debug = providedConfig.debug;
+    }
+    if ('logAccess' in providedConfig) {
+        if (typeof providedConfig.logAccess !== 'boolean') {
+            croak(`ERROR: logAccess should be boolean, not ${typeof providedConfig.logAccess}`);
+        }
+        config.logAccess = providedConfig.logAccess;
+    }
+    if ('logFormat' in providedConfig) {
+        if (!logFormatOptions.includes(providedConfig.logFormat)) {
+            croak(`ERROR: unknown logFormat option '${providedConfig.logFormat}' - should be one of ${logFormatOptions.join(', ')}`);
+        }
+        config.logFormat = providedConfig.logFormat;
+    }
+    if (providedConfig.accessLogPath) {
+        if (
+            typeof providedConfig.accessLogPath !== 'string') {
+            croak(`ERROR: accessLogPath, if present, should be a string, not '${providedConfig.accessLogPath}'`);
+        }
+        config.accessLogPath = path.resolve(providedConfig.accessLogPath);
     }
     if ('includeMutations' in providedConfig) {
         if (typeof providedConfig.includeMutations !== 'boolean') {

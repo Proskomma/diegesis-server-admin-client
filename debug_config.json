@@ -1,6 +1,8 @@
 {
   "port": 1234,
   "debug": true,
+  "logAccess": false,
+  "logFormat": "dev",
   "useCors": true,
   "orgs": [],
   "cronFrequency": "1 min",

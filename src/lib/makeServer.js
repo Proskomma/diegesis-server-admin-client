@@ -1,9 +1,11 @@
 const path = require("path");
+const fse = require('fs-extra');
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const {ApolloServer} = require("apollo-server-express");
 const {mergeTypeDefs} = require('@graphql-tools/merge')
+const morgan = require('morgan');
 const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
@@ -50,6 +52,16 @@ async function makeServer(config) {
     // Maybe start cron
     if (config.cronFrequency !== 'never') {
         doCron(config);
+    }
+
+    // Maybe log access using Morgan
+    if (config.logAccess) {
+        if (config.accessLogPath) {
+            const accessLogStream = fse.createWriteStream(config.accessLogPath, { flags: 'a' });
+            app.use(morgan(config.logFormat, { stream: accessLogStream }));
+        } else {
+            app.use(morgan(config.logFormat));
+        }
     }
 
     // Start server
