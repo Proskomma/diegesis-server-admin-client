@@ -58,9 +58,16 @@ async function makeServer(config) {
     if (config.logAccess) {
         if (config.accessLogPath) {
             const accessLogStream = fse.createWriteStream(config.accessLogPath, { flags: 'a' });
-            app.use(morgan(config.logFormat, { stream: accessLogStream }));
+            app.use(
+                morgan(
+                    config.logFormat,
+                    { stream: accessLogStream }
+                )
+            );
         } else {
-            app.use(morgan(config.logFormat));
+            app.use(
+                morgan(config.logFormat)
+            );
         }
     }
 

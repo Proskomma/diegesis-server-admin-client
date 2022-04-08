@@ -38,7 +38,7 @@ function doCron(config) {
                 const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
                 const org = orgJson.name;
                 const t = Date.now();
-                console.log('Making succinct for', `${org}/${transId} from ${contentType}`);
+                // console.log('Making succinct for', `${org}/${transId} from ${contentType}`);
                 const metadataPath = path.join(
                     transPath(config.dataPath, orgDir, transId),
                     'metadata.json'
@@ -56,7 +56,7 @@ function doCron(config) {
                     contentType,
                     fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
                 fse.writeJsonSync(path.resolve(config.dataPath, orgDir, 'translations', transId, 'succinct.json'), succinct);
-                console.log(`  Made in ${(Date.now() - t) / 1000} sec`);
+                // console.log(`  Made in ${(Date.now() - t) / 1000} sec`);
             }
         }
     );

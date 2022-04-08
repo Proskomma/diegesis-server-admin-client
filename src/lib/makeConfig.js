@@ -143,6 +143,7 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
     Debug ${config.debug ? "en" : "dis"}abled
     Verbose ${config.verbose ? "en" : "dis"}abled
+    Access logging ${!config.logAccess ? "disabled" : `to ${config.accessLogPath || 'console'} in Morgan '${config.logFormat}' format`}
     CORS ${config.useCors ? "en" : "dis"}abled
     Mutations ${config.includeMutations ? "included" : "not included"}
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}

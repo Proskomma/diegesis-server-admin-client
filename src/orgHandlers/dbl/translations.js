@@ -79,6 +79,10 @@ const fetchUsx = async (org, trans, config) => {
             fse.writeFileSync(path.join(usxBooksPath, `${bookName.code}.usx`), fileContent);
         }
     }
+    const vrs = zip.file(new RegExp('versification.vrs'));
+    const vrsContent = await vrs[0].async('text');
+    const vrsPath = path.join(tp, 'versification.vrs');
+    fse.writeFileSync(vrsPath, vrsContent);
 };
 
 module.exports = {getTranslationsCatalog, fetchUsfm, fetchUsx}
