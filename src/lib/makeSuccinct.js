@@ -1,6 +1,6 @@
 const {UWProskomma} = require('uw-proskomma');
 
-function makeSuccinct(org, metadata, docType, docs) {
+function makeSuccinct(org, metadata, docType, docs, vrsContent) {
     const pk = new UWProskomma();
     pk.importDocuments(
         {
@@ -20,6 +20,10 @@ function makeSuccinct(org, metadata, docType, docs) {
         metadataTags +=  ` "script:${metadata.script}"`;
     }
     pk.gqlQuerySync(`mutation { addDocSetTags(docSetId: "${docSetId}", tags: [${metadataTags}]) }`);
+    if (vrsContent) {
+        pk.gqlQuerySync(`mutation { setVerseMapping(docSetId: "${docSetId}" vrsSource: """${vrsContent}""")}`);
+    }
+    const hasMapping = pk.gqlQuerySync('{docSets { hasMapping } }').data.docSets[0].hasMapping;
     return pk.serializeSuccinct(docSetId);
 }
 

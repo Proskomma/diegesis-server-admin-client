@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const appRootPath = require("app-root-path");
 const {cronOptions} = require("./makeConfig.js");
 const makeSuccinct = require("./makeSuccinct.js");
-const {transPath, usfmDir, usxDir} = require("./dataPaths.js");
+const {transPath, usfmDir, usxDir, vrsPath} = require("./dataPaths.js");
 const appRoot = appRootPath.toString();
 
 function doCron(config) {
@@ -50,11 +50,18 @@ function doCron(config) {
                 if (!fse.pathExistsSync(contentDir)) {
                     throw new Error(`${contentType} content directory for ${org}/${transId} does not exist`);
                 }
+                let vrsContent = null;
+                const vrsP = vrsPath(config.dataPath, orgDir, transId);
+                if (fse.pathExistsSync(vrsP)) {
+                    vrsContent = fse.readFileSync(vrsP).toString();
+                }
                 const succinct = makeSuccinct(
                     org,
                     metadata,
                     contentType,
-                    fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
+                    fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
+                    vrsContent,
+                );
                 fse.writeJsonSync(path.resolve(config.dataPath, orgDir, 'translations', transId, 'succinct.json'), succinct);
                 // console.log(`  Made in ${(Date.now() - t) / 1000} sec`);
             }

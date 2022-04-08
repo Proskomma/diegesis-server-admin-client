@@ -418,11 +418,18 @@ const makeResolvers = async (config) => {
                             throw new Error(`Neither USFM nor USX directory exists for ${orgOb.name}/${transOb.id}`);
                         }
                     }
+                    let vrsContent = null;
+                    const vrsP = vrsPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    if (fse.pathExistsSync(vrsP)) {
+                        vrsContent = fse.readFileSync(vrsP).toString();
+                    }
                     const succinct = makeSuccinct(
                         orgOb.name,
                         metadata,
                         docType,
-                        fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()));
+                        fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
+                        vrsContent
+                    );
                     fse.writeJsonSync(
                         succinctPath(config.dataPath, orgOb.translationDir, transOb.id),
                         succinct,
