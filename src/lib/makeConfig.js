@@ -12,6 +12,7 @@ const croak = msg => {
 
 // Default config - override by passing config JSON file
 const defaultConfig = {
+    hostName: 'localhost',
     port: 2468,
     dataPath: path.resolve(appRoot, 'data'),
     useCors: false,
@@ -36,6 +37,13 @@ const cronOptions = {
 
 function makeConfig(providedConfig) {
     const config = defaultConfig;
+    if (providedConfig.hostName) {
+        if (
+            typeof providedConfig.hostName !== 'string') {
+            croak(`ERROR: hostName should be a string, not '${providedConfig.port}'`);
+        }
+        config.hostName = providedConfig.hostName;
+    }
     if (providedConfig.port) {
         if (
             typeof providedConfig.port !== 'number' ||
@@ -101,7 +109,7 @@ function makeConfig(providedConfig) {
     return config;
 }
 
-const configSummary = config => `  Listening on port ${config.port}
+const configSummary = config => `  Listening on ${config.hostName}:${config.port}
     Data directory is ${config.dataPath}
     ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
     Debug ${config.debug ? "en" : "dis"}abled

@@ -1,4 +1,5 @@
 {
+  "hostName": "localhost",
   "port": 2468,
   "debug": false,
   "useCors": false,

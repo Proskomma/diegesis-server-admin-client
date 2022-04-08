@@ -9,7 +9,7 @@ config = makeConfig(providedConfig);
 
 // Start listening
 makeServer(config).then(app => {
-    app.listen(config.port, () => {
+    app.listen(config.port, config.hostName,() => {
         config.verbose && console.log(configSummary(config));
     })
 });
