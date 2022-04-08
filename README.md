@@ -130,7 +130,7 @@ See
 - `port`: default is 2468.
 
 ### Directory usage
--`dataPath`: the directory within which Scripture data will be stored. Default is 'data' within the repo.
+- `dataPath`: the directory within which Scripture data will be stored. Default is 'data' within the repo.
 - `staticPath`: The directory from which static content will be stored. There is no default.
 
 ### Security
