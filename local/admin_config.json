@@ -1,0 +1,12 @@
+{
+  "port": 1234,
+  "debug": true,
+  "logAccess": false,
+  "logFormat": "dev",
+  "useCors": true,
+  "orgs": [],
+  "cronFrequency": "1 min",
+  "verbose": true,
+  "includeMutations": true,
+  "staticPath": "/home/mark/repos/proskomma/diegesis-server-admin-client/build"
+}
