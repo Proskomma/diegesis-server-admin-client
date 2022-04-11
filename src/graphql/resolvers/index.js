@@ -135,9 +135,10 @@ const makeResolvers = async (config) => {
         if (args.withMatchingMetadata) {
             ret = ret.filter(
                 t =>
-                    t.title.includes(args.withMatchingMetadata) ||
-                    t.description.includes(args.withMatchingMetadata)
-            );
+                    args.withMatchingMetadata.filter(
+                        md => t.title.toLowerCase().includes(md.toLowerCase())
+            ).length > 0
+            )
         }
         if (args.sortedBy) {
             if (!['id', 'languageCode', 'languageName', 'title'].includes(args.sortedBy)) {
