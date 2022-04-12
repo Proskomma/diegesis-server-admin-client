@@ -28,6 +28,8 @@ const makeResolvers = async (config) => {
         orgsData[orgRecord.name] = {
             orgDir: orgDir,
             name: orgRecord.name,
+            fullName: orgRecord.fullName,
+            contentType: orgRecord.contentType,
             translationDir: orgRecord.translationDir,
             translations: await orgHandlers[orgRecord.name].getTranslationsCatalog(),
         };
@@ -42,6 +44,7 @@ const makeResolvers = async (config) => {
         OrgName: new RegExp(/^[A-Za-z0-9]{2,64}$/),
         TranslationId: new RegExp(/^[A-Za-z0-9_-]{1,64}$/),
         BookCode: new RegExp(/^[A-Z0-9]{3}$/),
+        ContentType: new RegExp(/^(USFM|USX)$/),
     }
 
     const orgNameScalar = new GraphQLScalarType({
@@ -65,6 +68,32 @@ const makeResolvers = async (config) => {
             }
             if (!scalarRegexes.OrgName.test(ast.value)) {
                 throw new Error(`One or more characters is not allowed`);
+            }
+            return ast.value
+        },
+    });
+
+    const ContentTypeScalar = new GraphQLScalarType({
+        name: 'ContentType',
+        description: 'The type of content returned by an organization',
+        serialize(value) {
+            if (typeof value !== 'string') {
+                return null;
+            }
+            if (!scalarRegexes.ContentType.test(value)) {
+                return null;
+            }
+            return value;
+        },
+        parseValue(value) {
+            return value;
+        },
+        parseLiteral(ast) {
+            if (ast.kind !== Kind.STRING) {
+                throw new Error(`Must be a string, not ${ast.kind}`);
+            }
+            if (!scalarRegexes.ContentType.test(ast.value)) {
+                throw new Error(`Expected USFM or USX`);
             }
             return ast.value
         },
@@ -177,6 +206,7 @@ const makeResolvers = async (config) => {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
         BookCode: bookCodeScalar,
+        ContentType: ContentTypeScalar,
     }
     const queryResolver = {
         Query: {

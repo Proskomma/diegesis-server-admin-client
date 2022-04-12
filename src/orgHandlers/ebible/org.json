@@ -1,4 +1,6 @@
 {
   "translationDir": "ebible",
-  "name": "eBible"
+  "name": "eBible",
+  "fullName": "eBible.org",
+  "contentType": "USFM"
 }

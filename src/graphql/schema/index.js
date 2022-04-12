@@ -4,6 +4,7 @@ const scalarSchema = gql`
     scalar OrgName
     scalar TranslationId
     scalar BookCode
+    scalar ContentType
     `;
 
 const querySchema = gql`
@@ -20,6 +21,10 @@ const querySchema = gql`
     type Org {
         """A short name for the organization"""
         name: OrgName!
+        """A full name for the organization"""
+        fullName: String!
+        """The content type received from this organization"""
+        contentType: ContentType!
         """The number of catalog entries for this organization"""
         nCatalogEntries: Int!
         """The number of local translations for this organization"""
