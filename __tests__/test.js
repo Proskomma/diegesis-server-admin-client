@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const fse = require('fs-extra');
 
-const translationQuery =(org, trans) => `{ org(name:"%org%") {
+const translationQuery = (org, trans) => `{ org(name:"%org%") {
             nLocalTranslations
             localTranslation(id:"%trans%") {
               languageCode
@@ -51,7 +51,15 @@ const checkUsxTranslation = org => {
 
 beforeEach(async () => {
     global.__dataDir__ = fse.mkdtempSync(path.join(os.tmpdir(), 'dgsServerTest'));
-    global.__app__ = await makeServer(makeConfig({dataPath: global.__dataDir__, debug: true}));
+    global.__app__ = await makeServer(
+        makeConfig(
+            {
+                dataPath: global.__dataDir__,
+                debug: true,
+                includeMutations: true,
+            }
+        )
+    );
     global.__server__ = await global.__app__.listen(2468);
 })
 
