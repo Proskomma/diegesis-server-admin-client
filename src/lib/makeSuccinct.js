@@ -23,7 +23,6 @@ function makeSuccinct(org, metadata, docType, docs, vrsContent) {
     if (vrsContent) {
         pk.gqlQuerySync(`mutation { setVerseMapping(docSetId: "${docSetId}" vrsSource: """${vrsContent}""")}`);
     }
-    const hasMapping = pk.gqlQuerySync('{docSets { hasMapping } }').data.docSets[0].hasMapping;
     return pk.serializeSuccinct(docSetId);
 }
 
