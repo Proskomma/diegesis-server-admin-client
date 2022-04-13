@@ -44,6 +44,7 @@
     "path": "^0.12.7",
     "proskomma-utils": "^0.4.28",
     "uw-proskomma": "^0.6.4",
+    "winston": "^3.7.2",
     "xmldom": "^0.6.0"
   },
   "jest": {

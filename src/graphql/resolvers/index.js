@@ -1,7 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
-const {transPath, usfmDir, usxDir, succinctPath, vrsPath} = require('../../lib/dataPaths');
+const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath} = require('../../lib/dataPaths');
 const makeSuccinct = require('../../lib/makeSuccinct');
 const appRootPath = require("app-root-path");
 
@@ -199,6 +199,20 @@ const makeResolvers = async (config) => {
                 ret = ret.filter(t => !fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.id)));
             }
         }
+        if ('withSuccinct' in args) {
+            if (args.withSuccinct) {
+                ret = ret.filter(t => fse.pathExistsSync(succinctPath(config.dataPath, context.orgData.translationDir, t.id)));
+            } else {
+                ret = ret.filter(t => !fse.pathExistsSync(succinctPath(config.dataPath, context.orgData.translationDir, t.id)));
+            }
+        }
+        if ('withSuccinctError' in args) {
+            if (args.withSuccinctError) {
+                ret = ret.filter(t => fse.pathExistsSync(succinctErrorPath(config.dataPath, context.orgData.translationDir, t.id)));
+            } else {
+                ret = ret.filter(t => !fse.pathExistsSync(succinctErrorPath(config.dataPath, context.orgData.translationDir, t.id)));
+            }
+        }
         return ret;
     }
 
@@ -210,8 +224,13 @@ const makeResolvers = async (config) => {
     }
     const queryResolver = {
         Query: {
-            orgs: () => Object.values(orgsData),
-            org: (root, args) => orgsData[args.name],
+            orgs: (root, args, context) => {
+                return Object.values(orgsData);
+            },
+            org: (root, args, context) => {
+                context.incidentLogger = config.incidentLogger;
+                return orgsData[args.name];
+            },
         },
         Org: {
             nCatalogEntries: org => org.translations.length,
@@ -367,6 +386,17 @@ const makeResolvers = async (config) => {
                 }
                 return null;
             },
+            hasSuccinctError: (trans, args, context) => {
+                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.id);
+                return fse.pathExistsSync(succinctEP);
+            },
+            succinctError: (trans, args, context) => {
+                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.id);
+                if (fse.pathExistsSync(succinctEP)) {
+                    return fse.readFileSync(succinctEP).toString();
+                }
+                return null;
+            },
             hasVrs: (trans, args, context) => {
                 const vrsP = vrsPath(config.dataPath, context.orgData.translationDir, trans.id);
                 return fse.pathExistsSync(vrsP);
@@ -468,6 +498,23 @@ const makeResolvers = async (config) => {
                     return true;
                 } catch (err) {
                     console.log(err);
+                    return false;
+                }
+            },
+            deleteSuccinctError: async (root, args) => {
+                const orgOb = orgsData[args.org];
+                if (!orgOb) {
+                    return false;
+                }
+                const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
+                if (!transOb) {
+                    return false;
+                }
+                const succinctEP = succinctErrorPath(config.dataPath, orgOb.translationDir, transOb.id);
+                if (fse.pathExistsSync(succinctEP)) {
+                    fse.removeSync(succinctEP);
+                    return true;
+                } else {
                     return false;
                 }
             },

@@ -6,6 +6,7 @@ const cors = require("cors");
 const {ApolloServer} = require("apollo-server-express");
 const {mergeTypeDefs} = require('@graphql-tools/merge')
 const morgan = require('morgan');
+const winston = require('winston');
 const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
@@ -37,23 +38,6 @@ async function makeServer(config) {
         });
     }
 
-    // Apollo server
-    const resolvers = await makeResolvers(config);
-    const server = new ApolloServer({
-        typeDefs: mergeTypeDefs(
-            config.includeMutations ?
-                [scalarSchema, querySchema, mutationSchema] :
-                [scalarSchema, querySchema]
-        ),
-        resolvers,
-        debug: config.debug,
-    });
-
-    // Maybe start cron
-    if (config.cronFrequency !== 'never') {
-        doCron(config);
-    }
-
     // Maybe log access using Morgan
     if (config.logAccess) {
         if (config.accessLogPath) {
@@ -69,6 +53,30 @@ async function makeServer(config) {
                 morgan(config.logFormat)
             );
         }
+    }
+
+    // Log incidents using Winston
+    config.incidentLogger = winston.createLogger({
+        level: 'info',
+        format: winston.format.json(),
+        transports: [new winston.transports.Console()],
+    });
+
+    // Apollo server
+    const resolvers = await makeResolvers(config);
+    const server = new ApolloServer({
+        typeDefs: mergeTypeDefs(
+            config.includeMutations ?
+                [scalarSchema, querySchema, mutationSchema] :
+                [scalarSchema, querySchema]
+        ),
+        resolvers,
+        debug: config.debug,
+    });
+
+    // Maybe start cron
+    if (config.cronFrequency !== 'never') {
+        doCron(config);
     }
 
     // Start server

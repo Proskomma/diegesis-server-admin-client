@@ -11,13 +11,13 @@ function makeSuccinct(org, metadata, docType, docs, vrsContent) {
         docType,
         docs,
     )
-    const docSetId =  pk.gqlQuerySync('{docSets { id } }').data.docSets[0].id;
+    const docSetId = pk.gqlQuerySync('{docSets { id } }').data.docSets[0].id;
     let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}"`;
     if (metadata.textDirection) {
-        metadataTags +=  ` "direction:${metadata.textDirection}"`;
+        metadataTags += ` "direction:${metadata.textDirection}"`;
     }
     if (metadata.script) {
-        metadataTags +=  ` "script:${metadata.script}"`;
+        metadataTags += ` "script:${metadata.script}"`;
     }
     pk.gqlQuerySync(`mutation { addDocSetTags(docSetId: "${docSetId}", tags: [${metadataTags}]) }`);
     if (vrsContent) {

@@ -34,6 +34,14 @@ const succinctPath =
         );
     }
 
+const succinctErrorPath =
+    (dataPath, translationDir, translationId) => {
+        return path.join(
+            transPath(dataPath, translationDir, translationId),
+            'succinctError.json'
+        );
+    }
+
 const vrsPath =
     (dataPath, translationDir, translationId) => {
         return path.join(
@@ -42,4 +50,4 @@ const vrsPath =
         );
     }
 
-module.exports = {transPath, usfmDir, usxDir, succinctPath, vrsPath};
+module.exports = {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath};

@@ -65,6 +65,10 @@ const querySchema = gql`
             withUsfm: Boolean
             """Filter according to presence or absence of USX"""
             withUsx: Boolean
+            """Filter according to presence or absence of succinct JSON"""
+            withSuccinct: Boolean
+            """Filter according to presence or absence of succinct generation error"""
+            withSuccinctError: Boolean
             """Filter by language codes"""
             withLanguageCode: [String!]
             """Filter by text matches in title"""
@@ -145,6 +149,10 @@ const querySchema = gql`
         hasSuccinct: Boolean!
         """The Proskomma succinct docSet for this translation"""
         succinct: String
+        """Is there a succinct Json error?"""
+        hasSuccinctError: Boolean!
+        """The succinct Json error for this translation"""
+        succinctError: String
         """Is VRS file available?"""
         hasVrs: Boolean!
         """The VRS file for this translation"""
@@ -169,6 +177,13 @@ const mutationSchema = gql`
         ) : Boolean!
         """Makes succinct JSON from USFM or USX for the specified translation"""
         makeSuccinct(
+            """The name of the organization"""
+            org: OrgName!
+            """The organization-specific identifier of the translation"""
+            translationId: TranslationId!
+        ) : Boolean!
+        """Deletes a succinct error, if present, which will allow succinct generation by the cron"""
+        deleteSuccinctError(
             """The name of the organization"""
             org: OrgName!
             """The organization-specific identifier of the translation"""
