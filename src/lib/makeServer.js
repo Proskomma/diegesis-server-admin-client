@@ -25,6 +25,16 @@ async function makeServer(config) {
     if (config.staticPath) {
         app.use(express.static(config.staticPath));
     }
+
+    // Maybe copy local translations
+    if (config.localUsxPath) {
+        const targetDir = path.join(config.dataPath, 'localusx');
+        if (fse.pathExistsSync(targetDir)) {
+            fse.removeSync(targetDir);
+        }
+        fse.copySync(config.localUsxPath, targetDir);
+    }
+
     // Maybe HTML endpoints
     if (config.debug) {
         // Hello world index

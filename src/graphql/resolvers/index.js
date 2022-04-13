@@ -14,6 +14,12 @@ const makeResolvers = async (config) => {
     config.verbose && console.log("  Loading org handlers");
     let loadedSomething = false;
     for (const orgDir of fse.readdirSync(path.resolve(appRoot, 'src', 'orgHandlers'))) {
+        if (orgDir === 'localusx' && !config.localUsxPath) {
+            continue;
+        }
+        if (orgDir === 'localusfm' && !config.localUsfmPath) {
+            continue;
+        }
         const orgRecord = fse.readJsonSync(path.resolve(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
         if (config.orgs.length > 0 && !config.orgs.includes(orgRecord.name)) {
             continue;
@@ -31,7 +37,7 @@ const makeResolvers = async (config) => {
             fullName: orgRecord.fullName,
             contentType: orgRecord.contentType,
             translationDir: orgRecord.translationDir,
-            translations: await orgHandlers[orgRecord.name].getTranslationsCatalog(),
+            translations: await orgHandlers[orgRecord.name].getTranslationsCatalog(config),
         };
         loadedSomething = true;
     }

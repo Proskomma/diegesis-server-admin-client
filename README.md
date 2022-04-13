@@ -143,6 +143,8 @@ See
 
 ### Data sources and processing
 - `orgs`: an array of organization names for which handlers should be loaded. Default is [] which means 'all'.
+- `localUsfmPath`: the directory from which local USFM translations should be copied into the data directory. There is no default.
+- `localUsxPath`: the directory from which local USX translations should be copied into the data directory. There is no default.
 - `cronFrequency`: Controls how often the cron job that generates succinct JSON is run. Default is 'never'.
 
 ### Reporting

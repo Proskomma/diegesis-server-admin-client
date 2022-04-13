@@ -80,6 +80,28 @@ function makeConfig(providedConfig) {
         }
         config.staticPath = fqPath;
     }
+    if (providedConfig.localUsfmPath) {
+        if (
+            typeof providedConfig.localUsfmPath !== 'string') {
+            croak(`ERROR: localUsfmPath, if present, should be a string, not '${providedConfig.localUsfmPath}'`);
+        }
+        const fqPath = path.resolve(providedConfig.localUsfmPath);
+        if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
+            croak(`ERROR: localUsfmPath '${fqPath}' does not exist or is not a directory`);
+        }
+        config.localUsfmPath = fqPath;
+    }
+    if (providedConfig.localUsxPath) {
+        if (
+            typeof providedConfig.localUsxPath !== 'string') {
+            croak(`ERROR: localUsxPath, if present, should be a string, not '${providedConfig.localUsxPath}'`);
+        }
+        const fqPath = path.resolve(providedConfig.localUsxPath);
+        if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
+            croak(`ERROR: localUsxPath '${fqPath}' does not exist or is not a directory`);
+        }
+        config.localUsxPath = fqPath;
+    }
     if ('debug' in providedConfig) {
         if (typeof providedConfig.debug !== 'boolean') {
             croak(`ERROR: debug should be boolean, not ${typeof providedConfig.debug}`);
@@ -141,6 +163,8 @@ function makeConfig(providedConfig) {
 const configSummary = config => `  Listening on ${config.hostName}:${config.port}
     Data directory is ${config.dataPath}
     ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
+    ${config.localUsfmPath ? `Local USFM copied from ${config.localUsfmPath}` : 'No local USFM copied'}
+    ${config.localUsxPath ? `Local USX copied from ${config.localUsxPath}` : 'No local USX copied'}
     Debug ${config.debug ? "en" : "dis"}abled
     Verbose ${config.verbose ? "en" : "dis"}abled
     Access logging ${!config.logAccess ? "disabled" : `to ${config.accessLogPath || 'console'} in Morgan '${config.logFormat}' format`}
