@@ -3,7 +3,7 @@ const fse = require("fs-extra");
 const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
 const appRootPath = require("app-root-path");
-const {transPath} = require('../../lib/dataPaths.js');
+const {transPath, vrsPath} = require('../../lib/dataPaths.js');
 const appRoot = appRootPath.toString();
 
 async function getTranslationsCatalog() {
@@ -47,6 +47,8 @@ const fetchUsfm = async (org, trans, config) => {
             fse.writeFileSync(path.join(usfmBooksPath, `${bookName.code}.usfm`), fileContent);
         }
     }
+    const vrsResponse = await http.getText('https://git.door43.org/Door43-Catalog/versification/raw/branch/master/bible/ufw/ufw.vrs');
+    fse.writeFileSync(vrsPath(config.dataPath, org.translationDir, trans.id), vrsResponse.data);
 };
 
 const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};
