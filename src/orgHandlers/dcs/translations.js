@@ -17,7 +17,7 @@ async function getTranslationsCatalog() {
         languageCode: t.language,
         title: t.title.trim(),
         downloadURL: `https://git.door43.org/api/v1/repos/${t.full_name}`,
-        textDirection: null,
+        textDirection: t.language_direction,
         script: null,
         copyright: t.owner.full_name,
         description: t.description,
