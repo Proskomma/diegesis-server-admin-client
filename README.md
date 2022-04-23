@@ -20,8 +20,9 @@ For these sources it provides
 ## Installation
 ```
 npm install
-node src/index.js // most things disabled, listening on port 2468, OR
-node src/index.js debug_example_config.json // Most things enabled, listening on port 1234
+node src/index.js # most things disabled, listening on port 2468, OR
+node src/index.js debug_example_config.json # Most things enabled, listening on port 1234
+# Point browser at http://localhost:<portNo> - the GraphQL sandbox is at /graphql
 ```
 See also the Docker documentation at the end of this document
 
