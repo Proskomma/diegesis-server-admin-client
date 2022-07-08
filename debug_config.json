@@ -7,7 +7,5 @@
   "orgs": [],
   "cronFrequency": "1 min",
   "verbose": true,
-  "includeMutations": true,
-  "staticPath": "C:\\Users\\DELL\\Desktop\\Mark\\whit-git\\diegesis-server-admin-client\\build"
-
+  "includeMutations": true
 }
