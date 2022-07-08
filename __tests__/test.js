@@ -128,8 +128,15 @@ describe('eBible translations', () => {
         let org = res.org;
         expect(org.nLocalTranslations).toStrictEqual(0);
         res = await doMutation(2468, '{fetchUsfm(org:"eBible" translationId:"fraLSG")}');
+
+        res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
+        org = res.org;
         expect(org.nLocalTranslations).toStrictEqual(1);
+
         res = await doMutation(2468, '{deleteLocalTranslation(org:"eBible" translationId:"fraLSG")}');
+        
+        res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
+        org = res.org;
         expect(org.nLocalTranslations).toStrictEqual(0);
 
     })
