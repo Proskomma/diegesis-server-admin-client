@@ -168,6 +168,12 @@ const mutationSchema = gql`
             """The organization-specific identifier of the translation"""
             translationId: TranslationId!
         ) : Boolean!
+        deleteLocalTranslation (
+            """The name of the organization"""
+            org: OrgName!
+            """The organization-specific identifier of the translation"""
+            translationId: TranslationId!
+        ) : Boolean!
         """Fetches and processes the specified USX content from a remote server"""
         fetchUsx(
             """The name of the organization"""
