@@ -450,11 +450,19 @@ const makeResolvers = async (config) => {
                 }
                 try
                 {
-                    const pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    let pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.id);
                     if (fse.pathExistsSync(pathDir)) {
+
                         fse.rmSync(pathDir,{recursive:true});
+
+                        pathDir = transPath(config.dataPath, orgOb.translationDir, "");
+                        console.log(pathDir);
+                        if(fse.readdirSync(pathDir).length === 0){
+                            fse.rmSync(path.resolve(config.dataPath,orgOb.translationDir),{recursive:true});
+                        };
                         return true;
                     }
+
                     return false;
                     
 
