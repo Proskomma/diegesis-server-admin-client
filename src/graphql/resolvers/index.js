@@ -456,7 +456,6 @@ const makeResolvers = async (config) => {
                         fse.rmSync(pathDir,{recursive:true});
 
                         pathDir = transPath(config.dataPath, orgOb.translationDir, "");
-                        console.log(pathDir);
                         if(fse.readdirSync(pathDir).length === 0){
                             fse.rmSync(path.resolve(config.dataPath,orgOb.translationDir),{recursive:true});
                         };
