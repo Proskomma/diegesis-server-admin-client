@@ -439,6 +439,31 @@ const makeResolvers = async (config) => {
                     return false;
                 }
             },
+            deleteLocalTranslation: async(root, args) =>{
+                const orgOb = orgsData[args.org];
+                if (!orgOb) {
+                    return false;
+                }
+                const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
+                if (!transOb) {
+                    return false;
+                }
+                try
+                {
+                    const pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    if (fse.pathExistsSync(pathDir)) {
+                        fse.rmSync(pathDir,{recursive:true});
+                        return true;
+                    }
+                    return false;
+                    
+
+                } catch (err) {
+                    console.log(err);
+                    return false;
+                }
+                
+            },
             fetchUsx: async (root, args) => {
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {

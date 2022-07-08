@@ -123,7 +123,16 @@ describe('Read-only', () => {
 })
 
 describe('eBible translations', () => {
+    it('Does deleteLocalTranslation', async() => {
+        let res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
+        let org = res.org;
+        expect(org.nLocalTranslations).toStrictEqual(0);
+        res = await doMutation(2468, '{fetchUsfm(org:"eBible" translationId:"fraLSG")}');
+        expect(org.nLocalTranslations).toStrictEqual(1);
+        res = await doMutation(2468, '{deleteLocalTranslation(org:"eBible" translationId:"fraLSG")}');
+        expect(org.nLocalTranslations).toStrictEqual(0);
 
+    })
     it('Does Fetch', async () => {
         let res = await doQuery(2468, '{ org(name:"eBible") { nLocalTranslations } }');
         let org = res.org;
