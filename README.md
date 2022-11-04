@@ -199,12 +199,12 @@ docker logs diegesis-server
 ```
 
 ### Monitoring
-####Overview
+#### Overview
 ```
 docker ps
 ```
 
-####Resource usage
+#### Resource usage
 ```
 docker stats
 ```
