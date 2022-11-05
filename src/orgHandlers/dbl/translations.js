@@ -12,7 +12,8 @@ async function getTranslationsCatalog() {
     const http = require(`${appRoot}/src/lib/http.js`);
 
     const catalogResponse = await http.getText('https://app.thedigitalbiblelibrary.org/entries/_public_domain_entries_tabledata.json');
-    const catalogData = Object.values(catalogResponse.data.aaData);
+    const jsonData = JSON.parse(catalogResponse.data);
+    const catalogData = Object.values(jsonData.aaData);
     const catalog = catalogData.map(t => ({
         id: t[0],
         languageCode: t[2],

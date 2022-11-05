@@ -9,8 +9,8 @@ async function getTranslationsCatalog() {
     const http = require(`${appRoot}/src/lib/http.js`);
 
     const catalogResponse = await http.getText('https://api.vachanengine.org/v2/sources?content_type=bible');
-    const catalogData = catalogResponse.data;
-    const catalog = catalogData.map(t => ({
+    const jsonData = JSON.parse(catalogResponse.data);
+    const catalog = jsonData.map(t => ({
         id: t.sourceName,
         languageCode: t.language.code,
         title: t.version.versionName,

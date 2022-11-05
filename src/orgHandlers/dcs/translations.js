@@ -11,7 +11,8 @@ async function getTranslationsCatalog() {
     const http = require(`${appRoot}/src/lib/http.js`);
 
     const catalogResponse = await http.getText('https://git.door43.org/api/v1/repos/search?owner=unfoldingWord&subject=Aligned%20Bible,Bible,Hebrew%20Old%20Testament,Greek%20New%20Testament');
-    const catalogData = catalogResponse.data.data;
+    const jsonData = JSON.parse(catalogResponse.data);
+    const catalogData = jsonData.data;
     const catalog = catalogData.map(t => ({
         id: `${t.id}`,
         languageCode: t.language,
