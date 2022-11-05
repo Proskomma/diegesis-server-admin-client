@@ -10,6 +10,9 @@ const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
 
+const appRootPath = require("app-root-path");
+const appRoot = appRootPath.toString();
+
 async function makeServer(config) {
     // Express
     const app = express();
