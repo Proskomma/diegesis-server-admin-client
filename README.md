@@ -21,7 +21,7 @@ For these sources it provides
 ```
 npm install
 node src/index.js # most things disabled, listening on port 2468, OR
-node src/index.js debug_example_config.json # Most things enabled, listening on port 1234
+node src/index.js config/debug_config.json # Most things enabled, listening on port 1234
 # Point browser at http://localhost:<portNo> - the GraphQL sandbox is at /graphql
 ```
 See also the Docker documentation at the end of this document
@@ -123,8 +123,9 @@ mutation {
 
 ## Configuration
 See
-- `default_config.json`: the standard, (excessively) prudent config
-- `debug_config.json`: an 'everything enabled' config for debugging
+- `config/default_config.json`: the standard, (excessively) prudent config
+- `config/debug_config.json`: an 'everything enabled' config for debugging
+- `config/docker_config.json`: minor tweaks for Docker usage
 
 ### HTTP
 - `hostName`: default is 'localhost'.
@@ -165,23 +166,23 @@ Look at the existing examples. Your org handler directory should include
 ### Building
 ```
 docker build -t proskomma/diegesis-server .
-# Copies default_config.json into container as default config
+# Copies `config/default_config.json` into container as default config
 ```
-*Don't forget the final dot*
 
-### Running
+### Running with default configuration
 ```
-# With default config
 docker run --rm -d -p 3060:2468 --name=diegesis-server proskomma/diegesis-server
+```
 
-# With supplied config (debug in this case)
-# Note that the config file may change the listening port which must then be mapped using
-# -p when docker is run
-docker run -d -p 3060:1234 -v /my/absolute/path/to/debug_config.json:/app/config.json --name=diegesis-server proskomma/diegesis-server
+### Running with custom configuration
+Put your `config.json` file inside a directory `config` and then run
+```
+docker run --rm -d -p 3060:2460 -v /abs/path/to/config/:/app/config/ --name=diegesis-server proskomma-diegesis-server
 ```
 * `--rm` removes container after use
 * `-d` runs as daemon
 * `-p 3060:1234` exposes container port 2468 on local port 3060
+* `-v /abs/path/to/config/:/app/config/` 'bind mounts' the external config directory into your Docker container. This enables you to edit the configuration on the fly.
 
 ### Stopping
 ```
