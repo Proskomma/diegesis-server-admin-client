@@ -18,12 +18,26 @@ For these sources it provides
 - per-translation succinct JSON via GraphQL
 
 ## Installation
+* Clone this repository
 ```
+git clone git@github.com:proskomma/diegesis-server
+cd diegesis-server
 npm install
 node src/index.js # most things disabled, listening on port 2468, OR
 node src/index.js config/debug_config.json # Most things enabled, listening on port 1234
 # Point browser at http://localhost:<portNo> - the GraphQL sandbox is at /graphql
 ```
+
+* Or pull the docker image from [here](https://hub.docker.com/r/mvhsolutions/diegesis-server)
+```
+docker pull mvhsolutions/diegesis-server
+```
+
+* Or build your own docker image with the help of the provided Dockerfile
+```
+docker build -t proskomma/diegesis-server .
+```
+
 See also the Docker documentation at the end of this document
 
 ## Overview of the GraphQL
@@ -163,21 +177,17 @@ Look at the existing examples. Your org handler directory should include
 - a module called `translations.js` that returns `getTranslationsCatalog`, `fetchUsfm` and `fetchUsx`
 
 ## Using Docker
-### Building
-```
-docker build -t proskomma/diegesis-server .
-# Copies `config/default_config.json` into container as default config
-```
+_We assume you went with the pre-built image_
 
-### Running with default configuration
+### Running with standard configuration
 ```
-docker run --rm -d -p 3060:2468 --name=diegesis-server proskomma/diegesis-server
+docker run --rm -d -p 3060:2468 --name=diegesis-server mvhsolutions/diegesis-server
 ```
 
 ### Running with custom configuration
 Put your `config.json` file inside a directory `config` and then run
 ```
-docker run --rm -d -p 3060:2460 -v /abs/path/to/config/:/app/config/ --name=diegesis-server proskomma-diegesis-server
+docker run --rm -d -p 3060:2460 -v /abs/path/to/config/:/app/config/ --name=diegesis-server mvhsolutions/diegesis-server
 ```
 * `--rm` removes container after use
 * `-d` runs as daemon
