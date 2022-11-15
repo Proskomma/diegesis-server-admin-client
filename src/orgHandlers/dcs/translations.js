@@ -17,7 +17,7 @@ async function getTranslationsCatalog() {
         id: `${t.id}`,
         languageCode: t.language,
         title: t.title.trim(),
-        downloadURL: `https://git.door43.org/api/v1/repos/${t.full_name}`,
+        downloadURL: ` https://git.door43.org/api/v1/repos/${t.full_name}`,
         textDirection: t.language_direction,
         script: null,
         copyright: t.owner.full_name,
@@ -31,7 +31,7 @@ const fetchUsfm = async (org, trans, config) => {
     const http = require(`${appRoot}/src/lib/http.js`);
     const tp = transPath(config.dataPath, org.translationDir, trans.id);
     const repoDetailsResponse = await http.getText(trans.downloadURL);
-    const responseJson = repoDetailsResponse.data;
+    const responseJson = JSON.parse(repoDetailsResponse.data);
     const zipUrl = responseJson.catalog.latest.zipball_url;
     const downloadResponse = await http.getBuffer(zipUrl);
     const usfmBooksPath = path.join(tp, 'usfmBooks');
