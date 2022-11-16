@@ -46,7 +46,7 @@
     "implicitDependencies": ["diegesis-server"],
     "targets": {
       "start": {
-        "dependsOn": [ "build","^start"]
+        "dependsOn": ["^start"]
       }
     }
   }
