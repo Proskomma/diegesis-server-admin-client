@@ -11,7 +11,7 @@ const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/i
 const doCron = require("./cron.js");
 
 const appRootPath = require("app-root-path");
-const appRoot = appRootPath.toString();
+const appRoot = path.resolve(".");
 
 async function makeServer(config) {
     // Express

@@ -1,9 +1,10 @@
 const fse = require('fs-extra');
 const appRootPath = require("app-root-path");
-const appRoot = appRootPath.toString();
+const path = require("path");
+const appRoot = path.resolve(".");
 
 // CLI error helper function
-const path = require("path");
+
 const croak = msg => {
     const usageMessage = `%msg%\nUSAGE: node src/index.js [configFilePath]`
     console.log(usageMessage.replace('%msg%', msg));

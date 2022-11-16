@@ -5,7 +5,7 @@ const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath} = r
 const makeSuccinct = require('../../lib/makeSuccinct');
 const appRootPath = require("app-root-path");
 
-const appRoot = appRootPath.toString();
+const appRoot = path.resolve(".");
 
 const makeResolvers = async (config) => {
     const orgHandlers = {};

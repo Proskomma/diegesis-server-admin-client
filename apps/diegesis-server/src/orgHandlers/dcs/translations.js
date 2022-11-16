@@ -4,7 +4,7 @@ const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
 const appRootPath = require("app-root-path");
 const {transPath, vrsPath} = require('../../lib/dataPaths.js');
-const appRoot = appRootPath.toString();
+const appRoot = path.resolve(".");
 
 async function getTranslationsCatalog() {
 

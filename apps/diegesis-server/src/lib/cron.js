@@ -6,7 +6,7 @@ const appRootPath = require("app-root-path");
 const {cronOptions} = require("./makeConfig.js");
 const makeSuccinct = require("./makeSuccinct.js");
 const {transPath, usfmDir, usxDir, vrsPath} = require("./dataPaths.js");
-const appRoot = appRootPath.toString();
+const appRoot = path.resolve(".");
 
 function doCron(config) {
     cron.schedule(

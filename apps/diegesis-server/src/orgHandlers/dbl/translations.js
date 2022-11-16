@@ -5,7 +5,7 @@ const {ptBookArray} = require("proskomma-utils");
 const appRootPath = require("app-root-path");
 const DOMParser = require('xmldom').DOMParser;
 const {transPath} = require('../../lib/dataPaths.js');
-const appRoot = appRootPath.toString();
+const appRoot = path.resolve(".");
 
 async function getTranslationsCatalog() {
 

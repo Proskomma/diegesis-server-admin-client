@@ -58,5 +58,13 @@
       "__server__": null,
       "__dataDir__": null
     }
+  },
+  "nx": {
+    "implicitDependencies": ["diegesis-admin-client"],
+    "targets": {
+      "start": {
+        "dependsOn": ["^build"]
+      }
+    }
   }
 }
