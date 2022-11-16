@@ -1,0 +1,14 @@
+{
+  "name": "diegesis-monorepo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Proskomma/diegesis-monorepo.git",
+  "author": "Proskomma",
+  "license": "MIT",
+  "private": true,
+  "workspaces":["./apps/*","./libs/*"],
+  "devDependencies": {
+    "nx": "14.8.6",
+    "@nrwl/nx-cloud": "latest"
+  }
+}

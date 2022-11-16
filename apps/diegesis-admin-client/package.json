@@ -1,5 +1,5 @@
 {
-  "name": "diegesis-server-admin-client",
+  "name": "diegesis-admin-client",
   "version": "0.1.0",
   "private": true,
   "homepage": "/",
@@ -41,5 +41,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "nx": {
+    "implicitDependencies": ["diegesis-server"],
+    "targets": {
+      "start": {
+        "dependsOn": [ "build","^start"]
+      }
+    }
   }
 }
