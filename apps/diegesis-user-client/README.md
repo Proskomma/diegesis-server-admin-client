@@ -11,7 +11,7 @@ This client is currently designed to connect to Diegesis Server through `localho
 ### Building
 The following steps will install all the requirements for the app, and subsequently create a directory `build` with all the needed static artifacts.
 ```
-npm install
+npm install --legacy-peer-deps
 npm run build 
 ```
 
