@@ -1,8 +1,8 @@
-# diegesis-server-admin-client
-The admin-client provides a web GUI to the Diegesis server. 
+# diegesis-user-client
+The user-client provides a web GUI to the Diegesis server. 
 Currently, it only shows all the Entries per organization, and provides a way to download content into Diegesis for better caching.
 
-_This might be historical very soon_
+_This might be historical very soon_\
 The build step described below creates a couple of static files (CSS and JS) that are being picked up by Diegesis and shown to the end user.
 
 ## Setup
