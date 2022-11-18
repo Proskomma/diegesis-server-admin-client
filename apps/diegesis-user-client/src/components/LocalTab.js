@@ -6,7 +6,9 @@ import {gql, useQuery,useApolloClient,} from "@apollo/client";
 import GqlError from "./GqlError";
 //import { deleteTranslation } from '../lib/tableCallbacks';
 //import { Button } from '@mui/material';
-//import {Delete} from '@mui/icons-material';
+import CheckBoxOutlined from '@mui/icons-material/CheckBoxOutlined';
+import CheckBoxOutlineBlank from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
+import SmsFailedTwoTone from '@mui/icons-material/SmsFailedTwoTone';
 import Spinner from './Spinner';
 
 export default function LocalTab({selectedOrg, searchLang, searchText}) {
@@ -49,37 +51,49 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
         },
         {
             id: 'hasUsfm',
-            label: 'USFM?',
+            label: 'USFM',
             minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
+            align: 'center',
+            format: value => value ? iconYes() : iconNo()
         },
         {
             id: 'hasUsx',
-            label: 'USX?',
+            label: 'USX',
             minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
+            align: 'center',
+            format: value => value ? iconYes() : iconNo()
         },
         {
             id: 'hasSuccinct',
-            label: 'Succinct?',
+            label: 'Succinct',
             minWidth: 50,
-            align: 'right',
+            align: 'center',
         },
         {
             id: 'hasVrs',
-            label: 'VRS?',
+            label: 'VRS',
             minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
+            align: 'center',
+            format: value => value ? iconYes() : iconNo()
         },
     ];
 
+    function iconYes() {
+        return <CheckBoxOutlined sx={{ fontSize: 15}}/>
+    }
+
+    function iconNo() {
+        return <CheckBoxOutlineBlank sx={{ fontSize: 15}}/>
+    }
+
+    function iconFail(failMessage) {
+        return <SmsFailedTwoTone titleAccess={failMessage} sx={{ fontSize: 15, color: 'red', fontWeight: 'bold'}} />
+    }
+
     function createData(localTranslation) {
-        let succinctState = localTranslation.hasSuccinct ? 'yes' : 'no';
+        let succinctState = localTranslation.hasSuccinct ? iconYes() : iconNo();
         if (localTranslation.hasSuccinctError) {
-            succinctState = 'FAIL';
+            succinctState = iconFail('Succinct error');
         }
         return {
             id: localTranslation.id,
@@ -100,5 +114,6 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
     }
     const rows = data.org.localTranslations.map(lt => createData(lt));
     return <TranslationsTable columns={columns} rows={rows}/>
+
 
 }

@@ -1,13 +1,12 @@
 import React from "react";
-import {AppBar, Box, TextField, Toolbar, Typography} from "@mui/material";
-import PageMenu from "./PageMenu";
+import { AppBar, Box, TextField, Toolbar, Typography } from "@mui/material";
+import OrgSelector from "./OrgSelector";
 
 export default function Header({orgs, searchText, setSearchText, searchLang, setSearchLang, selectedOrgIndex, setSelectedOrgIndex}) {
 
     return <AppBar position="static">
         <Toolbar>
-            <PageMenu orgs={orgs} selectedOrgIndex={selectedOrgIndex} setSelectedOrgIndex={setSelectedOrgIndex}/>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>Diegesis</Typography>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>Diegesis Dashboard</Typography>
             <Box
                 sx={{
                     display: 'flex',
@@ -15,6 +14,8 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     maxWidth: '100%',
                 }}
             >
+                <OrgSelector orgs={orgs} selectedOrgIndex={selectedOrgIndex} setSelectedOrgIndex={setSelectedOrgIndex} />
+
                 <TextField
                     value={searchLang}
                     onChange={e => setSearchLang(e.target.value)}
@@ -22,8 +23,8 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     size="small"
                     id="searchLanguage"
                     variant="filled"
-                    color="secondary"
-                    sx={{ backgroundColor: "#FFF", opacity: "0.7" }}
+                    color="primary"
+                    sx={{ marginLeft: "1em", backgroundColor: "#FFF"}}
                 />
                 <TextField
                     value={searchText}
@@ -32,8 +33,8 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     size="small"
                     id="searchTitle"
                     variant="filled"
-                    color="secondary"
-                    sx={{ marginLeft: "2em", backgroundColor: "#FFF", opacity: "0.7" }}
+                    color="primary"
+                    sx={{ marginLeft: "1em", backgroundColor: "#FFF"}}
                 />
             </Box>
         </Toolbar>

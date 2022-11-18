@@ -9,9 +9,7 @@ import {
     Container,
     createTheme,
     CssBaseline,
-    Paper,
     ThemeProvider,
-    CircularProgress,
 } from '@mui/material';
 import Header from './components/Header';
 import TabbedBody from './components/TabbedBody';
@@ -28,14 +26,15 @@ function App() {
 
     const client = new ApolloClient(
         {
-            //uri: 'http://localhost:3060/graphql',
-            uri: '/graphql',
+            uri: 'http://localhost:3060/graphql',
+            //uri: '/graphql',
             cache: new InMemoryCache(),
         }
     );
 
     const memoClient = useMemo(() => client);
 
+    // This piece runs once, when the page is rendered
     useEffect(
         () => {
             const doOrgs = async () => {

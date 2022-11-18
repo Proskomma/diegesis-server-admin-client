@@ -10,7 +10,11 @@ export default function GqlError({error}) {
                 </Box> :
                 <Box>
                     <Typography variant="h5">GraphQL Error</Typography>
-                    <Typography>{JSON.stringify(error)}</Typography>
+                    <Typography 
+                        sx={{ backgroundColor: "pink"}}
+                    >
+                        {JSON.stringify(error)}
+                        </Typography>
                 </Box>
         }
     </Paper>;
