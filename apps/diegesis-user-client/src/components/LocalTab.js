@@ -2,11 +2,12 @@ import React from 'react';
 import { searchQuery } from '../lib/search';
 import TranslationsTable from "./TranslationsTable";
 import {gql, useQuery,useApolloClient,} from "@apollo/client";
-import GqlLoading from "./GqlLoading";
+//import GqlLoading from "./GqlLoading";
 import GqlError from "./GqlError";
-import { deleteTranslation } from '../lib/tableCallbacks';
-import { Button } from '@mui/material';
-import {Delete} from '@mui/icons-material';
+//import { deleteTranslation } from '../lib/tableCallbacks';
+//import { Button } from '@mui/material';
+//import {Delete} from '@mui/icons-material';
+import Spinner from './Spinner';
 
 export default function LocalTab({selectedOrg, searchLang, searchText}) {
 
@@ -92,7 +93,7 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
     }
 
     if (loading) {
-        return <GqlLoading />
+        return <Spinner />
     }
     if (error) {
         return <GqlError error={error} />

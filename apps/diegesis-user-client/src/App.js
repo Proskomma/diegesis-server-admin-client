@@ -11,10 +11,11 @@ import {
     CssBaseline,
     Paper,
     ThemeProvider,
-    Typography,
+    CircularProgress,
 } from '@mui/material';
 import Header from './components/Header';
 import TabbedBody from './components/TabbedBody';
+import Spinner from './components/Spinner';
 import './App.css';
 
 function App() {
@@ -27,7 +28,8 @@ function App() {
 
     const client = new ApolloClient(
         {
-            uri: 'http://localhost:1234/graphql',
+            //uri: 'http://localhost:3060/graphql',
+            uri: '/graphql',
             cache: new InMemoryCache(),
         }
     );
@@ -65,11 +67,7 @@ function App() {
                                 searchLang={searchLang}
                                 searchText={searchText}
                             /> :
-                            <Paper sx={{width: '100%', overflow: 'hidden'}}>
-                                <Box>
-                                    <Typography variant="h3">Loading</Typography>
-                                </Box>
-                            </Paper>
+                            <Spinner />
                         }
                     </Box>
                 </Container>
