@@ -34,8 +34,9 @@ docker pull mvhsolutions/diegesis-server
 ```
 
 * Or build your own docker image with the help of the provided Dockerfile
+_Make sure you are in the root of the monorepo folder_
 ```
-docker build -t proskomma/diegesis-server .
+docker build -t proskomma/diegesis-server -f diegesis-server/Dockerfile .
 ```
 
 See also the Docker documentation at the end of this document
