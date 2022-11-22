@@ -1,6 +1,6 @@
 # diegesis-server
 An Apollo-based server that caches Scripture from remote sources and serves them via a unified GraphQL interface.
-Locally stored resources are converted to a succinct format using the Proskomma engine.
+Locally stored resources are converted to a succinct format using the Proskomma engine. test
 
 Diegesis Server can currently interact with the following libraries
 - DBL
