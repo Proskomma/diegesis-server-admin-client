@@ -1,6 +1,6 @@
 #Stage 1: client builder
 FROM node:current-alpine
-ARG client_loc=./diegesis-user-client
+ARG client_loc=./apps/diegesis-user-client
 
 # Working inside build
 WORKDIR /build
@@ -17,7 +17,7 @@ RUN npm run build
 
 #Stage 2: runner
 FROM node:current-alpine
-ARG server_loc=./diegesis-server
+ARG server_loc=./apps/diegesis-server
 
 # Working from /app
 WORKDIR /app
