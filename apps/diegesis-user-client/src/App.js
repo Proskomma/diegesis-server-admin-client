@@ -26,7 +26,6 @@ function App() {
 
     const client = new ApolloClient(
         {
-            //uri: 'http://localhost:3060/graphql',
             uri: '/graphql',
             cache: new InMemoryCache(),
         }
