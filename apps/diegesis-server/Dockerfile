@@ -22,9 +22,10 @@ ARG server_loc=./diegesis-server
 # Working from /app
 WORKDIR /app
 
-# This copies the just built client-code straight into the static folder
+# Copy the just built client-code straight into the static folder
 COPY --from=0 /build/build/ static/
 
+# Now copy over server code
 COPY $server_loc/data/ data/
 COPY $server_loc/src/ src/
 COPY $server_loc/LICENSE .
@@ -34,5 +35,9 @@ COPY $server_loc/config/docker_config.json config/config.json
 
 # Install
 RUN npm install
+
+# Run as user diegesis
+RUN addgroup -g 2590 -S diegesis && adduser -u 2590 -S -G diegesis diegesis
+USER diegesis
 
 CMD [ "node", "src/index.js", "config/config.json" ]
