@@ -12,12 +12,12 @@ import {
     ThemeProvider,
 } from '@mui/material';
 import Header from './components/Header';
-import TabbedBody from './components/TabbedBody';
 import Spinner from './components/Spinner';
 import './App.css';
+import ListView from "./components/ListView";
 
 function App() {
-    const [selectedOrgIndex, setSelectedOrgIndex] = useState(0);
+    const [searchOrg, setSearchOrg] = useState('');
     const [searchLang, setSearchLang] = useState('');
     const [searchText, setSearchText] = useState('');
     const [orgs, setOrgs] = useState([]);
@@ -26,7 +26,6 @@ function App() {
 
     const client = new ApolloClient(
         {
-            //uri: 'http://localhost:3060/graphql',
             uri: '/graphql',
             cache: new InMemoryCache(),
         }
@@ -52,8 +51,8 @@ function App() {
                 <Container fixed className="App">
                     <Header
                         orgs={orgs}
-                        selectedOrgIndex={selectedOrgIndex}
-                        setSelectedOrgIndex={setSelectedOrgIndex}
+                        searchOrg={searchOrg}
+                        setSearchOrg={setSearchOrg}
                         searchLang={searchLang}
                         setSearchLang={setSearchLang}
                         searchText={searchText}
@@ -61,12 +60,9 @@ function App() {
                     />
                     <Box id="body">
                         {orgs.length > 0 ?
-                            <TabbedBody
-                                selectedOrg={orgs[selectedOrgIndex]}
-                                searchLang={searchLang}
-                                searchText={searchText}
-                            /> :
-                            <Spinner />
+                            <ListView searchOrg={searchOrg} searchLang={searchLang} searchText={searchText}/>
+                            :
+                            <Spinner/>
                         }
                     </Box>
                 </Container>

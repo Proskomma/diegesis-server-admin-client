@@ -1,12 +1,13 @@
 import React from "react";
 import { AppBar, Box, TextField, Toolbar, Typography } from "@mui/material";
-import OrgSelector from "./OrgSelector";
 
-export default function Header({orgs, searchText, setSearchText, searchLang, setSearchLang, selectedOrgIndex, setSelectedOrgIndex}) {
+export default function Header({orgs, searchText, setSearchText, searchLang, setSearchLang, searchOrg, setSearchOrg}) {
 
     return <AppBar position="static">
         <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>Diegesis Dashboard</Typography>
+            <Typography variant="h6">Diegesis - Creative Commons Scripture Content</Typography>
+        </Toolbar>
+        <Toolbar>
             <Box
                 sx={{
                     display: 'flex',
@@ -14,8 +15,16 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     maxWidth: '100%',
                 }}
             >
-                <OrgSelector orgs={orgs} selectedOrgIndex={selectedOrgIndex} setSelectedOrgIndex={setSelectedOrgIndex} />
-
+                <TextField
+                    value={searchOrg}
+                    onChange={e => setSearchOrg(e.target.value)}
+                    label="Org"
+                    size="small"
+                    id="searchOrg"
+                    variant="filled"
+                    color="primary"
+                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
+                />
                 <TextField
                     value={searchLang}
                     onChange={e => setSearchLang(e.target.value)}
@@ -24,7 +33,7 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     id="searchLanguage"
                     variant="filled"
                     color="primary"
-                    sx={{ marginLeft: "1em", backgroundColor: "#FFF"}}
+                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
                 />
                 <TextField
                     value={searchText}
@@ -34,7 +43,7 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     id="searchTitle"
                     variant="filled"
                     color="primary"
-                    sx={{ marginLeft: "1em", backgroundColor: "#FFF"}}
+                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
                 />
             </Box>
         </Toolbar>

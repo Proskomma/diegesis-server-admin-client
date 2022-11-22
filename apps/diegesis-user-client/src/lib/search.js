@@ -8,9 +8,8 @@ function searchClause(searchLang, searchText) {
         )`;
 }
 
-function searchQuery(query, org, searchLang, searchText) {
-   return query.replace('%org%', org)
-       .replace(
+function searchQuery(query, searchLang, searchText) {
+   return query.replace(
            '%searchClause%',
            searchText.trim().length > 0 || searchLang.trim().length > 0 ?
                searchClause(searchLang, searchText) :
