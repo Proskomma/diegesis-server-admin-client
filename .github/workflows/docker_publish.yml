@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'apps/diegesis-server'
-      - 'apps/diegesis-user-client'
 
 jobs:
   publish-to-docker:
