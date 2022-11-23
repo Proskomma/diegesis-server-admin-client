@@ -3,7 +3,7 @@ import {searchQuery} from '../lib/search';
 import TranslationsTable from "./TranslationsTable";
 import {gql, useQuery} from "@apollo/client";
 import GqlError from "./GqlError";
-import {Button, Typography} from "@mui/material";
+import {Button, Typography, Grid} from "@mui/material";
 import Spinner from './Spinner';
 import {Download, Book, Info} from '@mui/icons-material';
 
@@ -35,8 +35,8 @@ export default function ListView({searchOrg, searchLang, searchText}) {
     );
 
     const columns = [
-        {id: 'docSet', label: 'DocSet', minWidth: 200},
-        {id: 'actions', label: 'Actions', minWidth: 100}
+        {id: 'docSet', label: 'DocSet', minWidth: 300},
+        {id: 'actions', label: 'Actions', minWidth: 50}
     ];
 
     function createData(localTranslation, orgId) {
@@ -45,17 +45,23 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                 <Typography variant="body2">{localTranslation.id} ({orgId})</Typography>
                 <Typography sx={{fontWeight: 'bold'}} variant="body1">{localTranslation.title} ({localTranslation.languageCode})</Typography>
             </>,
-            actions: <>
+            actions: <Grid container sx={{"textAlign": "right"}}>
+                <Grid item xs={12} md={4}>
                 <Button>
                     <Info/>
                 </Button>
+                </Grid>
+                <Grid item xs={12} md={4}>
                 <Button>
                     <Book/>
                 </Button>
+                </Grid>
+                <Grid item xs={12} md={4}>
                 <Button>
                     <Download/>
                 </Button>
-            </>
+                </Grid>
+            </Grid>
         };
     }
 

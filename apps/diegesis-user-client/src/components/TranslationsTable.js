@@ -1,38 +1,14 @@
-import {Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow} from "@mui/material";
-import React, {useState} from "react";
+import {Paper, Table, TableBody, TableCell, TableContainer, TableRow} from "@mui/material";
+import React from "react";
 
 export default function TranslationsTable({columns, rows})
 {
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-
-
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(event.target.value);
-        setPage(0);
-    };
-
     return (
         <Paper sx={{width: '100%', overflow: 'hidden'}}>
-            <TablePagination
-                siez="small"
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
             <TableContainer>
                 <Table stickyHeader size="small" aria-label="sticky table">
                     <TableBody>
                         {rows
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => {
                                 return (
                                     <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>

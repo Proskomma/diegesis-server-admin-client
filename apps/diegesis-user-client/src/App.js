@@ -12,6 +12,7 @@ import {
     ThemeProvider,
 } from '@mui/material';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Spinner from './components/Spinner';
 import './App.css';
 import ListView from "./components/ListView";
@@ -65,6 +66,7 @@ function App() {
                             <Spinner/>
                         }
                     </Box>
+                    <Footer />
                 </Container>
             </ThemeProvider>
         </ApolloProvider>
