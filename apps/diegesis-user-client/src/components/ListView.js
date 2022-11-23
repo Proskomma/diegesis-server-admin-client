@@ -70,7 +70,7 @@ export default function ListView({searchOrg, searchLang, searchText}) {
     for (const orgData of data.orgs) {
         orgData.localTranslations.forEach(
             lt => {
-                if (so === '' || so === orgData.id.toLowerCase()) {
+                if (so === 'all' || so === orgData.id.toLowerCase()) {
                     rows.push(createData(lt, orgData.id));
                 }
             }

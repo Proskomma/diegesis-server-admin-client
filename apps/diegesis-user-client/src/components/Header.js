@@ -1,5 +1,6 @@
 import React from "react";
 import { AppBar, Box, TextField, Toolbar, Typography } from "@mui/material";
+import OrgSelector from "./OrgSelector";
 
 export default function Header({orgs, searchText, setSearchText, searchLang, setSearchLang, searchOrg, setSearchOrg}) {
 
@@ -15,15 +16,11 @@ export default function Header({orgs, searchText, setSearchText, searchLang, set
                     maxWidth: '100%',
                 }}
             >
-                <TextField
-                    value={searchOrg}
-                    onChange={e => setSearchOrg(e.target.value)}
-                    label="Org"
-                    size="small"
-                    id="searchOrg"
-                    variant="filled"
-                    color="primary"
-                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
+                <OrgSelector
+                    orgs={orgs}
+                    searchOrg={searchOrg}
+                    setSearchOrg={setSearchOrg}
+                    sx={{ marginRight: "1em"}}
                 />
                 <TextField
                     value={searchLang}

@@ -17,7 +17,7 @@ import './App.css';
 import ListView from "./components/ListView";
 
 function App() {
-    const [searchOrg, setSearchOrg] = useState('');
+    const [searchOrg, setSearchOrg] = useState('all');
     const [searchLang, setSearchLang] = useState('');
     const [searchText, setSearchText] = useState('');
     const [orgs, setOrgs] = useState([]);
