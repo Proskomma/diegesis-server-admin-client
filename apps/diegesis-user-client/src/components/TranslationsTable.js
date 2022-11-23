@@ -1,4 +1,4 @@
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow} from "@mui/material";
+import {Paper, Table, TableBody, TableCell, TableContainer, TablePagination, TableRow} from "@mui/material";
 import React, {useState} from "react";
 
 export default function TranslationsTable({columns, rows})
