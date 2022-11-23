@@ -1,21 +1,23 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {
+    createBrowserRouter,
+    RouterProvider,
+} from "react-router-dom";
+import {
     ApolloClient,
     ApolloProvider, gql,
     InMemoryCache,
 } from "@apollo/client";
 import {
-    Box,
-    Container,
     createTheme,
     CssBaseline,
     ThemeProvider,
 } from '@mui/material';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Spinner from './components/Spinner';
 import './App.css';
-import ListView from "./components/ListView";
+import HomePage from "./pages/HomePage";
+import WhoPage from "./pages/WhoPage";
+import HowPage from "./pages/HowPage";
+import ListPage from "./pages/ListPage";
 
 function App() {
     const [searchOrg, setSearchOrg] = useState('all');
@@ -46,28 +48,37 @@ function App() {
         []
     );
 
+    const router = createBrowserRouter([
+        {
+            path: "/",
+            element: <HomePage />
+        },
+        {
+            path: "/who",
+            element: <WhoPage />
+        },
+        {
+            path: "/how",
+            element: <HowPage />
+        },
+        {
+            path: "/list",
+            element: <ListPage
+                orgs={orgs}
+                searchOrg={searchOrg}
+                setSearchOrg={setSearchOrg}
+                searchLang={searchLang}
+                setSearchLang={setSearchLang}
+                searchText={searchText}
+                setSearchText={setSearchText}
+            />,
+        },
+    ]);
+
     return (<ApolloProvider client={client}>
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
-                <Container fixed className="App">
-                    <Header
-                        orgs={orgs}
-                        searchOrg={searchOrg}
-                        setSearchOrg={setSearchOrg}
-                        searchLang={searchLang}
-                        setSearchLang={setSearchLang}
-                        searchText={searchText}
-                        setSearchText={setSearchText}
-                    />
-                    <Box id="body">
-                        {orgs.length > 0 ?
-                            <ListView searchOrg={searchOrg} searchLang={searchLang} searchText={searchText}/>
-                            :
-                            <Spinner/>
-                        }
-                    </Box>
-                    <Footer />
-                </Container>
+                <RouterProvider router={router} />
             </ThemeProvider>
         </ApolloProvider>
     );

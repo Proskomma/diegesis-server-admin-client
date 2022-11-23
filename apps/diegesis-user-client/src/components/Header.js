@@ -1,48 +1,29 @@
 import React from "react";
-import { AppBar, Box, TextField, Toolbar, Typography } from "@mui/material";
-import OrgSelector from "./OrgSelector";
+import {Link as RouterLink} from "react-router-dom";
+import { AppBar, Toolbar, Box } from "@mui/material";
+import {Home, Engineering, Dataset, Diversity3} from '@mui/icons-material';
 
-export default function Header({orgs, searchText, setSearchText, searchLang, setSearchLang, searchOrg, setSearchOrg}) {
+export default function Header({selected, children}) {
+
+    const linkBoxStyles = {
+        m: 3,
+    }
+
+    const selectedLinkStyles = {
+        color: "#fff"
+    }
+
+    const linkStyles = {
+        color: "#999"
+    }
 
     return <AppBar position="static">
         <Toolbar>
-            <Typography variant="h6">Diegesis - Creative Commons Scripture Content</Typography>
+            <RouterLink to="/"><Box sx={linkBoxStyles}><Home  sx={selected === 'home'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
+            <RouterLink to="/who"><Box sx={linkBoxStyles}><Diversity3 sx={selected === 'who'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
+            <RouterLink to="/how"><Box sx={linkBoxStyles}><Engineering sx={selected === 'how'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
+            <RouterLink to="/list"><Box sx={linkBoxStyles}><Dataset sx={selected === 'list'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
         </Toolbar>
-        <Toolbar>
-            <Box
-                sx={{
-                    display: 'flex',
-                    width: 500,
-                    maxWidth: '100%',
-                }}
-            >
-                <OrgSelector
-                    orgs={orgs}
-                    searchOrg={searchOrg}
-                    setSearchOrg={setSearchOrg}
-                    sx={{ marginRight: "1em"}}
-                />
-                <TextField
-                    value={searchLang}
-                    onChange={e => setSearchLang(e.target.value)}
-                    label="Language"
-                    size="small"
-                    id="searchLanguage"
-                    variant="filled"
-                    color="primary"
-                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
-                />
-                <TextField
-                    value={searchText}
-                    onChange={e => setSearchText(e.target.value)}
-                    label="Title"
-                    size="small"
-                    id="searchTitle"
-                    variant="filled"
-                    color="primary"
-                    sx={{ marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
-                />
-            </Box>
-        </Toolbar>
+        {children}
     </AppBar>
 }
