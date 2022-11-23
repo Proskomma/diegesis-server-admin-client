@@ -3,7 +3,7 @@ import {searchQuery} from '../lib/search';
 import TranslationsTable from "./TranslationsTable";
 import {gql, useQuery} from "@apollo/client";
 import GqlError from "./GqlError";
-import {Button} from "@mui/material";
+import {Button, Typography} from "@mui/material";
 import Spinner from './Spinner';
 import {Download, Book, Info} from '@mui/icons-material';
 
@@ -35,23 +35,16 @@ export default function ListView({searchOrg, searchLang, searchText}) {
     );
 
     const columns = [
-        {id: 'org', label: 'Org', minWidth: 50},
-        {id: 'id', label: 'ID', minWidth: 100},
-        {id: 'languageCode', label: 'Language', minWidth: 50},
-        {
-            id: 'title',
-            label: 'Title',
-            minWidth: 100,
-        },
+        {id: 'docSet', label: 'DocSet', minWidth: 200},
         {id: 'actions', label: 'Actions', minWidth: 100}
     ];
 
     function createData(localTranslation, orgId) {
         return {
-            org: orgId,
-            id: localTranslation.id,
-            languageCode: localTranslation.languageCode,
-            title: localTranslation.title,
+            docSet: <>
+                <Typography variant="body2">{localTranslation.id} ({orgId})</Typography>
+                <Typography sx={{fontWeight: 'bold'}} variant="body1">{localTranslation.title} ({localTranslation.languageCode})</Typography>
+            </>,
             actions: <>
                 <Button>
                     <Info/>

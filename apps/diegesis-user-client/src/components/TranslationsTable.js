@@ -18,7 +18,7 @@ export default function TranslationsTable({columns, rows})
 
     return (
         <Paper sx={{width: '100%', overflow: 'hidden'}}>
-            <TableContainer sx={{maxHeight: 440}}>
+            <TableContainer>
                 <Table stickyHeader size="small" aria-label="sticky table">
                     <TableHead>
                         <TableRow>
