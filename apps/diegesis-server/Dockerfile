@@ -8,10 +8,10 @@ WORKDIR /build
 COPY $client_loc/src/ src/
 COPY $client_loc/public/ public/
 COPY $client_loc/package.json .
-COPY $client_loc/package-lock.json .
+COPY $client_loc/yarn.lock .
 
 # Install
-RUN npm install --legacy-peer-deps
+RUN yarn install
 RUN npm run build
 
 #Stage 2: runner
