@@ -53,7 +53,7 @@ export default function ListPage({
                 </Box>
             </Toolbar>
         </Header>
-        <Box id="body">
+        <Box id="body" style={{marginTop: "150px"}}>
             <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>Biblical Resources on Diegesis</Typography>
             {orgs.length > 0 ?
                 <ListView searchOrg={searchOrg} searchLang={searchLang} searchText={searchText}/>

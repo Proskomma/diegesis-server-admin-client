@@ -31,7 +31,6 @@ export default function ListView({searchOrg, searchLang, searchText}) {
 
     const {loading, error, data} = useQuery(
         gql`${queryString}`,
-        {pollInterval: 2000}
     );
 
     const columns = [

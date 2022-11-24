@@ -17,7 +17,7 @@ export default function Header({selected, children}) {
         color: "#999"
     }
 
-    return <AppBar position="static">
+    return <AppBar position="fixed">
         <Toolbar>
             <RouterLink to="/"><Box sx={linkBoxStyles}><Home  sx={selected === 'home'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
             <RouterLink to="/who"><Box sx={linkBoxStyles}><Diversity3 sx={selected === 'who'? selectedLinkStyles : linkStyles}/></Box></RouterLink>
