@@ -1,6 +1,6 @@
 const path = require("path");
 const fse = require("fs-extra");
-const appRootPath =require("app-root-path");
+const appRootPath = require("app-root-path");
 const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = path.resolve(".");
 
@@ -8,7 +8,15 @@ async function getTranslationsCatalog() {
 
     const http = require(`${appRoot}/src/lib/http.js`);
 
-    const catalogResponse = await http.getText('https://api.vachanengine.org/v2/sources?content_type=bible');
+    let catalogResponse = null;
+    try {
+        catalogResponse = await http.getText('https://api.vachanengine.org/v2/sources?content_type=bible');
+    } catch (err) {
+        console.log(`    *** Error from Vachan sources endpoint: ${err.message} ***`);
+    }
+    if (!catalogResponse) {
+        return;
+    }
     const jsonData = JSON.parse(catalogResponse.data);
     const catalog = jsonData.map(t => ({
         id: t.sourceName,
@@ -40,6 +48,8 @@ const fetchUsfm = async (org, trans, config) => {
     }
 };
 
-const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};
+const fetchUsx = async (org) => {
+    throw new Error(`USX fetching is not supported for ${org.name}`)
+};
 
-module.exports = { getTranslationsCatalog, fetchUsfm, fetchUsx }
+module.exports = {getTranslationsCatalog, fetchUsfm, fetchUsx}

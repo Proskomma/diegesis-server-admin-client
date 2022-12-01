@@ -18,6 +18,9 @@ import HomePage from "./pages/HomePage";
 import WhoPage from "./pages/WhoPage";
 import HowPage from "./pages/HowPage";
 import ListPage from "./pages/ListPage";
+import EntryDetailsPage from "./pages/EntryDetailsPage";
+import EntryBrowsePage from "./pages/EntryBrowsePage";
+import EntryDownloadPage from "./pages/EntryDownloadPage";
 
 function App() {
     const [searchOrg, setSearchOrg] = useState('all');
@@ -51,7 +54,7 @@ function App() {
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <HomePage />
+            element: <HomePage />,
         },
         {
             path: "/who",
@@ -73,6 +76,18 @@ function App() {
                 setSearchText={setSearchText}
             />,
         },
+        {
+            path: "/entry/details/:orgId/:entryId",
+            element: <EntryDetailsPage />
+        },
+        {
+            path: "/entry/browse/:orgId/:entryId",
+            element: <EntryBrowsePage />
+        },
+        {
+            path: "/entry/download/:orgId/:entryId",
+            element: <EntryDownloadPage />
+        }
     ]);
 
     return (<ApolloProvider client={client}>

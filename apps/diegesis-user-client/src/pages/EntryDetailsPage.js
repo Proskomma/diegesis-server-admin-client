@@ -1,22 +1,20 @@
-import {Container, Typography, Box} from "@mui/material";
-import {Link} from "react-router-dom";
+import {Container, Typography, Box, Button} from "@mui/material";
+import {useParams, Link as RouterLink} from "react-router-dom";
+import {ArrowBack} from '@mui/icons-material';
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-export default function HomePage() {
+export default function EntryDetailsPage() {
+
+    const {orgId, entryId} = useParams();
 
     return <Container fixed className="homepage">
-        <Header selected="home"/>
+        <Header selected="list"/>
         <Box style={{marginTop: "100px"}}>
-            <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>Diegesis</Typography>
-            <Typography variant="h6" paragraph="true">Creative Commons Scripture Resources to Go!</Typography>
-            <Typography variant="body1" paragraph="true">Diegesis is a place to find Bibles and related resources, in a
-                variety of formats, released under open licences. (In other words, you can use, share, improve and
-                translate
-                them.)</Typography>
-            <Typography variant="body1" paragraph="true">You can see the content <Link
-                to="/list">here</Link>.</Typography>
+            <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}><Button>
+                <RouterLink to="/list"><ArrowBack/></RouterLink></Button> Details</Typography>
+            <Typography variant="h6" paragraph="true">{orgId} {entryId}</Typography>
             <Footer/>
         </Box>
     </Container>;

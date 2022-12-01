@@ -1,9 +1,10 @@
 import React from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 import {searchQuery} from '../lib/search';
 import TranslationsTable from "./TranslationsTable";
 import {gql, useQuery} from "@apollo/client";
 import GqlError from "./GqlError";
-import {Button, Typography, Grid} from "@mui/material";
+import {Button, Typography, Grid, Box} from "@mui/material";
 import Spinner from './Spinner';
 import {Download, Book, Info} from '@mui/icons-material';
 
@@ -42,23 +43,24 @@ export default function ListView({searchOrg, searchLang, searchText}) {
         return {
             docSet: <>
                 <Typography variant="body2">{localTranslation.id} ({orgId})</Typography>
-                <Typography sx={{fontWeight: 'bold'}} variant="body1">{localTranslation.title} ({localTranslation.languageCode})</Typography>
+                <Typography sx={{fontWeight: 'bold'}}
+                            variant="body1">{localTranslation.title} ({localTranslation.languageCode})</Typography>
             </>,
             actions: <Grid container sx={{"textAlign": "right"}}>
                 <Grid item xs={12} md={4}>
-                <Button>
-                    <Info/>
-                </Button>
+                    <Button>
+                        <RouterLink to={`/entry/details/${orgId}/${localTranslation.id}`}><Info/></RouterLink>
+                    </Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                <Button>
-                    <Book/>
-                </Button>
+                    <Button>
+                        <RouterLink to={`/entry/browse/${orgId}/${localTranslation.id}`}><Book/></RouterLink>
+                    </Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                <Button>
-                    <Download/>
-                </Button>
+                    <Button>
+                        <RouterLink to={`/entry/download/${orgId}/${localTranslation.id}`}><Download/></RouterLink>
+                    </Button>
                 </Grid>
             </Grid>
         };

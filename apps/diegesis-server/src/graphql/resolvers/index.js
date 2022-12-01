@@ -258,8 +258,7 @@ const makeResolvers = async (config) => {
                     org,
                     args,
                     context,
-                    org.translations
-                        .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
+                    (org.translations || []).filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
                 ).map(
                     t => fse.readJsonSync(
                         path.join(
@@ -463,13 +462,13 @@ const makeResolvers = async (config) => {
                     }
 
                     return false;
-                    
+
 
                 } catch (err) {
                     console.log(err);
                     return false;
                 }
-                
+
             },
             fetchUsx: async (root, args) => {
                 const orgOb = orgsData[args.org];
