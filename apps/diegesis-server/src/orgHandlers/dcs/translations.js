@@ -24,7 +24,7 @@ async function getTranslationsCatalog() {
         description: t.description,
         abbreviation: t.name,
         owner: t.owner.login,
-        revision: t.release_counter,
+        revision: `${t.release_counter}`,
     }));
     return catalog;
 }

@@ -47,7 +47,7 @@ const fetchUsx = async (org, trans, config) => {
     const metadataContent = await metadata[0].async('text');
     const parser = new DOMParser();
     const metadataRoot = parser.parseFromString(metadataContent, "application/xml").documentElement;
-    metadataRecord.revision = metadataRoot.getAttribute('revision');
+    metadataRecord.revision = metadataRoot.getAttribute('revision') || '???';
     metadataRecord.description =
         metadataRoot.getElementsByTagName('identification')['0']
             .getElementsByTagName('description')['0']
@@ -68,7 +68,7 @@ const fetchUsx = async (org, trans, config) => {
         metadataRoot.getElementsByTagName('agencies')['0']
             .getElementsByTagName('rightsHolder')['0']
             .getElementsByTagName('abbr')['0']
-            .childNodes[0].nodeValue;
+            .childNodes[0].nodeValue || '???';
     metadataRecord.copyright =
         metadataRoot.getElementsByTagName('copyright')['0']
             .getElementsByTagName('fullStatement')['0']

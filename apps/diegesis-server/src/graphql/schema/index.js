@@ -88,8 +88,12 @@ const querySchema = gql`
     type CatalogEntry {
         """An id for the translation which is unique within the organization"""
         id: TranslationId!
+        """The revision of the translation"""
+        revision: String!
         """The language code"""
         languageCode: String!
+        """The owner"""
+        owner: String!
         """a title of the translation"""
         title: String!
         """Is USFM available locally?"""
@@ -102,8 +106,12 @@ const querySchema = gql`
     type Translation {
         """An id for the translation which is unique within the organization"""
         id: TranslationId!
+        """The revision of the translation"""
+        revision: String!
         """The language code"""
         languageCode: String!
+        """The owner"""
+        owner: String!
         """a title of the translation"""
         title: String!
         """The direction of the text"""

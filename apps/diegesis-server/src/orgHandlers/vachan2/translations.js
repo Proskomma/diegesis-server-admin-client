@@ -27,7 +27,7 @@ async function getTranslationsCatalog() {
         copyright: `${t.metaData['Copyright Holder'] || ''} ${t.license.code}`.trim(),
         description: t.metaData['Version Name (in Eng)'] || null,
         abbreviation: t.version.versionAbbreviation,
-        revision: t.version.revision,
+        revision: `${t.version.revision}`,
         owner: 'vachan2',
     }));
     return catalog;
@@ -43,7 +43,7 @@ const fetchUsfm = async (org, trans, config) => {
         fse.mkdirsSync(usfmBooksPath);
     }
     fse.writeJsonSync(path.join(tp, 'metadata.json'), trans);
-    for (const bookOb of responseJson) {
+    for (const bookOb of JSON.parse(responseJson)) {
         const bookCode = bookOb.book.bookCode.toUpperCase();
         fse.writeFileSync(path.join(usfmBooksPath, `${bookCode}.usfm`), bookOb.USFM);
     }
