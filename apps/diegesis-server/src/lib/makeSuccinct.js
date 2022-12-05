@@ -1,7 +1,6 @@
 const {Proskomma} = require('proskomma');
 
 function makeSuccinct(org, metadata, docType, docs, vrsContent) {
-    return;
     const pk = new Proskomma([
         {
             name: "source",
@@ -26,15 +25,16 @@ function makeSuccinct(org, metadata, docType, docs, vrsContent) {
     ]);
     pk.importDocuments(
         {
-            org,
-            lang: metadata.languageCode,
-            abbr: metadata.abbreviation,
+            source: org,
+            owner: metadata.owner,
+            project: metadata.abbreviation,
+            revision: metadata.revision,
         },
         docType,
         docs,
-    )
+    );
     const docSetId = pk.gqlQuerySync('{docSets { id } }').data.docSets[0].id;
-    let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}"`;
+    let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}" "language:${metadata.languageCode}"`;
     if (metadata.textDirection) {
         metadataTags += ` "direction:${metadata.textDirection}"`;
     }

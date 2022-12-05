@@ -36,7 +36,7 @@ async function getTranslationsCatalog() {
         description: t.description,
         abbreviation: t.translationId,
         owner: 'ebible',
-        revision: t.UpdateDate.replace(/-/g, "_"),
+        revision: t.UpdateDate,
     }));
     return catalog;
 }
