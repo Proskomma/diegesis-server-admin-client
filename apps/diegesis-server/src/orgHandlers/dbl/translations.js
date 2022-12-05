@@ -2,7 +2,6 @@ const path = require("path");
 const fse = require("fs-extra");
 const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
-const appRootPath = require("app-root-path");
 const DOMParser = require('xmldom').DOMParser;
 const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = path.resolve(".");
@@ -48,6 +47,7 @@ const fetchUsx = async (org, trans, config) => {
     const metadataContent = await metadata[0].async('text');
     const parser = new DOMParser();
     const metadataRoot = parser.parseFromString(metadataContent, "application/xml").documentElement;
+    metadataRecord.revision = metadataRoot.getAttribute('revision');
     metadataRecord.description =
         metadataRoot.getElementsByTagName('identification')['0']
             .getElementsByTagName('description')['0']
@@ -63,6 +63,11 @@ const fetchUsx = async (org, trans, config) => {
     metadataRecord.abbreviation =
         metadataRoot.getElementsByTagName('identification')['0']
             .getElementsByTagName('abbreviation')['0']
+            .childNodes[0].nodeValue;
+    metadataRecord.owner =
+        metadataRoot.getElementsByTagName('agencies')['0']
+            .getElementsByTagName('rightsHolder')['0']
+            .getElementsByTagName('abbr')['0']
             .childNodes[0].nodeValue;
     metadataRecord.copyright =
         metadataRoot.getElementsByTagName('copyright')['0']

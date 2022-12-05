@@ -1,6 +1,5 @@
 const path = require("path");
 const fse = require("fs-extra");
-const appRootPath = require("app-root-path");
 const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = path.resolve(".");
 
@@ -28,6 +27,8 @@ async function getTranslationsCatalog() {
         copyright: `${t.metaData['Copyright Holder'] || ''} ${t.license.code}`.trim(),
         description: t.metaData['Version Name (in Eng)'] || null,
         abbreviation: t.version.versionAbbreviation,
+        revision: t.version.revision,
+        owner: 'vachan2',
     }));
     return catalog;
 }

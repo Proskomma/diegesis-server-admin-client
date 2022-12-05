@@ -1,22 +1,28 @@
 const {Proskomma} = require('proskomma');
 
 function makeSuccinct(org, metadata, docType, docs, vrsContent) {
+    return;
     const pk = new Proskomma([
         {
-            name: "org",
+            name: "source",
             type: "string",
             regex: "^[^\\s]+$"
         },
         {
-            name: "lang",
+            name: "owner",
             type: "string",
             regex: "^[^\\s]+$"
         },
         {
-            name: "abbr",
+            name: "project",
             type: "string",
-            regex: "^[A-za-z0-9_-]+$"
-        }
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "revision",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
     ]);
     pk.importDocuments(
         {

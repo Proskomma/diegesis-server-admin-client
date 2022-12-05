@@ -10,7 +10,7 @@ async function getTranslationsCatalog() {
 
     const http = require(`${appRoot}/src/lib/http.js`);
 
-    const catalogResponse = await http.getText('https://git.door43.org/api/v1/repos/search?owner=unfoldingWord&subject=Aligned%20Bible,Bible,Hebrew%20Old%20Testament,Greek%20New%20Testament');
+    const catalogResponse = await http.getText('https://git.door43.org/api/v1/repos/search?owner=unfoldingWord,mvhs&subject=Aligned%20Bible,Bible,Hebrew%20Old%20Testament,Greek%20New%20Testament');
     const jsonData = JSON.parse(catalogResponse.data);
     const catalogData = jsonData.data;
     const catalog = catalogData.map(t => ({
@@ -23,6 +23,8 @@ async function getTranslationsCatalog() {
         copyright: t.owner.full_name,
         description: t.description,
         abbreviation: t.name,
+        owner: t.owner.login,
+        revision: t.release_counter,
     }));
     return catalog;
 }

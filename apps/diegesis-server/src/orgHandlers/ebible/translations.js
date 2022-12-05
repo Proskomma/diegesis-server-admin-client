@@ -2,7 +2,6 @@ const path = require("path");
 const fse  = require("fs-extra");
 const jszip = require("jszip");
 const {ptBookArray} = require("proskomma-utils");
-const appRootPath = require("app-root-path");
 const {transPath} = require('../../lib/dataPaths.js');
 const appRoot = path.resolve(".");
 
@@ -36,6 +35,8 @@ async function getTranslationsCatalog() {
         copyright: t.Copyright,
         description: t.description,
         abbreviation: t.translationId,
+        owner: 'ebible',
+        revision: t.UpdateDate.replace(/-/g, "_"),
     }));
     return catalog;
 }
