@@ -1,7 +1,23 @@
-const {UWProskomma} = require('uw-proskomma');
+const {Proskomma} = require('proskomma');
 
 function makeSuccinct(org, metadata, docType, docs, vrsContent) {
-    const pk = new UWProskomma();
+    const pk = new Proskomma([
+        {
+            name: "org",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "lang",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "abbr",
+            type: "string",
+            regex: "^[A-za-z0-9_-]+$"
+        }
+    ]);
     pk.importDocuments(
         {
             org,
