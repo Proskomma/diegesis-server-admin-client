@@ -29,17 +29,9 @@ const fetchUsfm = async (org) => {
 const fetchUsx = async (org, trans, config) => {
 
     const http = require(`${appRoot}/src/lib/http.js`);
-    const tp = transPath(config.dataPath, org.translationDir, trans.id);
-    if (!fse.pathExistsSync(tp)) {
-        fse.mkdirsSync(tp);
-    }
     const entryInfoResponse = await http.getText(trans.downloadURL);
     const licenceId = entryInfoResponse.data.replace(/[\S\s]+license=(\d+)[\S\s]+/, "$1");
     const downloadResponse = await http.getBuffer(`https://app.thedigitalbiblelibrary.org/entry/download_archive?id=${trans.id}&license=${licenceId}&type=release`);
-    const usxBooksPath = path.join(tp, 'usxBooks');
-    if (!fse.pathExistsSync(usxBooksPath)) {
-        fse.mkdirsSync(usxBooksPath);
-    }
     const metadataRecord = {...trans};
     const zip = new jszip();
     await zip.loadAsync(downloadResponse.data);
@@ -77,6 +69,16 @@ const fetchUsx = async (org, trans, config) => {
             .replace(/<[^>]+>/g, "")
             .replace(/\s+/g, " ")
             .trim();
+    trans.owner = metadataRecord.owner;
+    trans.revision = metadataRecord.revision;
+    const tp = transPath(config.dataPath, org.translationDir, metadataRecord.owner, trans.id, metadataRecord.revision);
+    if (!fse.pathExistsSync(tp)) {
+        fse.mkdirsSync(tp);
+    }
+    const usxBooksPath = path.join(tp, 'usxBooks');
+    if (!fse.pathExistsSync(usxBooksPath)) {
+        fse.mkdirsSync(usxBooksPath);
+    }
     fse.writeJsonSync(path.join(tp, 'metadata.json'), metadataRecord);
     for (const bookName of ptBookArray) {
         const foundFiles = zip.file(new RegExp(`release/USX_1/${bookName.code}[^/]*.usx$`, 'g'));

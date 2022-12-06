@@ -31,7 +31,7 @@ async function getTranslationsCatalog() {
 
 const fetchUsfm = async (org, trans, config) => {
     const http = require(`${appRoot}/src/lib/http.js`);
-    const tp = transPath(config.dataPath, org.translationDir, trans.id);
+    const tp = transPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision);
     const repoDetailsResponse = await http.getText(trans.downloadURL);
     const responseJson = JSON.parse(repoDetailsResponse.data);
     const zipUrl = responseJson.catalog.latest.zipball_url;
@@ -51,7 +51,7 @@ const fetchUsfm = async (org, trans, config) => {
         }
     }
     const vrsResponse = await http.getText('https://git.door43.org/Door43-Catalog/versification/raw/branch/master/bible/ufw/ufw.vrs');
-    fse.writeFileSync(vrsPath(config.dataPath, org.translationDir, trans.id), vrsResponse.data);
+    fse.writeFileSync(vrsPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision), vrsResponse.data);
 };
 
 const fetchUsx = async (org) => {throw new Error(`USX fetching is not supported for ${org.name}`)};

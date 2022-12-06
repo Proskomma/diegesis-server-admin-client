@@ -1,51 +1,69 @@
 const path = require("path");
 
 const transPath =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("transPath now requires 5 args");
+        }
         return path.resolve(
             dataPath,
             translationDir,
-            'translations',
-            translationId,
+            `${translationOwner}--${translationId}`,
+            translationRevision
         );
     }
 
 const usfmDir =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("usfmDir now requires 5 args");
+        }
        return path.join(
-            transPath(dataPath, translationDir, translationId),
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'usfmBooks'
         );
     }
 
 const usxDir =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("usxDir now requires 5 args");
+        }
          return path.join(
-            transPath(dataPath, translationDir, translationId),
+             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'usxBooks'
         );
     }
 
 const succinctPath =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("succinctPath now requires 5 args");
+        }
         return path.join(
-            transPath(dataPath, translationDir, translationId),
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'succinct.json'
         );
     }
 
 const succinctErrorPath =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("succinctErrorPath now requires 5 args");
+        }
         return path.join(
-            transPath(dataPath, translationDir, translationId),
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'succinctError.json'
         );
     }
 
 const vrsPath =
-    (dataPath, translationDir, translationId) => {
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("vrsPath now requires 5 args");
+        }
         return path.join(
-            transPath(dataPath, translationDir, translationId),
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'versification.vrs'
         );
     }

@@ -44,7 +44,7 @@ async function getTranslationsCatalog() {
 const fetchUsfm = async (org, trans, config) => {
 
     const http = require(`${appRoot}/src/lib/http.js`);
-    const tp = transPath(config.dataPath, org.translationDir, trans.id);
+    const tp = transPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision);
     if (!fse.pathExistsSync(tp)) {
         fse.mkdirsSync(tp);
     }

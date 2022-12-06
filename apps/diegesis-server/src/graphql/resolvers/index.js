@@ -3,7 +3,6 @@ const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath} = require('../../lib/dataPaths');
 const makeSuccinct = require('../../lib/makeSuccinct');
-const appRootPath = require("app-root-path");
 
 const appRoot = path.resolve(".");
 
@@ -193,16 +192,16 @@ const makeResolvers = async (config) => {
         }
         if ('withUsfm' in args) {
             if (args.withUsfm) {
-                ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.owner, t.id, t.revision)));
             } else {
-                ret = ret.filter(t => !fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => !fse.pathExistsSync(usfmDir(config.dataPath, context.orgData.translationDir, t.owner, t.id, t.revision)));
             }
         }
         if ('withUsx' in args) {
             if (args.withUsx) {
-                ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.owner, t.id, t.revision)));
             } else {
-                ret = ret.filter(t => !fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.id)));
+                ret = ret.filter(t => !fse.pathExistsSync(usxDir(config.dataPath, context.orgData.translationDir, t.owner, t.id, t.revision)));
             }
         }
         if ('withSuccinct' in args) {
@@ -241,12 +240,12 @@ const makeResolvers = async (config) => {
         Org: {
             nCatalogEntries: org => org.translations.length,
             nLocalTranslations: (org, args, context) => {
-                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)));
+                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)));
                 if (args.withUsfm) {
-                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, org.translationDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, org.translationDir, t.owner, t.id, t.revision)));
                 }
                 if (args.withUsx) {
-                    ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, org.translationDir, t.id)));
+                    ret = ret.filter(t => fse.pathExistsSync(usxDir(config.dataPath, org.translationDir, t.owner, t.id, t.revision)));
                 }
                 return ret.length;
             },
@@ -258,11 +257,11 @@ const makeResolvers = async (config) => {
                     org,
                     args,
                     context,
-                    (org.translations || []).filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
+                    (org.translations || []).filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)))
                 ).map(
                     t => fse.readJsonSync(
                         path.join(
-                            transPath(config.dataPath, org.translationDir, t.id),
+                            transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision),
                             'metadata.json'
                         )
                     ));
@@ -277,12 +276,12 @@ const makeResolvers = async (config) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
                 const trans = org.translations
-                    .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.id)))
+                    .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)))
                     .filter(t => t.id === args.id)[0];
                 if (trans) {
                     return fse.readJsonSync(
                         path.join(
-                            transPath(config.dataPath, org.translationDir, trans.id),
+                            transPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision),
                             'metadata.json'
                         )
                     );
@@ -291,23 +290,10 @@ const makeResolvers = async (config) => {
                 }
             },
         },
-        CatalogEntry: {
-            hasLocalUsfm: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
-                return fse.pathExistsSync(usfmDirPath);
-            },
-            hasLocalUsx: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
-                return fse.pathExistsSync(usxDirPath);
-            },
-            hasLocalSuccinct: (trans, args, context) => {
-                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
-                return fse.pathExistsSync(succinctP);
-            },
-        },
+        CatalogEntry: {},
         Translation: {
             nUsfmBooks: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).length;
                 } else {
@@ -315,7 +301,7 @@ const makeResolvers = async (config) => {
                 }
             },
             usfmBookCodes: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]);
                 } else {
@@ -323,7 +309,7 @@ const makeResolvers = async (config) => {
                 }
             },
             hasUsfmBookCode: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usfmDirPath)) {
                     return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]).includes(args.code);
                 } else {
@@ -331,11 +317,11 @@ const makeResolvers = async (config) => {
                 }
             },
             hasUsfm: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(usfmDirPath);
             },
             usfmForBookCode: (trans, args, context) => {
-                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 const bookPath = path.join(usfmDirPath, `${args.code}.usfm`);
                 if (fse.pathExistsSync(bookPath)) {
                     return fse.readFileSync(bookPath).toString();
@@ -344,7 +330,7 @@ const makeResolvers = async (config) => {
                 }
             },
             nUsxBooks: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).length;
                 } else {
@@ -352,7 +338,7 @@ const makeResolvers = async (config) => {
                 }
             },
             usxBookCodes: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]);
                 } else {
@@ -360,7 +346,7 @@ const makeResolvers = async (config) => {
                 }
             },
             hasUsxBookCode: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usxDirPath)) {
                     return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]).includes(args.code);
                 } else {
@@ -368,11 +354,11 @@ const makeResolvers = async (config) => {
                 }
             },
             hasUsx: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(usxDirPath);
             },
             usxForBookCode: (trans, args, context) => {
-                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.id);
+                const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 const bookPath = path.join(usxDirPath, `${args.code}.usx`);
                 if (fse.pathExistsSync(bookPath)) {
                     return fse.readFileSync(bookPath).toString();
@@ -381,11 +367,11 @@ const makeResolvers = async (config) => {
                 }
             },
             hasSuccinct: (trans, args, context) => {
-                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(succinctP);
             },
             succinct: (trans, args, context) => {
-                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(succinctP)) {
                     return fse.readFileSync(succinctP).toString();
                 }
@@ -427,8 +413,8 @@ const makeResolvers = async (config) => {
                     return false;
                 }
                 try {
-                    await orgHandlers[args.org].fetchUsfm(orgOb, transOb, config);
-                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    await orgHandlers[args.org].fetchUsfm(orgOb, transOb, config); // Adds owner and revision to transOb
+                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                     if (fse.pathExistsSync(succinctP)) {
                         fse.unlinkSync(succinctP);
                     }
@@ -449,12 +435,12 @@ const makeResolvers = async (config) => {
                 }
                 try
                 {
-                    let pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    let pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                     if (fse.pathExistsSync(pathDir)) {
 
                         fse.rmSync(pathDir,{recursive:true});
 
-                        pathDir = transPath(config.dataPath, orgOb.translationDir, "");
+                        pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, "");
                         if(fse.readdirSync(pathDir).length === 0){
                             fse.rmSync(path.resolve(config.dataPath,orgOb.translationDir),{recursive:true});
                         };
@@ -480,8 +466,8 @@ const makeResolvers = async (config) => {
                     return false;
                 }
                 try {
-                    await orgHandlers[args.org].fetchUsx(orgOb, transOb, config);
-                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.id);
+                    await orgHandlers[args.org].fetchUsx(orgOb, transOb, config);  // Adds owner and revision to transOb
+                    const succinctP = succinctPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                     if (fse.pathExistsSync(succinctP)) {
                         fse.unlinkSync(succinctP);
                     }
@@ -503,14 +489,14 @@ const makeResolvers = async (config) => {
                 try {
                     const metadata = fse.readJsonSync(
                         path.join(
-                            transPath(config.dataPath, orgOb.translationDir, transOb.id),
+                            transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision),
                             'metadata.json'
                         )
                     );
-                    let contentDir = usfmDir(config.dataPath, orgOb.translationDir, transOb.id);
+                    let contentDir = usfmDir(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                     let docType = 'usfm';
                     if (!fse.pathExistsSync(contentDir)) {
-                        contentDir = usxDir(config.dataPath, orgOb.translationDir, transOb.id);
+                        contentDir = usxDir(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                         docType = 'usx';
                         if (!fse.pathExistsSync(contentDir)) {
                             throw new Error(`Neither USFM nor USX directory exists for ${orgOb.name}/${transOb.id}`);

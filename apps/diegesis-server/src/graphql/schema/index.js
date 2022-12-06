@@ -80,8 +80,12 @@ const querySchema = gql`
         ): [Translation!]!
         """Translation of this organization with the given id, if found locally"""
         localTranslation(
+            """The owner"""
+            owner: String!
             """The id of the translation"""
             id: TranslationId!
+            """The revision of the translation"""
+            revision: String!
         ): Translation
     }
     """A Catalog Entry"""
@@ -96,13 +100,8 @@ const querySchema = gql`
         owner: String!
         """a title of the translation"""
         title: String!
-        """Is USFM available locally?"""
-        hasLocalUsfm: Boolean!
-        """Is USX available locally?"""
-        hasLocalUsx: Boolean!
-        """Is Proskomma succinct docSet available locally?"""
-        hasLocalSuccinct: Boolean!
     }
+    """A Local Translation"""
     type Translation {
         """An id for the translation which is unique within the organization"""
         id: TranslationId!
@@ -173,35 +172,47 @@ const mutationSchema = gql`
         fetchUsfm(
             """The name of the organization"""
             org: OrgName!
-            """The organization-specific identifier of the translation"""
+            """The id of the translation"""
             translationId: TranslationId!
         ) : Boolean!
         deleteLocalTranslation (
             """The name of the organization"""
             org: OrgName!
-            """The organization-specific identifier of the translation"""
-            translationId: TranslationId!
+            """The owner"""
+            owner: String!
+            """The id of the translation"""
+            id: TranslationId!
+            """The revision of the translation"""
+            revision: String!
         ) : Boolean!
         """Fetches and processes the specified USX content from a remote server"""
         fetchUsx(
             """The name of the organization"""
             org: OrgName!
-            """The organization-specific identifier of the translation"""
+            """The id of the translation"""
             translationId: TranslationId!
         ) : Boolean!
         """Makes succinct JSON from USFM or USX for the specified translation"""
         makeSuccinct(
             """The name of the organization"""
             org: OrgName!
-            """The organization-specific identifier of the translation"""
-            translationId: TranslationId!
+            """The owner"""
+            owner: String!
+            """The id of the translation"""
+            id: TranslationId!
+            """The revision of the translation"""
+            revision: String!
         ) : Boolean!
         """Deletes a succinct error, if present, which will allow succinct generation by the cron"""
         deleteSuccinctError(
             """The name of the organization"""
             org: OrgName!
-            """The organization-specific identifier of the translation"""
-            translationId: TranslationId!
+            """The owner"""
+            owner: String!
+            """The id of the translation"""
+            id: TranslationId!
+            """The revision of the translation"""
+            revision: String!
         ) : Boolean!
     }
 `;

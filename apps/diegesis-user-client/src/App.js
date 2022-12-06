@@ -77,7 +77,7 @@ function App() {
             />,
         },
         {
-            path: "/entry/details/:orgId/:entryId",
+            path: "/entry/details/:source/:owner/:entryId/:revision",
             element: <EntryDetailsPage />
         },
         {

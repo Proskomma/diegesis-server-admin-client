@@ -35,7 +35,7 @@ async function getTranslationsCatalog() {
 
 const fetchUsfm = async (org, trans, config) => {
     const http = require(`${appRoot}/src/lib/http.js`);
-    const tp = transPath(config.dataPath, org.translationDir, trans.id);
+    const tp = transPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision);
     const downloadResponse = await http.getText(trans.downloadURL);
     const responseJson = downloadResponse.data;
     const usfmBooksPath = path.join(tp, 'usfmBooks');
