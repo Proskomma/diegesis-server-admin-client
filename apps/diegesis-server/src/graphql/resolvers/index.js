@@ -171,7 +171,7 @@ const makeResolvers = async (config) => {
                 t =>
                     args.withMatchingMetadata.filter(
                         md => t.title.toLowerCase().includes(md.toLowerCase())
-            ).length > 0
+                    ).length > 0
             )
         }
         if (args.sortedBy) {
@@ -221,6 +221,20 @@ const makeResolvers = async (config) => {
         return ret;
     }
 
+    const localTranslations = orgData => {
+        const ret = [];
+        const td = path.resolve(config.dataPath, orgData.translationDir);
+        for (const [owner, entryId] of fse.readdirSync(td).map(fn => fn.split('--'))) {
+            for (const revision of fse.readdirSync(path.join(td, `${owner}--${entryId}`))) {
+                const transDir = path.join(td, `${owner}--${entryId}`, revision);
+                const metadata = fse.readJsonSync(path.join(transDir, 'metadata.json'));
+                metadata.dir = transDir;
+                ret.push(metadata);
+            }
+        }
+        return ret;
+    }
+
     const scalarResolvers = {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
@@ -240,7 +254,7 @@ const makeResolvers = async (config) => {
         Org: {
             nCatalogEntries: org => org.translations.length,
             nLocalTranslations: (org, args, context) => {
-                let ret = org.translations.filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)));
+                let ret = localTranslations(org);
                 if (args.withUsfm) {
                     ret = ret.filter(t => fse.pathExistsSync(usfmDir(config.dataPath, org.translationDir, t.owner, t.id, t.revision)));
                 }
@@ -257,14 +271,7 @@ const makeResolvers = async (config) => {
                     org,
                     args,
                     context,
-                    (org.translations || []).filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)))
-                ).map(
-                    t => fse.readJsonSync(
-                        path.join(
-                            transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision),
-                            'metadata.json'
-                        )
-                    ));
+                    localTranslations(org) || [])
             },
             catalogEntry: (org, args, context) => {
                 context.orgData = org;
@@ -378,22 +385,22 @@ const makeResolvers = async (config) => {
                 return null;
             },
             hasSuccinctError: (trans, args, context) => {
-                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(succinctEP);
             },
             succinctError: (trans, args, context) => {
-                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const succinctEP = succinctErrorPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(succinctEP)) {
                     return fse.readFileSync(succinctEP).toString();
                 }
                 return null;
             },
             hasVrs: (trans, args, context) => {
-                const vrsP = vrsPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const vrsP = vrsPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(vrsP);
             },
             vrs: (trans, args, context) => {
-                const vrsP = vrsPath(config.dataPath, context.orgData.translationDir, trans.id);
+                const vrsP = vrsPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(vrsP)) {
                     return fse.readFileSync(vrsP).toString();
                 }
@@ -424,7 +431,7 @@ const makeResolvers = async (config) => {
                     return false;
                 }
             },
-            deleteLocalTranslation: async(root, args) =>{
+            deleteLocalTranslation: async (root, args) => {
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;
@@ -433,17 +440,17 @@ const makeResolvers = async (config) => {
                 if (!transOb) {
                     return false;
                 }
-                try
-                {
+                try {
                     let pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
                     if (fse.pathExistsSync(pathDir)) {
 
-                        fse.rmSync(pathDir,{recursive:true});
+                        fse.rmSync(pathDir, {recursive: true});
 
                         pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, "");
-                        if(fse.readdirSync(pathDir).length === 0){
-                            fse.rmSync(path.resolve(config.dataPath,orgOb.translationDir),{recursive:true});
-                        };
+                        if (fse.readdirSync(pathDir).length === 0) {
+                            fse.rmSync(path.resolve(config.dataPath, orgOb.translationDir), {recursive: true});
+                        }
+                        ;
                         return true;
                     }
 

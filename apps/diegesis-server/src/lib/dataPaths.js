@@ -1,5 +1,13 @@
 const path = require("path");
 
+const orgPath =
+    (dataPath, translationDir) => {
+        return path.resolve(
+            dataPath,
+            translationDir,
+        );
+    }
+
 const transPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
@@ -68,4 +76,4 @@ const vrsPath =
         );
     }
 
-module.exports = {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath};
+module.exports = {orgPath, transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath};
