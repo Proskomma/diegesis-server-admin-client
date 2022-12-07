@@ -235,6 +235,16 @@ const makeResolvers = async (config) => {
         return ret;
     }
 
+    const localTranslation = (orgData, owner, entryId, revision) => {
+        const td = path.resolve(config.dataPath, orgData.translationDir);
+        const translationPath = transPath(config.dataPath, orgData.translationDir, owner, entryId, revision);
+        if (fse.pathExistsSync(translationPath)) {
+            return fse.readJsonSync(path.join(translationPath, "metadata.json"));
+        } else {
+            return null;
+        }
+    }
+
     const scalarResolvers = {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
@@ -282,19 +292,7 @@ const makeResolvers = async (config) => {
             localTranslation: (org, args, context) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
-                const trans = org.translations
-                    .filter(t => fse.pathExistsSync(transPath(config.dataPath, org.translationDir, t.owner, t.id, t.revision)))
-                    .filter(t => t.id === args.id)[0];
-                if (trans) {
-                    return fse.readJsonSync(
-                        path.join(
-                            transPath(config.dataPath, org.translationDir, trans.owner, trans.id, trans.revision),
-                            'metadata.json'
-                        )
-                    );
-                } else {
-                    return null;
-                }
+                return localTranslation(org, args.owner, args.id, args.revision);
             },
         },
         CatalogEntry: {},
