@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const appRootPath = require("app-root-path");
 const {cronOptions} = require("./makeConfig.js");
 const makeSuccinct = require("./makeSuccinct.js");
-const {transPath, usfmDir, usxDir, vrsPath} = require("./dataPaths.js");
+const {transPath, usfmDir, usxDir, vrsPath, succinctPath, succinctErrorPath} = require("./dataPaths.js");
 const appRoot = path.resolve(".");
 
 function doCron(config) {
@@ -13,48 +13,61 @@ function doCron(config) {
         cronOptions[config.cronFrequency],
         () => {
             let taskSpec = null;
-            for (const orgDir of fse.readdirSync(path.resolve(config.dataPath))) {
-                if (taskSpec) {
-                    break;
-                }
-                const transDir = path.resolve(config.dataPath, orgDir, 'translations');
-                if (fse.pathExistsSync(transDir)) {
-                    for (const translationId of fse.readdirSync(transDir)) {
-                        if (fse.pathExistsSync(path.join(transDir, translationId, 'succinctError.json'))) {
-                            continue
-                        }
-                        if (!fse.pathExistsSync(path.join(transDir, translationId, 'succinct.json'))) {
-                            if (fse.pathExistsSync(path.join(transDir, translationId, 'usfmBooks'))) {
-                                taskSpec = [orgDir, translationId, 'usfm'];
-                                break;
-                            }
-                            if (fse.pathExistsSync(path.join(transDir, translationId, 'usxBooks'))) {
-                                taskSpec = [orgDir, translationId, 'usx'];
-                                break;
+            try {
+                for (const orgDir of fse.readdirSync(path.resolve(config.dataPath))) {
+                    if (taskSpec) {
+                        break;
+                    }
+                    const transDir = path.resolve(config.dataPath, orgDir);
+                    if (fse.pathExistsSync(transDir) && fse.lstatSync(transDir).isDirectory()) {
+                        for (const ownerTranslationId of fse.readdirSync(transDir)) {
+                            for (const revision of fse.readdirSync(path.join(transDir, ownerTranslationId))) {
+                                if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinctError.json'))) {
+                                    continue
+                                }
+                                if (!fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinct.json'))) {
+                                    const [owner, translationId] = ownerTranslationId.split("--");
+                                    if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usfmBooks'))) {
+                                        taskSpec = [orgDir, owner, translationId, revision, 'usfm'];
+                                        break;
+                                    }
+                                    if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usxBooks'))) {
+                                        taskSpec = [orgDir, owner, translationId, revision, 'usx'];
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            } catch (err) {
+                const succinctError = {
+                    generatedBy: 'cron',
+                    context: {},
+                    message: err.message
+                };
+                config.incidentLogger.error(succinctError);
+                return;
             }
             if (taskSpec) {
-                const [orgDir, transId, contentType] = taskSpec;
+                const [orgDir, owner, transId, revision, contentType] = taskSpec;
                 try {
                     const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
                     const org = orgJson.name;
                     const t = Date.now();
                     const metadataPath = path.join(
-                        transPath(config.dataPath, orgDir, transId),
+                        transPath(config.dataPath, orgDir, owner, transId, revision),
                         'metadata.json'
                     );
                     const metadata = fse.readJsonSync(metadataPath);
                     let contentDir = (contentType === 'usfm') ?
-                        usfmDir(config.dataPath, orgDir, transId) :
-                        usxDir(config.dataPath, orgDir, transId);
+                        usfmDir(config.dataPath, orgDir, owner, transId, revision) :
+                        usxDir(config.dataPath, orgDir, owner, transId, revision);
                     if (!fse.pathExistsSync(contentDir)) {
-                        throw new Error(`${contentType} content directory for ${org}/${transId} does not exist`);
+                        throw new Error(`${contentType} content directory for ${org}/${owner}/${transId}/${revision} does not exist`);
                     }
                     let vrsContent = null;
-                    const vrsP = vrsPath(config.dataPath, orgDir, transId);
+                    const vrsP = vrsPath(config.dataPath, orgDir, owner, transId, revision);
                     if (fse.pathExistsSync(vrsP)) {
                         vrsContent = fse.readFileSync(vrsP).toString();
                     }
@@ -65,7 +78,7 @@ function doCron(config) {
                         fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
                         vrsContent,
                     );
-                    fse.writeJsonSync(path.resolve(config.dataPath, orgDir, 'translations', transId, 'succinct.json'), succinct);
+                    fse.writeJsonSync(succinctPath(config.dataPath, orgDir, owner, transId, revision), succinct);
                 } catch (error) {
                     const succinctError = {
                         generatedBy: 'cron',
@@ -75,7 +88,7 @@ function doCron(config) {
                         message: error.message
                     };
                     config.incidentLogger.error(succinctError);
-                    fse.writeJsonSync(path.resolve(config.dataPath, orgDir, 'translations', transId, 'succinctError.json'), succinctError);
+                    fse.writeJsonSync(succinctErrorPath(config.dataPath, orgDir, owner, transId, revision), succinctError);
                 }
             }
         }
