@@ -81,11 +81,11 @@ function App() {
             element: <EntryDetailsPage />
         },
         {
-            path: "/entry/browse/:orgId/:entryId",
+            path: "/entry/browse/:source/:owner/:entryId/:revision",
             element: <EntryBrowsePage />
         },
         {
-            path: "/entry/download/:orgId/:entryId",
+            path: "/entry/download/:source/:owner/:entryId/:revision",
             element: <EntryDownloadPage />
         }
     ]);

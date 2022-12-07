@@ -57,12 +57,12 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <Button>
-                        <RouterLink to={`/entry/browse/${orgId}/${localTranslation.id}`}><Book/></RouterLink>
+                        <RouterLink to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Book/></RouterLink>
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <Button>
-                        <RouterLink to={`/entry/download/${orgId}/${localTranslation.id}`}><Download/></RouterLink>
+                        <RouterLink to={`/entry/download/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Download/></RouterLink>
                     </Button>
                 </Grid>
             </Grid>
