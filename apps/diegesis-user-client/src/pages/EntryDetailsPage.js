@@ -22,6 +22,10 @@ export default function EntryDetailsPage() {
             ) {
               languageCode
               title
+              textDirection
+              script
+              copyright
+              abbreviation
             }
           }
         }`
@@ -54,10 +58,34 @@ export default function EntryDetailsPage() {
             <Typography variant="h5" paragraph="true">Details</Typography>
             <Grid container>
                 <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Language</Typography>
+                    <Typography variant="body1" paragraph="true">Abbreviation</Typography>
                 </Grid>
                 <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{translationInfo.languageCode}</Typography>
+                    <Typography variant="body1" paragraph="true">{translationInfo.abbreviation}</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                    <Typography variant="body1" paragraph="true">Copyright</Typography>
+                </Grid>
+                <Grid item xs={9}>
+                    <Typography variant="body1" paragraph="true">{translationInfo.copyright}</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                    <Typography variant="body1" paragraph="true">Language</Typography>
+                </Grid>
+                <Grid item xs={3}>
+                    <Typography variant="body1" paragraph="true">
+                        {translationInfo.languageCode}
+                    </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                    <Typography variant="body1" paragraph="true">
+                        {translationInfo.textDirection ? translationInfo.textDirection : ""}
+                    </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                    <Typography variant="body1" paragraph="true">
+                        {translationInfo.script ? translationInfo.script : ""}
+                    </Typography>
                 </Grid>
                 <Grid item xs={3}>
                     <Typography variant="body1" paragraph="true">Data Source</Typography>
