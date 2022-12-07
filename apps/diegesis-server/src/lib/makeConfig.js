@@ -24,6 +24,7 @@ const defaultConfig = {
     orgs: [], // Empty array means 'all',
     verbose: false,
     includeMutations: false,
+    redirectToRoot: [],
 }
 
 const cronOptions = {
@@ -80,6 +81,23 @@ function makeConfig(providedConfig) {
             croak(`ERROR: staticPath '${fqPath}' does not exist or is not a directory`);
         }
         config.staticPath = fqPath;
+    }
+    if (providedConfig.redirectToRoot) {
+        if (!providedConfig.staticPath) {
+            croak(`ERROR: redirectToRoot present but staticPath absent`);
+        }
+        if (!Array.isArray(providedConfig.redirectToRoot)) {
+            croak(`ERROR: redirectToRoot, if present, should be an array, not '${providedConfig.redirectToRoot}'`);
+        }
+        for (const redirect of providedConfig.redirectToRoot) {
+            if (typeof redirect !== 'string') {
+                croak(`ERROR: redirectToRoot elements should be strings, not '${redirect}'`);
+            }
+            if (!redirect.startsWith('/')) {
+                croak(`ERROR: redirectToRoot elements should start with '/' (from '${redirect}')`);
+            }
+        }
+        config.redirectToRoot = providedConfig.redirectToRoot;
     }
     if (providedConfig.localUsfmPath) {
         if (
@@ -164,6 +182,7 @@ function makeConfig(providedConfig) {
 const configSummary = config => `  Listening on ${config.hostName}:${config.port}
     Data directory is ${config.dataPath}
     ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
+    ${config.redirectToRoot.length > 0 ? `Root Redirects on ${config.redirectToRoot.join(', ')}` : "No Root Redirects"}
     ${config.localUsfmPath ? `Local USFM copied from ${config.localUsfmPath}` : 'No local USFM copied'}
     ${config.localUsxPath ? `Local USX copied from ${config.localUsxPath}` : 'No local USX copied'}
     Debug ${config.debug ? "en" : "dis"}abled

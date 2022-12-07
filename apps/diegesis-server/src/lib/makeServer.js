@@ -79,6 +79,17 @@ async function makeServer(config) {
         transports: [new winston.transports.Console()],
     });
 
+    // Redirect to root, for one-page apps
+    for (const redirect of config.redirectToRoot) {
+        app.get(redirect, function (req, res) {
+            res.sendFile(`${config.staticPath}/index.html`, function (err) {
+                if (err) {
+                    res.status(500).send(err)
+                }
+            })
+        });
+    }
+
     // Apollo server
     const resolvers = await makeResolvers(config);
     const server = new ApolloServer({
