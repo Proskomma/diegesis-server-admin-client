@@ -1,6 +1,6 @@
 const {Proskomma} = require('proskomma');
 
-function makeSuccinct(org, metadata, docType, docs, vrsContent) {
+function makeDownloads(org, metadata, docType, docs, vrsContent) {
     const pk = new Proskomma([
         {
             name: "source",
@@ -45,7 +45,12 @@ function makeSuccinct(org, metadata, docType, docs, vrsContent) {
     if (vrsContent) {
         pk.gqlQuerySync(`mutation { setVerseMapping(docSetId: "${docSetId}" vrsSource: """${vrsContent}""")}`);
     }
-    return pk.serializeSuccinct(docSetId);
+    const perfResult = pk.gqlQuerySync(`{docSet(id: "${docSetId}") { documents { bookCode: header(id:"bookCode") perf sofria } } }`);
+    return {
+        succinct: pk.serializeSuccinct(docSetId),
+        perf: perfResult.data.docSet.documents.map(d => [d.bookCode, d.perf]),
+        sofria: perfResult.data.docSet.documents.map(d => [d.bookCode, d.sofria]),
+    };
 }
 
-module.exports = makeSuccinct;
+module.exports = makeDownloads;

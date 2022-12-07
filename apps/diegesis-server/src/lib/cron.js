@@ -2,10 +2,9 @@ const cron = require("node-cron");
 const path = require("path");
 const fse = require('fs-extra');
 
-const appRootPath = require("app-root-path");
 const {cronOptions} = require("./makeConfig.js");
-const makeSuccinct = require("./makeSuccinct.js");
-const {transPath, usfmDir, usxDir, vrsPath, succinctPath, succinctErrorPath} = require("./dataPaths.js");
+const makeDownloads = require("./makeDownloads.js");
+const {transPath, usfmDir, usxDir, vrsPath, succinctPath, perfDir, sofriaDir, succinctErrorPath} = require("./dataPaths.js");
 const appRoot = path.resolve(".");
 
 function doCron(config) {
@@ -71,14 +70,28 @@ function doCron(config) {
                     if (fse.pathExistsSync(vrsP)) {
                         vrsContent = fse.readFileSync(vrsP).toString();
                     }
-                    const succinct = makeSuccinct(
+                    const downloads = makeDownloads(
                         org,
                         metadata,
                         contentType,
                         fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
                         vrsContent,
                     );
-                    fse.writeJsonSync(succinctPath(config.dataPath, orgDir, owner, transId, revision), succinct);
+                    const perfD = perfDir(config.dataPath, orgDir, owner, transId, revision);
+                    if (!fse.pathExistsSync(perfD)) {
+                        fse.mkdir(perfD);
+                    }
+                    for (const [bookCode, perf] of downloads.perf) {
+                        fse.writeFileSync(path.join(perfD, `${bookCode}.json`), JSON.stringify(JSON.parse(perf), null, 2));
+                    }
+                    const sofriaD = sofriaDir(config.dataPath, orgDir, owner, transId, revision);
+                    if (!fse.pathExistsSync(sofriaD)) {
+                        fse.mkdir(sofriaD);
+                    }
+                    for (const [bookCode, sofria] of downloads.sofria) {
+                        fse.writeFileSync(path.join(sofriaD, `${bookCode}.json`), JSON.stringify(JSON.parse(sofria), null, 2));
+                    }
+                    fse.writeJsonSync(succinctPath(config.dataPath, orgDir, owner, transId, revision), downloads.succinct);
                 } catch (error) {
                     const succinctError = {
                         generatedBy: 'cron',

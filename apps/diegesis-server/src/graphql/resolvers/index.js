@@ -2,7 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath} = require('../../lib/dataPaths');
-const makeSuccinct = require('../../lib/makeSuccinct');
+const makeSuccinct = require('../../lib/makeDownloads');
 
 const appRoot = path.resolve(".");
 

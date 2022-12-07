@@ -128,11 +128,11 @@ mutation {
   fetchUsx(org: "DBL", translationId: "de4e12af7f28f599")
 }
 ```
-#### Make Succinct
+#### Make Downloads
 This may also happen via the cron, if configured.
 ```
 mutation {
-  makeSuccinct(org: "eBible", translationId: "fraLSG")
+  makeDownloads(org: "eBible", translationId: "fraLSG")
 }
 ```
 
@@ -149,6 +149,9 @@ See
 ### Directory usage
 - `dataPath`: the directory within which Scripture data will be stored. Default is 'data' within the repo.
 - `staticPath`: The directory from which static content will be stored. There is no default.
+
+### Routing
+- `redirectToRoot`: an array of absolute url specs to redirect to `index.html` within the `staticPath`.
 
 ### Security
 - `useCors`: whether to enable wildcard CORS. Default is false.

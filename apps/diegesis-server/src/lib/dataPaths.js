@@ -37,9 +37,31 @@ const usxDir =
         if (!translationRevision) {
             throw new Error("usxDir now requires 5 args");
         }
-         return path.join(
-             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
+        return path.join(
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
             'usxBooks'
+        );
+    }
+
+const perfDir =
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("perfDir now requires 5 args");
+        }
+        return path.join(
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
+            'perfBooks'
+        );
+    }
+
+const sofriaDir =
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("sofriaDir now requires 5 args");
+        }
+        return path.join(
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
+            'sofriaBooks'
         );
     }
 
@@ -76,4 +98,4 @@ const vrsPath =
         );
     }
 
-module.exports = {orgPath, transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath};
+module.exports = {orgPath, transPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, vrsPath};
