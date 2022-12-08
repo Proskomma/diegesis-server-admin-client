@@ -375,9 +375,27 @@ const makeResolvers = async (config) => {
                 const perfDirPath = perfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(perfDirPath);
             },
+            perfForBookCode: (trans, args, context) => {
+                const perfDirPath = perfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                const bookPath = path.join(perfDirPath, `${args.code}.json`);
+                if (fse.pathExistsSync(bookPath)) {
+                    return fse.readFileSync(bookPath).toString();
+                } else {
+                    return null;
+                }
+            },
             hasSofria: (trans, args, context) => {
                 const sofriaDirPath = sofriaDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 return fse.pathExistsSync(sofriaDirPath);
+            },
+            sofriaForBookCode: (trans, args, context) => {
+                const sofriaDirPath = sofriaDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                const bookPath = path.join(sofriaDirPath, `${args.code}.json`);
+                if (fse.pathExistsSync(bookPath)) {
+                    return fse.readFileSync(bookPath).toString();
+                } else {
+                    return null;
+                }
             },
             hasSuccinct: (trans, args, context) => {
                 const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);

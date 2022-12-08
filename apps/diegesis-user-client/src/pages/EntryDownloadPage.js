@@ -15,7 +15,21 @@ export default function EntryDownloadPage() {
 
     const client = useApolloClient();
 
-    const downloadSuccinct = async () => {
+    const downloadTranslation = async downloadType => {
+        const downloadTypes = {
+            succinct: {
+                mime: "application/json",
+                suffix: "succinct.json"
+            },
+            vrs: {
+                mime: "text/plain",
+                suffix: "vrs.txt"
+            }
+        }
+        if (!downloadTypes[downloadType]) {
+            console.log(`Unknown Download Translation Type ${downloadType}`);
+            return;
+        }
         const queryString = `query {
             org(name:"""%source%""") {
               localTranslation(
@@ -23,24 +37,74 @@ export default function EntryDownloadPage() {
                 id: """%entryId%"""
                 revision: """%revision%"""
               ) {
-                succinct
+                %downloadType%
               }
             }
           }`
             .replace("%source%", source)
             .replace("%owner%", owner)
             .replace("%entryId%", entryId)
-            .replace("%revision%", revision);
+            .replace("%revision%", revision)
+            .replace("%downloadType%", downloadType);
         const query = gql`${queryString}`;
         const result = await client.query({query});
         const element = document.createElement("a");
-        const file = new Blob([result.data.org.localTranslation.succinct], {type: 'text/plain'});
+        const file = new Blob([result.data.org.localTranslation[downloadType]], {type: downloadTypes[downloadType].mime});
         element.href = URL.createObjectURL(file);
-        element.download = `${source}_${owner}_${entryId}_${revision}_succinct.json`;
+        element.download = `${source}_${owner}_${entryId}_${revision}_${downloadTypes[downloadType].suffix}`;
         document.body.appendChild(element);
         element.click();
     }
 
+    const downloadBook = async (downloadType, bookCode) => {
+        const downloadTypes = {
+            usfm: {
+                mime: "text/plain",
+                suffix: "usfm.txt"
+            },
+            usx: {
+                mime: "text/xml",
+                suffix: "usx.xml"
+            },
+            perf: {
+                mime: "application/json",
+                suffix: "perf.json"
+            },
+            sofria: {
+                mime: "application/json",
+                suffix: "sofria.json"
+            }
+        }
+        if (!downloadTypes[downloadType]) {
+            console.log(`Unknown Download Book Type ${downloadType}`);
+            return;
+        }
+        const queryString = `query {
+            org(name:"""%source%""") {
+              localTranslation(
+                owner: """%owner%"""
+                id: """%entryId%"""
+                revision: """%revision%"""
+              ) {
+                download: %downloadType%ForBookCode(code: """%bookCode%""")
+              }
+            }
+          }`
+            .replace("%source%", source)
+            .replace("%owner%", owner)
+            .replace("%entryId%", entryId)
+            .replace("%revision%", revision)
+            .replace("%downloadType%", downloadType)
+            .replace("%bookCode%", bookCode);
+        const query = gql`${queryString}`;
+        const result = await client.query({query});
+        const element = document.createElement("a");
+        const file = new Blob([result.data.org.localTranslation.download], {type: downloadTypes[downloadType].mime});
+        element.href = URL.createObjectURL(file);
+        element.download = `${source}_${owner}_${entryId}_${revision}_${bookCode}_${downloadTypes[downloadType].suffix}`;
+        document.body.appendChild(element);
+        element.click();
+    }
 
     const queryString =
         `query {
@@ -102,12 +166,12 @@ export default function EntryDownloadPage() {
                 {
                     translationInfo.hasSuccinct &&
                     <>
-                        <Grid item xs={6}>
+                        <Grid item xs={4}>
                             <Typography variant="body1" paragraph="true">Proskomma Succinct</Typography>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={8}>
                             <Typography variant="body1" paragraph="true">
-                                <Button onClick={downloadSuccinct}>
+                                <Button onClick={() => downloadTranslation("succinct")}>
                                     <Download/>
                                 </Button>
                             </Typography>
@@ -117,11 +181,15 @@ export default function EntryDownloadPage() {
                 {
                     translationInfo.hasVrs &&
                     <>
-                        <Grid item xs={6}>
+                        <Grid item xs={4}>
                             <Typography variant="body1" paragraph="true">Versification</Typography>
                         </Grid>
-                        <Grid item xs={6}>
-                            <Typography variant="body1" paragraph="true"><Button><Download/></Button></Typography>
+                        <Grid item xs={8}>
+                            <Typography variant="body1" paragraph="true">
+                                <Button onClick={() => downloadTranslation("vrs")}>
+                                    <Download/>
+                                </Button>
+                            </Typography>
                         </Grid>
                     </>
                 }
@@ -154,22 +222,42 @@ export default function EntryDownloadPage() {
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="body1" paragraph="true">
-                                            <Button disabled={!translationInfo.hasUsfm}><Download/></Button>
+                                            <Button
+                                                onClick={() => downloadBook("usfm", b)}
+                                                disabled={!translationInfo.hasUsfm}
+                                            >
+                                                <Download/>
+                                            </Button>
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="body1" paragraph="true">
-                                            <Button disabled={!translationInfo.hasUsx}><Download/></Button>
+                                            <Button
+                                                onClick={() => downloadBook("usx", b)}
+                                                disabled={!translationInfo.hasUsx}
+                                            >
+                                                <Download/>
+                                            </Button>
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="body1" paragraph="true">
-                                            <Button disabled={!translationInfo.hasPerf}><Download/></Button>
+                                            <Button
+                                                onClick={() => downloadBook("perf", b)}
+                                                disabled={!translationInfo.hasPerf}
+                                            >
+                                                <Download/>
+                                            </Button>
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={2}>
                                         <Typography variant="body1" paragraph="true">
-                                            <Button disabled={!translationInfo.hasSofria}><Download/></Button>
+                                            <Button
+                                                onClick={() => downloadBook("sofria", b)}
+                                                disabled={!translationInfo.hasSofria}
+                                            >
+                                                <Download/>
+                                            </Button>
                                         </Typography>
                                     </Grid>
                                 </>

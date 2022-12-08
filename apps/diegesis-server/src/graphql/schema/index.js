@@ -147,12 +147,22 @@ const querySchema = gql`
         ): Boolean
         """Is USX available?"""
         hasUsx: Boolean!
-        """Is PERF available?"""
-        hasPerf: Boolean!
-        """Is SOFRIA available?"""
-        hasSofria: Boolean!
         """The USX for this translation"""
         usxForBookCode(
+            """The bookCode"""
+            code: BookCode!
+        ): String
+        """Is PERF available?"""
+        hasPerf: Boolean!
+        """The PERF for this translation"""
+        perfForBookCode(
+            """The bookCode"""
+            code: BookCode!
+        ): String
+        """Is SOFRIA available?"""
+        hasSofria: Boolean!
+        """The SOFRIA for this translation"""
+        sofriaForBookCode(
             """The bookCode"""
             code: BookCode!
         ): String
