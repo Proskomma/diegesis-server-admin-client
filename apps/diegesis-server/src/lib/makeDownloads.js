@@ -45,11 +45,12 @@ function makeDownloads(org, metadata, docType, docs, vrsContent) {
     if (vrsContent) {
         pk.gqlQuerySync(`mutation { setVerseMapping(docSetId: "${docSetId}" vrsSource: """${vrsContent}""")}`);
     }
-    const perfResult = pk.gqlQuerySync(`{docSet(id: "${docSetId}") { documents { bookCode: header(id:"bookCode") perf sofria } } }`);
+    const perfResult = pk.gqlQuerySync(`{docSet(id: "${docSetId}") { documents { bookCode: header(id:"bookCode") perf } } }`);
+    const sofriaResult = pk.gqlQuerySync(`{docSet(id: "${docSetId}") { documents { bookCode: header(id:"bookCode") sofria } } }`);
     return {
         succinct: pk.serializeSuccinct(docSetId),
         perf: perfResult.data.docSet.documents.map(d => [d.bookCode, d.perf]),
-        sofria: perfResult.data.docSet.documents.map(d => [d.bookCode, d.sofria]),
+        sofria: sofriaResult.data.docSet.documents.map(d => [d.bookCode, d.sofria]),
     };
 }
 

@@ -13,7 +13,8 @@ const getBuffer = async url => {
             responseType: 'arraybuffer',
             url,
             "validateStatus": false,
-        }
+            maxContentLength: 200000000,
+            maxBodyLength: 2000000000        }
     );
     if (downloadResponse.status !== 200) {
         throw new Error(`Attempt to download URL ${url} as buffer returned status ${downloadResponse.status}`);
@@ -34,7 +35,8 @@ const getText = async url => {
             responseType: 'text',
             url,
             "validateStatus": false,
-        }
+            maxContentLength: 200000000,
+            maxBodyLength: 2000000000        }
     );
     if (downloadResponse.status !== 200) {
         throw new Error(`Attempt to download URL ${url} as text returned status ${downloadResponse.status}`);
@@ -56,7 +58,8 @@ const postText = async (url, payload) => {
             url,
             data: payload,
             "validateStatus": false,
-        }
+            maxContentLength: 200000000,
+            maxBodyLength: 2000000000        }
     );
     if (downloadResponse.status !== 200) {
         throw new Error(`Attempt to POST to ${url} as text returned status ${downloadResponse.status}`);
@@ -87,7 +90,8 @@ async function doMutation(port, query) {
         {
             responseType: 'text',
             "validateStatus": false,
-        }
+            maxContentLength: 200000000,
+            maxBodyLength: 2000000000        }
     );
     if (downloadResponse.status !== 200) {
         throw new Error(`GQL mutation POST returned status ${downloadResponse.status}`);
