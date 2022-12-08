@@ -1,4 +1,4 @@
-const {Proskomma} = require('proskomma');
+const {Proskomma} = require('proskomma-core');
 
 function makeDownloads(org, metadata, docType, docs, vrsContent) {
     const pk = new Proskomma([
