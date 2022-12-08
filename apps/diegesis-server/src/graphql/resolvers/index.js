@@ -1,7 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
-const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath} = require('../../lib/dataPaths');
+const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
 const makeSuccinct = require('../../lib/makeDownloads');
 
 const appRoot = path.resolve(".");
@@ -370,6 +370,14 @@ const makeResolvers = async (config) => {
                 } else {
                     return null;
                 }
+            },
+            hasPerf: (trans, args, context) => {
+                const perfDirPath = perfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                return fse.pathExistsSync(perfDirPath);
+            },
+            hasSofria: (trans, args, context) => {
+                const sofriaDirPath = sofriaDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                return fse.pathExistsSync(sofriaDirPath);
             },
             hasSuccinct: (trans, args, context) => {
                 const succinctP = succinctPath(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);

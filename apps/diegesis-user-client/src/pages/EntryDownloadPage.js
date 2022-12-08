@@ -27,10 +27,10 @@ export default function EntryDownloadPage() {
               }
             }
           }`
-                .replace("%source%", source)
-                .replace("%owner%", owner)
-                .replace("%entryId%", entryId)
-                .replace("%revision%", revision);
+            .replace("%source%", source)
+            .replace("%owner%", owner)
+            .replace("%entryId%", entryId)
+            .replace("%revision%", revision);
         const query = gql`${queryString}`;
         const result = await client.query({query});
         const element = document.createElement("a");
@@ -53,6 +53,10 @@ export default function EntryDownloadPage() {
               usfmBookCodes
               usxBookCodes
               hasSuccinct
+              hasUsfm
+              hasUsx
+              hasPerf
+              hasSofria
               hasVrs
               title
             }
@@ -76,6 +80,13 @@ export default function EntryDownloadPage() {
 
     const translationInfo = data.org.localTranslation;
 
+    let bookCodes;
+    if (translationInfo.usfmBookCodes.length > 0) {
+        bookCodes = [...translationInfo.usfmBookCodes];
+    } else {
+        bookCodes = [...translationInfo.usxBookCodes];
+    }
+
     return <Container fixed className="homepage">
         <Header selected="list"/>
         <Box style={{marginTop: "100px"}}>
@@ -84,8 +95,10 @@ export default function EntryDownloadPage() {
                     <RouterLink to="/list"><ArrowBack/></RouterLink></Button>
                 {translationInfo.title}
             </Typography>
-            <Typography variant="h5" paragraph="true">Download</Typography>
             <Grid container>
+                <Grid item xs={12}>
+                    <Typography variant="h5" paragraph="true">Download by Translation</Typography>
+                </Grid>
                 {
                     translationInfo.hasSuccinct &&
                     <>
@@ -102,54 +115,6 @@ export default function EntryDownloadPage() {
                     </>
                 }
                 {
-                    translationInfo.usfmBookCodes.length > 0 &&
-                    <>
-                        <Grid item xs={3}>
-                            <Typography variant="body1" paragraph="true">USFM:</Typography>
-                        </Grid>
-                        <Grid container xs={9}>
-                            {
-                                translationInfo.usfmBookCodes.map(bc =>
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="body1"
-                                                        paragraph="true">{bc}</Typography>
-                                        </Grid>
-                                        <Grid item xs={8}>
-                                            <Typography variant="body1"
-                                                        paragraph="true"><Button><Download/></Button></Typography>
-                                        </Grid>
-                                    </>
-                                )
-                            }
-                        </Grid>
-                    </>
-                }
-                {
-                    translationInfo.usxBookCodes.length > 0 &&
-                    <>
-                        <Grid item xs={3}>
-                            <Typography variant="body1" paragraph="true">USX:</Typography>
-                        </Grid>
-                        <Grid container xs={9}>
-                            {
-                                translationInfo.usxBookCodes.map(bc =>
-                                    <>
-                                        <Grid item xs={4}>
-                                            <Typography variant="body1"
-                                                        paragraph="true">{bc}</Typography>
-                                        </Grid>
-                                        <Grid item xs={8}>
-                                            <Typography variant="body1"
-                                                        paragraph="true"><Button><Download/></Button></Typography>
-                                        </Grid>
-                                    </>
-                                )
-                            }
-                        </Grid>
-                    </>
-                }
-                {
                     translationInfo.hasVrs &&
                     <>
                         <Grid item xs={6}>
@@ -159,6 +124,59 @@ export default function EntryDownloadPage() {
                             <Typography variant="body1" paragraph="true"><Button><Download/></Button></Typography>
                         </Grid>
                     </>
+                }
+                {
+                    bookCodes.length > 0 &&
+                    <>
+                        <Grid item xs={12}>
+                            <Typography variant="h5" paragraph="true">Download by Book</Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <Typography variant="body1" paragraph="true">Book Code</Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Typography variant="body1" paragraph="true">USFM</Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Typography variant="body1" paragraph="true">USX</Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Typography variant="body1" paragraph="true">PERF</Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <Typography variant="body1" paragraph="true">SOFRIA</Typography>
+                        </Grid>
+                        {
+                            bookCodes.map(b =>
+                                <>
+                                    <Grid item xs={4}>
+                                        <Typography variant="body1" paragraph="true">{b}</Typography>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Typography variant="body1" paragraph="true">
+                                            <Button disabled={!translationInfo.hasUsfm}><Download/></Button>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Typography variant="body1" paragraph="true">
+                                            <Button disabled={!translationInfo.hasUsx}><Download/></Button>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Typography variant="body1" paragraph="true">
+                                            <Button disabled={!translationInfo.hasPerf}><Download/></Button>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Typography variant="body1" paragraph="true">
+                                            <Button disabled={!translationInfo.hasSofria}><Download/></Button>
+                                        </Typography>
+                                    </Grid>
+                                </>
+                            )
+                        }
+                    </>
+
                 }
             </Grid>
             <Footer/>
