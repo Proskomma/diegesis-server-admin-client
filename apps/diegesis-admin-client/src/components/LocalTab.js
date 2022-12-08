@@ -72,7 +72,7 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
         },
     ];
 
-    function createData(localTranslation) {
+    const createData = localTranslation => {
         let succinctState = localTranslation.hasSuccinct ? 'yes' : 'no';
         if (localTranslation.hasSuccinctError) {
             succinctState = 'FAIL';
@@ -90,7 +90,9 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
                     () => deleteTranslation(
                         client,
                         selectedOrg,
+                        localTranslation.owner,
                         localTranslation.id,
+                        localTranslation.revision,
                     )
                 }
             >

@@ -1,7 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
-const {transPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
+const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
 const makeSuccinct = require('../../lib/makeDownloads');
 
 const appRoot = path.resolve(".");
@@ -235,9 +235,8 @@ const makeResolvers = async (config) => {
         return ret;
     }
 
-    const localTranslation = (orgData, owner, entryId, revision) => {
-        const td = path.resolve(config.dataPath, orgData.translationDir);
-        const translationPath = transPath(config.dataPath, orgData.translationDir, owner, entryId, revision);
+    const localTranslation = (org, owner, entryId, revision) => {
+        const translationPath = transPath(config.dataPath, org, owner, entryId, revision);
         if (fse.pathExistsSync(translationPath)) {
             return fse.readJsonSync(path.join(translationPath, "metadata.json"));
         } else {
@@ -292,7 +291,7 @@ const makeResolvers = async (config) => {
             localTranslation: (org, args, context) => {
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
-                return localTranslation(org, args.owner, args.id, args.revision);
+                return localTranslation(org.orgDir, args.owner, args.id, args.revision);
             },
         },
         CatalogEntry: {},
@@ -460,27 +459,17 @@ const makeResolvers = async (config) => {
                 if (!orgOb) {
                     return false;
                 }
-                const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
-                if (!transOb) {
-                    return false;
-                }
                 try {
-                    let pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
+                    let pathDir = transPath(config.dataPath, orgOb.orgDir, args.owner, args.id, args.revision);
                     if (fse.pathExistsSync(pathDir)) {
-
                         fse.rmSync(pathDir, {recursive: true});
-
-                        pathDir = transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, "");
+                        pathDir = transParentPath(config.dataPath, orgOb.orgDir, args.owner, args.id);
                         if (fse.readdirSync(pathDir).length === 0) {
-                            fse.rmSync(path.resolve(config.dataPath, orgOb.translationDir), {recursive: true});
+                            fse.rmSync(pathDir, {recursive: true});
                         }
-                        ;
                         return true;
                     }
-
                     return false;
-
-
                 } catch (err) {
                     console.log(err);
                     return false;

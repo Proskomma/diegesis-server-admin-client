@@ -21,6 +21,18 @@ const transPath =
         );
     }
 
+const transParentPath =
+    (dataPath, translationDir, translationOwner, translationId) => {
+        if (!translationId) {
+            throw new Error("transParentPath requires 4 args");
+        }
+        return path.resolve(
+            dataPath,
+            translationDir,
+            `${translationOwner}--${translationId}`
+        );
+    }
+
 const usfmDir =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
@@ -98,4 +110,4 @@ const vrsPath =
         );
     }
 
-module.exports = {orgPath, transPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, vrsPath};
+module.exports = {orgPath, transPath, transParentPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, vrsPath};
