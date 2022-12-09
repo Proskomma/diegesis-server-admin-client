@@ -44,6 +44,7 @@
     "os": "^0.1.2",
     "path": "^0.12.7",
     "proskomma-core": "^0.9.3",
+    "proskomma-utils": "^0.8.2",
     "winston": "^3.7.2",
     "xmldom": "^0.6.0"
   },
