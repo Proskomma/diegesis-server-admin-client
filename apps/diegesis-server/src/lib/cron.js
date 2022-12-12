@@ -49,6 +49,12 @@ function doCron(config) {
                 return;
             }
             if (taskSpec) {
+                if (config.verbose) {
+                    config.incidentLogger.info({
+                        context: {running: "cronTask"},
+                        taskSpec
+                    });
+                }
                 const [orgDir, owner, transId, revision, contentType] = taskSpec;
                 try {
                     const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
@@ -71,12 +77,17 @@ function doCron(config) {
                         vrsContent = fse.readFileSync(vrsP).toString();
                     }
                     const downloads = makeDownloads(
+                        config,
                         org,
                         metadata,
                         contentType,
                         fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
                         vrsContent,
                     );
+                    if (downloads.succinctError) {
+                        fse.writeJsonSync(succinctErrorPath(config.dataPath, orgDir, owner, transId, revision), downloads.succinctError);
+                        return;
+                    }
                     const perfD = perfDir(config.dataPath, orgDir, owner, transId, revision);
                     if (!fse.pathExistsSync(perfD)) {
                         fse.mkdir(perfD);
@@ -92,13 +103,13 @@ function doCron(config) {
                         fse.writeFileSync(path.join(sofriaD, `${bookCode}.json`), JSON.stringify(JSON.parse(sofria), null, 2));
                     }
                     fse.writeJsonSync(succinctPath(config.dataPath, orgDir, owner, transId, revision), downloads.succinct);
-                } catch (error) {
+                } catch (err) {
                     const succinctError = {
                         generatedBy: 'cron',
                         context: {
                             taskSpec,
                         },
-                        message: error.message
+                        message: err.message
                     };
                     config.incidentLogger.error(succinctError);
                     fse.writeJsonSync(succinctErrorPath(config.dataPath, orgDir, owner, transId, revision), succinctError);

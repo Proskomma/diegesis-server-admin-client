@@ -10,5 +10,6 @@
   "verbose": true,
   "includeMutations": true,
   "staticPath": "../diegesis-user-client/build",
-  "redirectToRoot": ["/who", "/how", "/list", "/entry/*"]
+  "redirectToRoot": ["/who", "/how", "/list", "/entry/*"],
+  "deleteGenerated": false
 }

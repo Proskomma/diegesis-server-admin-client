@@ -25,6 +25,7 @@ const defaultConfig = {
     verbose: false,
     includeMutations: false,
     redirectToRoot: [],
+    deleteGenerated: false,
 }
 
 const cronOptions = {
@@ -164,6 +165,12 @@ function makeConfig(providedConfig) {
         }
         config.cronFrequency = providedConfig.cronFrequency;
     }
+    if ('deleteGenerated' in providedConfig) {
+        if (typeof providedConfig.deleteGenerated !== 'boolean') {
+            croak(`ERROR: deleteGenerated should be boolean, not ${typeof providedConfig.useCors}`);
+        }
+        config.deleteGenerated = providedConfig.deleteGenerated;
+    }
     if ('orgs' in providedConfig) {
         if (!Array.isArray(providedConfig.orgs)) {
             croak(`ERROR: orgs should be an array, not '${providedConfig.orgs}'`);
@@ -191,6 +198,7 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     CORS ${config.useCors ? "en" : "dis"}abled
     Mutations ${config.includeMutations ? "included" : "not included"}
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
+    ${config.deleteGenerated ? "Delete Generated Content" : ""}
 `}`
 
 module.exports = {makeConfig, cronOptions, configSummary};

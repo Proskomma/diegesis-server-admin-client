@@ -90,6 +90,24 @@ async function makeServer(config) {
         });
     }
 
+    // Maybe delete generated files and directories
+    if (config.deleteGenerated) {
+        for (const org of fse.readdirSync(config.dataPath)) {
+            const orgDir = path.join(config.dataPath, org);
+            if (fse.pathExistsSync(orgDir) && fse.lstatSync(orgDir).isDirectory()) {
+                for (const trans of fse.readdirSync(orgDir)) {
+                    const transDir = path.join(orgDir, trans);
+                    for (const revision of fse.readdirSync(transDir)) {
+                        const revisionDir = path.join(transDir, revision);
+                        for (const toRemove of ["succinct.json", "succinctError.json", "sofriaBooks", "perfBooks"]) {
+                            fse.remove(path.join(revisionDir, toRemove));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Apollo server
     const resolvers = await makeResolvers(config);
     const server = new ApolloServer({
