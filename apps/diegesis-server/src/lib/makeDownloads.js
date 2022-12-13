@@ -8,7 +8,8 @@ const {
     succinctErrorPath,
     perfDir,
     sofriaDir,
-    succinctPath
+    succinctPath,
+    lockPath,
 } = require("./dataPaths.js");
 const fse = require('fs-extra');
 const {parentPort} = require("node:worker_threads");
@@ -23,6 +24,7 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
             transPath(dataPath, orgDir, owner, transId, revision),
             'metadata.json'
         );
+        fse.writeJsonSync(lockPath(dataPath, orgDir, owner, transId, revision), {orgDir, owner, transId, revision});
         const metadata = fse.readJsonSync(metadataPath);
         let contentDir = (contentType === 'usfm') ?
             usfmDir(dataPath, orgDir, owner, transId, revision) :
@@ -45,6 +47,7 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
         );
         if (downloads.succinctError) {
             fse.writeJsonSync(succinctErrorPath(dataPath, orgDir, owner, transId, revision), downloads.succinctError);
+            fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
             return;
         }
         const perfD = perfDir(dataPath, orgDir, owner, transId, revision);
@@ -72,9 +75,11 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
         };
         parentPort.postMessage(succinctError);
         fse.writeJsonSync(succinctErrorPath(dataPath, orgDir, owner, transId, revision), succinctError);
+        fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
         return;
     }
-    parentPort.postMessage({status: "done"});
+    fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
+    parentPort.postMessage({orgDir, owner, transId, revision, status: "done"});
 }
 
 function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
@@ -140,6 +145,7 @@ function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
             message: err.message
         };
         parentPort.postMessage(ret.succinctError);
+        fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
         return;
     }
     const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({id: d.id, book: d.bookCode}));

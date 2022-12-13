@@ -99,6 +99,17 @@ const succinctErrorPath =
         );
     }
 
+const lockPath =
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("lockPath requires 5 args");
+        }
+        return path.join(
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
+            'lock.json'
+        );
+    }
+
 const vrsPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
@@ -110,4 +121,4 @@ const vrsPath =
         );
     }
 
-module.exports = {orgPath, transPath, transParentPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, vrsPath};
+module.exports = {orgPath, transPath, transParentPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, lockPath, vrsPath};

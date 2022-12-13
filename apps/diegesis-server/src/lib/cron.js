@@ -8,28 +8,41 @@ function doCron(config) {
     cron.schedule(
         cronOptions[config.cronFrequency],
         () => {
-            let taskSpec = null;
+            let nLocked = 0;
+            let maxTasks = config.nWorkers;
+            let taskSpecs = [];
             try {
                 for (const orgDir of fse.readdirSync(path.resolve(config.dataPath))) {
-                    if (taskSpec) {
+                    if (taskSpecs.length > maxTasks) {
                         break;
                     }
                     const transDir = path.resolve(config.dataPath, orgDir);
                     if (fse.pathExistsSync(transDir) && fse.lstatSync(transDir).isDirectory()) {
                         for (const ownerTranslationId of fse.readdirSync(transDir)) {
+                            if (taskSpecs.length > maxTasks) {
+                                break;
+                            }
                             for (const revision of fse.readdirSync(path.join(transDir, ownerTranslationId))) {
                                 if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinctError.json'))) {
-                                    continue
+                                    continue;
+                                }
+                                if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'lock.json'))) {
+                                    nLocked++;
+                                    continue;
                                 }
                                 if (!fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinct.json'))) {
                                     const [owner, translationId] = ownerTranslationId.split("--");
                                     if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usfmBooks'))) {
-                                        taskSpec = [orgDir, owner, translationId, revision, 'usfm'];
-                                        break;
+                                        if (taskSpecs.length >= maxTasks) {
+                                            break;
+                                        }
+                                        taskSpecs.push([orgDir, owner, translationId, revision, 'usfm']);
                                     }
                                     if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usxBooks'))) {
-                                        taskSpec = [orgDir, owner, translationId, revision, 'usx'];
-                                        break;
+                                        if (taskSpecs.length >= maxTasks) {
+                                            break;
+                                        }
+                                        taskSpecs.push([orgDir, owner, translationId, revision, 'usx']);
                                     }
                                 }
                             }
@@ -45,22 +58,22 @@ function doCron(config) {
                 config.incidentLogger.error(succinctError);
                 return;
             }
-            if (taskSpec) {
-                if (config.verbose) {
-                    config.incidentLogger.info({
-                        context: {running: "cronTask"},
-                        taskSpec
-                    });
-                }
-                try {
+            try {
+                for (const taskSpec of taskSpecs.slice(0, (taskSpecs.length - nLocked))) {
+                    if (config.verbose) {
+                        config.incidentLogger.info({
+                            context: {running: "cronTask"},
+                            taskSpec
+                        });
+                    }
                     const worker = new Worker('./src/lib/makeDownloads.js');
                     worker.on('message', e => config.incidentLogger.info(e));
                     worker.on('error', e => config.incidentLogger.error(e));
                     const [orgDir, owner, transId, revision, contentType] = taskSpec;
                     worker.postMessage({dataPath: config.dataPath, orgDir, owner, transId, revision, contentType});
-                } catch (err) {
-                    console.log(err.message);
                 }
+            } catch (err) {
+                console.log(err.message);
             }
         }
     );
