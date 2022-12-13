@@ -7,8 +7,10 @@
   "useCors": true,
   "orgs": [],
   "cronFrequency": "1 min",
+  "nWorkers": 2,
   "verbose": true,
   "includeMutations": true,
   "staticPath": "../diegesis-user-client/build",
-  "redirectToRoot": ["/who", "/how", "/list", "/entry/*"]
+  "redirectToRoot": ["/who", "/how", "/list", "/entry/*"],
+  "deleteGenerated": true
 }

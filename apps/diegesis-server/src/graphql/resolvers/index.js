@@ -2,7 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
-const makeSuccinct = require('../../lib/makeDownloads');
+// const makeSuccinct = require('../../lib/makeDownloads');
 
 const appRoot = path.resolve(".");
 
@@ -527,6 +527,7 @@ const makeResolvers = async (config) => {
                     if (fse.pathExistsSync(vrsP)) {
                         vrsContent = fse.readFileSync(vrsP).toString();
                     }
+                    /*
                     const succinct = makeSuccinct(
                         orgOb.name,
                         metadata,
@@ -534,6 +535,7 @@ const makeResolvers = async (config) => {
                         fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
                         vrsContent
                     );
+                     */
                     fse.writeJsonSync(
                         succinctPath(config.dataPath, orgOb.translationDir, transOb.id),
                         succinct,

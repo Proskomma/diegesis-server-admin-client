@@ -25,6 +25,8 @@ const defaultConfig = {
     verbose: false,
     includeMutations: false,
     redirectToRoot: [],
+    deleteGenerated: false,
+    nWorkers: 1,
 }
 
 const cronOptions = {
@@ -164,6 +166,22 @@ function makeConfig(providedConfig) {
         }
         config.cronFrequency = providedConfig.cronFrequency;
     }
+    if (providedConfig.nWorkers) {
+        if (
+            typeof providedConfig.nWorkers !== 'number' ||
+            providedConfig.nWorkers.toString().includes('.') ||
+            providedConfig.nWorkers < 1 ||
+            providedConfig.nWorkers > 16) {
+            croak(`ERROR: nWorkers should be an integer between 1 and 16, not '${providedConfig.nWorkers}'`);
+        }
+        config.nWorkers = providedConfig.nWorkers;
+    }
+    if ('deleteGenerated' in providedConfig) {
+        if (typeof providedConfig.deleteGenerated !== 'boolean') {
+            croak(`ERROR: deleteGenerated should be boolean, not ${typeof providedConfig.useCors}`);
+        }
+        config.deleteGenerated = providedConfig.deleteGenerated;
+    }
     if ('orgs' in providedConfig) {
         if (!Array.isArray(providedConfig.orgs)) {
             croak(`ERROR: orgs should be an array, not '${providedConfig.orgs}'`);
@@ -191,6 +209,8 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     CORS ${config.useCors ? "en" : "dis"}abled
     Mutations ${config.includeMutations ? "included" : "not included"}
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
+    ${config.nWorkers} worker threads
+    ${config.deleteGenerated ? "Delete all generated content" : "Delete lock files only"}
 `}`
 
 module.exports = {makeConfig, cronOptions, configSummary};

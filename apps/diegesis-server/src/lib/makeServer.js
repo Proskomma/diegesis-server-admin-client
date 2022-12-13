@@ -58,11 +58,11 @@ async function makeServer(config) {
     // Maybe log access using Morgan
     if (config.logAccess) {
         if (config.accessLogPath) {
-            const accessLogStream = fse.createWriteStream(config.accessLogPath, { flags: 'a' });
+            const accessLogStream = fse.createWriteStream(config.accessLogPath, {flags: 'a'});
             app.use(
                 morgan(
                     config.logFormat,
-                    { stream: accessLogStream }
+                    {stream: accessLogStream}
                 )
             );
         } else {
@@ -88,6 +88,22 @@ async function makeServer(config) {
                 }
             })
         });
+    }
+
+    // Delete lock files and maybe generated files and directories
+    for (const org of fse.readdirSync(config.dataPath)) {
+        const orgDir = path.join(config.dataPath, org);
+        if (fse.pathExistsSync(orgDir) && fse.lstatSync(orgDir).isDirectory()) {
+            for (const trans of fse.readdirSync(orgDir)) {
+                const transDir = path.join(orgDir, trans);
+                for (const revision of fse.readdirSync(transDir)) {
+                    const revisionDir = path.join(transDir, revision);
+                    for (const toRemove of (config.deleteGenerated ? ["succinct.json", "succinctError.json", "lock.json", "sofriaBooks", "perfBooks"] : ["lock.json"])) {
+                        fse.remove(path.join(revisionDir, toRemove));
+                    }
+                }
+            }
+        }
     }
 
     // Apollo server
