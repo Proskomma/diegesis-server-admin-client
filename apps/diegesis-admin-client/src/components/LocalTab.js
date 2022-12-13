@@ -18,7 +18,9 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
             id: name
             localTranslations%searchClause% {
                 id
+                revision
                 languageCode
+                owner
                 title
                 hasUsfm
                 hasUsx
@@ -39,7 +41,17 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
     );
 
     const columns = [
+        {
+            id: 'owner',
+            label: 'Owner',
+            minWidth: 100,
+        },
         {id: 'id', label: 'ID', minWidth: 100},
+        {
+            id: 'revision',
+            label: 'Revision',
+            minWidth: 100,
+        },
         {id: 'languageCode', label: 'Language', minWidth: 50},
         {
             id: 'title',
@@ -47,31 +59,10 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
             minWidth: 200,
         },
         {
-            id: 'hasUsfm',
-            label: 'USFM?',
-            minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
-        },
-        {
-            id: 'hasUsx',
-            label: 'USX?',
-            minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
-        },
-        {
             id: 'hasSuccinct',
             label: 'Succinct?',
             minWidth: 50,
             align: 'right',
-        },
-        {
-            id: 'hasVrs',
-            label: 'VRS?',
-            minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
         },
         {
             id: 'actions',
@@ -81,7 +72,7 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
         },
     ];
 
-    function createData(localTranslation) {
+    const createData = localTranslation => {
         let succinctState = localTranslation.hasSuccinct ? 'yes' : 'no';
         if (localTranslation.hasSuccinctError) {
             succinctState = 'FAIL';
@@ -90,8 +81,8 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
             id: localTranslation.id,
             languageCode: localTranslation.languageCode,
             title: localTranslation.title,
-            hasUsfm: localTranslation.hasUsfm,
-            hasUsx: localTranslation.hasUsx,
+            owner: localTranslation.owner,
+            revision: localTranslation.revision,
             hasSuccinct: succinctState,
             hasVrs: localTranslation.hasVrs,
             actions: <Button
@@ -99,7 +90,9 @@ export default function LocalTab({selectedOrg, searchLang, searchText}) {
                     () => deleteTranslation(
                         client,
                         selectedOrg,
+                        localTranslation.owner,
                         localTranslation.id,
+                        localTranslation.revision,
                     )
                 }
             >

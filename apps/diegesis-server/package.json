@@ -1,0 +1,74 @@
+{
+  "name": "diegesis-server",
+  "version": "0.5.1",
+  "description": "A New Apollo-based Server for Diegesis",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "cross-env NODE_ENV=test jest --testTimeout=30000",
+    "start": "node src/index.js config/debug_config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proskomma/diegesis-server.git"
+  },
+  "keywords": [
+    "Proskomma",
+    "Diegesis",
+    "GraphQL",
+    "Scripture"
+  ],
+  "author": "Mark Howe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Proskomma/diegesis-server/issues"
+  },
+  "homepage": "https://github.com/Proskomma/diegesis-server#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.2.2",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "@graphql-tools/merge": "^8.2.7",
+    "apollo-server-express": "^3.6.4",
+    "app-root-path": "^3.0.0",
+    "axios": "^1.1.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "fs-extra": "^10.0.1",
+    "graphql": "^16.3.0",
+    "helmet": "^6.0.0",
+    "jszip": "^3.7.1",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.0",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "proskomma-core": "^0.9.3",
+    "proskomma-utils": "^0.8.2",
+    "winston": "^3.7.2",
+    "xmldom": "^0.6.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "globals": {
+      "__app__": null,
+      "__server__": null,
+      "__dataDir__": null
+    }
+  },
+  "nx": {
+    "implicitDependencies": [
+      "diegesis-admin-client"
+    ],
+    "targets": {
+      "start": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  }
+}

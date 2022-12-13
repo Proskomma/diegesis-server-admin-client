@@ -1,0 +1,12 @@
+{
+  "hostName": "localhost",
+  "port": 2468,
+  "debug": false,
+  "logAccess": false,
+  "logFormat": "combined",
+  "useCors": false,
+  "orgs": [],
+  "cronFrequency": "never",
+  "verbose": false,
+  "includeMutations": false
+}

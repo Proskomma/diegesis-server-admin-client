@@ -28,9 +28,6 @@ export default function RemoteTab({selectedOrg, searchLang, searchText}) {
                     id
                     languageCode
                     title
-                    hasLocalUsfm
-                    hasLocalUsx
-
                 }
             }
         }`,
@@ -52,13 +49,6 @@ export default function RemoteTab({selectedOrg, searchLang, searchText}) {
             minWidth: 200,
         },
         {
-            id: 'isLocal',
-            label: 'Local?',
-            minWidth: 50,
-            align: 'right',
-            format: value => value ? "yes" : "no"
-        },
-        {
             id: 'actions',
             label: 'Actions',
             minWidth: 100,
@@ -71,7 +61,6 @@ export default function RemoteTab({selectedOrg, searchLang, searchText}) {
             id: catalogEntry.id,
             languageCode: catalogEntry.languageCode,
             title: catalogEntry.title,
-            isLocal: catalogEntry.hasLocalUsfm || catalogEntry.hasLocalUsx,
             actions: <Button
                 disabled={catalogEntry.hasLocalUsfm || catalogEntry.hasLocalUsx}
                 onClick={
