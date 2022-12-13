@@ -1,11 +1,8 @@
 const cron = require("node-cron");
 const path = require("path");
 const fse = require('fs-extra');
-
+const {Worker} = require('node:worker_threads');
 const {cronOptions} = require("./makeConfig.js");
-const makeDownloads = require("./makeDownloads.js");
-const {transPath, usfmDir, usxDir, vrsPath, succinctPath, perfDir, sofriaDir, succinctErrorPath} = require("./dataPaths.js");
-const appRoot = path.resolve(".");
 
 function doCron(config) {
     cron.schedule(
@@ -55,64 +52,14 @@ function doCron(config) {
                         taskSpec
                     });
                 }
-                const [orgDir, owner, transId, revision, contentType] = taskSpec;
                 try {
-                    const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
-                    const org = orgJson.name;
-                    const t = Date.now();
-                    const metadataPath = path.join(
-                        transPath(config.dataPath, orgDir, owner, transId, revision),
-                        'metadata.json'
-                    );
-                    const metadata = fse.readJsonSync(metadataPath);
-                    let contentDir = (contentType === 'usfm') ?
-                        usfmDir(config.dataPath, orgDir, owner, transId, revision) :
-                        usxDir(config.dataPath, orgDir, owner, transId, revision);
-                    if (!fse.pathExistsSync(contentDir)) {
-                        throw new Error(`${contentType} content directory for ${org}/${owner}/${transId}/${revision} does not exist`);
-                    }
-                    let vrsContent = null;
-                    const vrsP = vrsPath(config.dataPath, orgDir, owner, transId, revision);
-                    if (fse.pathExistsSync(vrsP)) {
-                        vrsContent = fse.readFileSync(vrsP).toString();
-                    }
-                    const downloads = makeDownloads(
-                        config,
-                        org,
-                        metadata,
-                        contentType,
-                        fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
-                        vrsContent,
-                    );
-                    if (downloads.succinctError) {
-                        fse.writeJsonSync(succinctErrorPath(config.dataPath, orgDir, owner, transId, revision), downloads.succinctError);
-                        return;
-                    }
-                    const perfD = perfDir(config.dataPath, orgDir, owner, transId, revision);
-                    if (!fse.pathExistsSync(perfD)) {
-                        fse.mkdir(perfD);
-                    }
-                    for (const [bookCode, perf] of downloads.perf) {
-                        fse.writeFileSync(path.join(perfD, `${bookCode}.json`), JSON.stringify(JSON.parse(perf), null, 2));
-                    }
-                    const sofriaD = sofriaDir(config.dataPath, orgDir, owner, transId, revision);
-                    if (!fse.pathExistsSync(sofriaD)) {
-                        fse.mkdir(sofriaD);
-                    }
-                    for (const [bookCode, sofria] of downloads.sofria) {
-                        fse.writeFileSync(path.join(sofriaD, `${bookCode}.json`), JSON.stringify(JSON.parse(sofria), null, 2));
-                    }
-                    fse.writeJsonSync(succinctPath(config.dataPath, orgDir, owner, transId, revision), downloads.succinct);
+                    const worker = new Worker('./src/lib/makeDownloads.js');
+                    worker.on('message', e => config.incidentLogger.info(e));
+                    worker.on('error', e => config.incidentLogger.error(e));
+                    const [orgDir, owner, transId, revision, contentType] = taskSpec;
+                    worker.postMessage({dataPath: config.dataPath, orgDir, owner, transId, revision, contentType});
                 } catch (err) {
-                    const succinctError = {
-                        generatedBy: 'cron',
-                        context: {
-                            taskSpec,
-                        },
-                        message: err.message
-                    };
-                    config.incidentLogger.error(succinctError);
-                    fse.writeJsonSync(succinctErrorPath(config.dataPath, orgDir, owner, transId, revision), succinctError);
+                    console.log(err.message);
                 }
             }
         }

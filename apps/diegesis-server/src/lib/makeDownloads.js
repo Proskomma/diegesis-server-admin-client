@@ -1,6 +1,83 @@
 const {Proskomma} = require('proskomma-core');
+const path = require("path");
+const {
+    transPath,
+    usfmDir,
+    usxDir,
+    vrsPath,
+    succinctErrorPath,
+    perfDir,
+    sofriaDir,
+    succinctPath
+} = require("./dataPaths.js");
+const fse = require('fs-extra');
+const {parentPort} = require("node:worker_threads");
+const appRoot = path.resolve(".");
 
-function makeDownloads(config, org, metadata, docType, docs, vrsContent) {
+function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) {
+    try {
+        const orgJson = require(path.join(appRoot, 'src', 'orgHandlers', orgDir, 'org.json'));
+        const org = orgJson.name;
+        const t = Date.now();
+        const metadataPath = path.join(
+            transPath(dataPath, orgDir, owner, transId, revision),
+            'metadata.json'
+        );
+        const metadata = fse.readJsonSync(metadataPath);
+        let contentDir = (contentType === 'usfm') ?
+            usfmDir(dataPath, orgDir, owner, transId, revision) :
+            usxDir(dataPath, orgDir, owner, transId, revision);
+        if (!fse.pathExistsSync(contentDir)) {
+            throw new Error(`${contentType} content directory for ${org}/${owner}/${transId}/${revision} does not exist`);
+        }
+        let vrsContent = null;
+        const vrsP = vrsPath(dataPath, orgDir, owner, transId, revision);
+        if (fse.pathExistsSync(vrsP)) {
+            vrsContent = fse.readFileSync(vrsP).toString();
+        }
+        const downloads = makeDownloads(
+            dataPath,
+            org,
+            metadata,
+            contentType,
+            fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
+            vrsContent,
+        );
+        if (downloads.succinctError) {
+            fse.writeJsonSync(succinctErrorPath(dataPath, orgDir, owner, transId, revision), downloads.succinctError);
+            return;
+        }
+        const perfD = perfDir(dataPath, orgDir, owner, transId, revision);
+        if (!fse.pathExistsSync(perfD)) {
+            fse.mkdir(perfD);
+        }
+        for (const [bookCode, perf] of downloads.perf) {
+            fse.writeFileSync(path.join(perfD, `${bookCode}.json`), JSON.stringify(JSON.parse(perf), null, 2));
+        }
+        const sofriaD = sofriaDir(dataPath, orgDir, owner, transId, revision);
+        if (!fse.pathExistsSync(sofriaD)) {
+            fse.mkdir(sofriaD);
+        }
+        for (const [bookCode, sofria] of downloads.sofria) {
+            fse.writeFileSync(path.join(sofriaD, `${bookCode}.json`), JSON.stringify(JSON.parse(sofria), null, 2));
+        }
+        fse.writeJsonSync(succinctPath(dataPath, orgDir, owner, transId, revision), downloads.succinct);
+    } catch (err) {
+        const succinctError = {
+            generatedBy: 'cron',
+            context: {
+                taskSpec,
+            },
+            message: err.message
+        };
+        parentPort.postMessage(succinctError);
+        fse.writeJsonSync(succinctErrorPath(dataPath, orgDir, owner, transId, revision), succinctError);
+        return;
+    }
+    parentPort.postMessage({status: "done"});
+}
+
+function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
     const pk = new Proskomma([
         {
             name: "source",
@@ -62,7 +139,7 @@ function makeDownloads(config, org, metadata, docType, docs, vrsContent) {
             },
             message: err.message
         };
-        config.incidentLogger.error(ret.succinctError);
+        parentPort.postMessage(ret.succinctError);
         return;
     }
     const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({id: d.id, book: d.bookCode}));
@@ -71,7 +148,7 @@ function makeDownloads(config, org, metadata, docType, docs, vrsContent) {
             let docResult = pk.gqlQuerySync(`{ document(id: """${doc.id}""") { bookCode: header(id:"bookCode") perf } }`).data.document;
             ret.perf.push([docResult.bookCode, docResult.perf]);
         } catch (err) {
-            config.incidentLogger.error({
+            parentPort.postMessage({
                 generatedBy: 'cron',
                 context: {
                     docSetId,
@@ -86,7 +163,7 @@ function makeDownloads(config, org, metadata, docType, docs, vrsContent) {
             const docResult = pk.gqlQuerySync(`{document(id: """${doc.id}""") { bookCode: header(id:"bookCode") sofria } }`).data.document;
             ret.sofria.push([docResult.bookCode, docResult.sofria]);
         } catch (err) {
-            config.incidentLogger.error({
+            parentPort.postMessage({
                 generatedBy: 'cron',
                 context: {
                     docSetId,
@@ -101,4 +178,6 @@ function makeDownloads(config, org, metadata, docType, docs, vrsContent) {
     return ret;
 }
 
-module.exports = makeDownloads;
+parentPort.on("message", data => {
+    doDownloads(data);
+});
