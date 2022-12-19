@@ -9,7 +9,11 @@ export default function BrowseScripture({pk}) {
     const [scriptureResult, setScriptureResult] = useState({});
 
     const docName = d => {
-        return d.headers.filter(d => d.key === 'bookCode')[0].value;
+        return d.headers.filter(d => d.key === 'toc3')[0]?.value ||
+            d.headers.filter(d => d.key === 'h')[0]?.value ||
+            d.headers.filter(d => d.key === 'toc2')[0]?.value ||
+            d.headers.filter(d => d.key === 'toc')[0]?.value ||
+            d.headers.filter(d => d.key === 'bookCode')[0].value
     }
 
     useEffect(
