@@ -18,7 +18,7 @@ export default function BrowseScripture({pk}) {
                 pk.gqlQuerySync(
                     `{
                docSets {
-                 documents {
+                 documents(sortedBy:"paratext") {
                    id
                    headers { key value }
                  }
@@ -35,8 +35,6 @@ export default function BrowseScripture({pk}) {
     const docMenuItems = scriptureResult.data && scriptureResult.data.docSets && scriptureResult.data.docSets[0].documents ?
         scriptureResult.data.docSets[0].documents.map(d => ({id: d.id, label: docName(d)})) :
         [];
-
-    const firstDocItem = docMenuItems[0] || {};
 
     return (
         <Grid container>

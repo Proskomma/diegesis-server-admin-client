@@ -81,10 +81,13 @@ const fetchUsx = async (org, trans, config) => {
     }
     fse.writeJsonSync(path.join(tp, 'metadata.json'), metadataRecord);
     for (const bookName of ptBookArray) {
-        const foundFiles = zip.file(new RegExp(`release/USX_1/${bookName.code}[^/]*.usx$`, 'g'));
-        if (foundFiles.length === 1) {
-            const fileContent = await foundFiles[0].async('text');
-            fse.writeFileSync(path.join(usxBooksPath, `${bookName.code}.usx`), fileContent);
+        for (const usxN of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+            const foundFiles = zip.file(new RegExp(`release/USX_${usxN}/${bookName.code}[^/]*.usx$`, 'g'));
+            if (foundFiles.length === 1) {
+                const fileContent = await foundFiles[0].async('text');
+                fse.writeFileSync(path.join(usxBooksPath, `${bookName.code}.usx`), fileContent);
+                break;
+            }
         }
     }
     const vrs = zip.file(new RegExp('versification.vrs'));
