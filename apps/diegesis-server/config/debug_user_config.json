@@ -12,5 +12,5 @@
   "includeMutations": true,
   "staticPath": "../diegesis-user-client/build",
   "redirectToRoot": ["/who", "/how", "/list", "/entry/*"],
-  "deleteGenerated": true
+  "deleteGenerated": false
 }

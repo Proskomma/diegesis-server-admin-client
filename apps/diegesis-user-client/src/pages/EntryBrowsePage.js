@@ -1,12 +1,15 @@
-import {Container, Typography, Grid, Box, Button} from "@mui/material";
+import React from 'react';
+import {Container, Typography, Box, Button} from "@mui/material";
 import {useParams, Link as RouterLink} from "react-router-dom";
 import {ArrowBack} from '@mui/icons-material';
 import {gql, useQuery} from "@apollo/client";
+import {Proskomma} from 'proskomma-core';
 import GqlError from "../components/GqlError";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Spinner from "../components/Spinner";
+import BrowseScripture from "../components/BrowseScripture";
 
 export default function EntryBrowsePage() {
 
@@ -22,6 +25,7 @@ export default function EntryBrowsePage() {
             ) {
               languageCode
               title
+              succinct
             }
           }
         }`
@@ -43,6 +47,31 @@ export default function EntryBrowsePage() {
 
     const translationInfo = data.org.localTranslation;
 
+    const pk = new Proskomma([
+        {
+            name: "source",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "owner",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "project",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+        {
+            name: "revision",
+            type: "string",
+            regex: "^[^\\s]+$"
+        },
+    ]);
+
+    pk.loadSuccinctDocSet(JSON.parse(translationInfo.succinct));
+
     return <Container fixed className="homepage">
         <Header selected="list"/>
         <Box style={{marginTop: "100px"}}>
@@ -51,39 +80,7 @@ export default function EntryBrowsePage() {
                     <RouterLink to="/list"><ArrowBack/></RouterLink></Button>
                 {translationInfo.title}
             </Typography>
-            <Typography variant="h5" paragraph="true">Browse</Typography>
-            <Grid container>
-                <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Language</Typography>
-                </Grid>
-                <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{translationInfo.languageCode}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Data Source</Typography>
-                </Grid>
-                <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{source}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Owner</Typography>
-                </Grid>
-                <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{owner}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Entry ID</Typography>
-                </Grid>
-                <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{entryId}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                    <Typography variant="body1" paragraph="true">Revision</Typography>
-                </Grid>
-                <Grid item xs={9}>
-                    <Typography variant="body1" paragraph="true">{revision}</Typography>
-                </Grid>
-            </Grid>
+            <BrowseScripture pk={pk}/>
             <Footer/>
         </Box>
     </Container>;

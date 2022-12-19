@@ -20,7 +20,7 @@ export default function OrgSelector({orgs, searchOrg, setSearchOrg}) {
             </MenuItem>
             {orgs.map((option, index) => (
                 <MenuItem
-                    key={option}
+                    key={index}
                     value={option}
                 >
                     {option}

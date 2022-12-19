@@ -56,8 +56,12 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Button>
-                        <RouterLink to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Book/></RouterLink>
+                    <Button disabled={!localTranslation.hasSuccinct}>
+                        {
+                            localTranslation.hasSuccinct ?
+                            <RouterLink to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Book/></RouterLink> :
+                                <Book/>
+                        }
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
