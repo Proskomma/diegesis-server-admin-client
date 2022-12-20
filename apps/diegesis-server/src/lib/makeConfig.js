@@ -74,32 +74,64 @@ function makeConfig(providedConfig) {
         config.dataPath = fqPath;
     }
     if (providedConfig.staticPath) {
-        if (
-            typeof providedConfig.staticPath !== 'string') {
-            croak(`ERROR: staticPath, if present, should be a string, not '${providedConfig.staticPath}'`);
+        croak('ERROR: the staticPath config option has been replaced by staticPaths');
+    }
+    if (providedConfig.staticPaths) {
+        if (!Array.isArray(providedConfig.staticPaths)) {
+            croak(`ERROR: staticPaths, if present, should be an array, not '${providedConfig.staticPaths}'`);
         }
-        const fqPath = path.resolve(providedConfig.staticPath);
-        if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
-            croak(`ERROR: staticPath '${fqPath}' does not exist or is not a directory`);
+        let specs = [];
+        for (const staticPathSpec of providedConfig.staticPaths) {
+            const spec = {};
+            if (typeof staticPathSpec !== 'object' || Array.isArray(staticPathSpec)) {
+                croak(`ERROR: static path spec should be an object, not '${JSON.stringify(staticPathSpec)}'`);
+            }
+            if (!staticPathSpec.path) {
+                croak(`ERROR: static path spec must contain a path: '${JSON.stringify(staticPathSpec)}'`);
+            }
+            if (!staticPathSpec.url) {
+                croak(`ERROR: static path spec must contain a url: '${JSON.stringify(staticPathSpec)}'`);
+            }
+            const fqPath = path.resolve(staticPathSpec.path);
+            if (!fse.existsSync(fqPath) || !fse.lstatSync(fqPath).isDirectory()) {
+                croak(`ERROR: static path '${fqPath}' does not exist or is not a directory`);
+            }
+            spec.path = fqPath;
+            if (!staticPathSpec.url.startsWith('/')) {
+                croak(`ERROR: static url '${staticPathSpec.url}' does not begin with a /`);
+            }
+            spec.url = staticPathSpec.url;
+            if (staticPathSpec.redirectTarget) {
+                const fqPath = path.resolve(staticPathSpec.redirectTarget);
+                if (!fse.existsSync(fqPath)) {
+                    croak(`ERROR: redirectTarget '${fqPath}' does not exist`);
+                }
+                spec.redirectTarget = fqPath;
+            }
+            spec.redirects = [];
+            if (staticPathSpec.redirects) {
+                if (!staticPathSpec.redirectTarget) {
+                    croak(`ERROR: cannot use 'redirects' without 'redirectTarget' in staticPaths`);
+                }
+                if (!Array.isArray(staticPathSpec.redirects)) {
+                    croak(`ERROR: static path redirects, if present, should be an array, not '${staticPathSpec.redirects}'`);
+                }
+                for (const redirect of staticPathSpec.redirects) {
+                    if (typeof redirect !== 'string') {
+                        croak(`ERROR: redirect elements should be strings, not '${redirect}'`);
+                    }
+                    if (!redirect.startsWith('/')) {
+                        croak(`ERROR: redirect elements should start with '/' (from '${redirect}')`);
+                    }
+                }
+                spec.redirects = staticPathSpec.redirects;
+            }
+            specs.push(spec);
         }
-        config.staticPath = fqPath;
+        config.staticPaths = specs;
     }
     if (providedConfig.redirectToRoot) {
-        if (!providedConfig.staticPath) {
-            croak(`ERROR: redirectToRoot present but staticPath absent`);
-        }
-        if (!Array.isArray(providedConfig.redirectToRoot)) {
-            croak(`ERROR: redirectToRoot, if present, should be an array, not '${providedConfig.redirectToRoot}'`);
-        }
-        for (const redirect of providedConfig.redirectToRoot) {
-            if (typeof redirect !== 'string') {
-                croak(`ERROR: redirectToRoot elements should be strings, not '${redirect}'`);
-            }
-            if (!redirect.startsWith('/')) {
-                croak(`ERROR: redirectToRoot elements should start with '/' (from '${redirect}')`);
-            }
-        }
-        config.redirectToRoot = providedConfig.redirectToRoot;
+        croak("ERROR: redirectToRoot has been replaced by 'redirects' inside static path specs");
     }
     if (providedConfig.localUsfmPath) {
         if (
@@ -197,10 +229,17 @@ function makeConfig(providedConfig) {
     return config;
 }
 
+const staticDescription = specs => {
+    return 'Static Paths:\n' +
+        specs.map(
+            sp =>
+                `      serve '${sp.path}'\n        at '${sp.url}${sp.redirects.length > 1 ? "\n        redirecting " + sp.redirects.join(', ') + '\n          to ' + sp.redirectTarget + "'": ""}`
+        ).join('\n')
+}
+
 const configSummary = config => `  Listening on ${config.hostName}:${config.port}
     Data directory is ${config.dataPath}
-    ${config.staticPath ? `Static directory is ${config.staticPath}` : "No static directory"}
-    ${config.redirectToRoot.length > 0 ? `Root Redirects on ${config.redirectToRoot.join(', ')}` : "No Root Redirects"}
+    ${config.staticPaths ? `${staticDescription(config.staticPaths)}` : "No static paths"}
     ${config.localUsfmPath ? `Local USFM copied from ${config.localUsfmPath}` : 'No local USFM copied'}
     ${config.localUsxPath ? `Local USX copied from ${config.localUsxPath}` : 'No local USX copied'}
     Debug ${config.debug ? "en" : "dis"}abled

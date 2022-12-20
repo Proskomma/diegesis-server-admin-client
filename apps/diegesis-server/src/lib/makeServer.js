@@ -28,9 +28,20 @@ async function makeServer(config) {
             next();
         });
     }
-    // Maybe static
-    if (config.staticPath) {
-        app.use(express.static(config.staticPath));
+    // Maybe static, each with optional 'to root' redirects
+    if (config.staticPaths) {
+        for (const staticPathSpec of config.staticPaths) {
+            app.use(staticPathSpec.url, express.static(staticPathSpec.path));
+            for (const redirect of staticPathSpec.redirects) {
+                app.get(redirect, (req, res) => {
+                    res.sendFile(staticPathSpec.redirectTarget, function (err) {
+                        if (err) {
+                            res.status(500).send(err)
+                        }
+                    })
+                });
+            }
+        }
     }
 
     // Maybe copy local translations
@@ -78,17 +89,6 @@ async function makeServer(config) {
         format: winston.format.json(),
         transports: [new winston.transports.Console()],
     });
-
-    // Redirect to root, for one-page apps
-    for (const redirect of config.redirectToRoot) {
-        app.get(redirect, function (req, res) {
-            res.sendFile(`${config.staticPath}/index.html`, function (err) {
-                if (err) {
-                    res.status(500).send(err)
-                }
-            })
-        });
-    }
 
     // Delete lock files and maybe generated files and directories
     for (const org of fse.readdirSync(config.dataPath)) {

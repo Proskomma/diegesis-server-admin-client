@@ -9,5 +9,16 @@
   "cronFrequency": "1 min",
   "verbose": true,
   "includeMutations": true,
-  "staticPath": "../diegesis-admin-client/build"
+  "staticPaths": [
+    {
+      "path": "../diegesis-admin-client/build",
+      "url": "/admin"
+    },
+    {
+      "path": "../diegesis-user-client/build",
+      "url": "/",
+      "redirectTarget": "../diegesis-user-client/build/index.html",
+      "redirects": ["/who", "/how", "/list", "/entry/*"]
+    }
+  ]
 }
