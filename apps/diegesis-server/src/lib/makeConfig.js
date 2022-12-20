@@ -186,6 +186,19 @@ function makeConfig(providedConfig) {
         }
         config.includeMutations = providedConfig.includeMutations;
     }
+    if ('superusers' in providedConfig) {
+        if (typeof providedConfig.superusers !== 'object' || Array.isArray(providedConfig.superusers)) {
+            croak(`ERROR: superusers, if present, should be an object, not '${JSON.stringify(providedConfig.superusers)}'`);
+        }
+        for (const password of Object.values(providedConfig.superusers)) {
+            if (typeof password !== 'string') {
+                croak(`ERROR: superuser password hash should be a string, not '${JSON.stringify(providedConfig.superusers)}'`)
+            }
+        }
+        config.superusers = providedConfig.superusers;
+    } else {
+        config.superusers = [];
+    }
     if ('useCors' in providedConfig) {
         if (typeof providedConfig.useCors !== 'boolean') {
             croak(`ERROR: useCors should be boolean, not ${typeof providedConfig.useCors}`);
@@ -250,6 +263,7 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
     ${config.nWorkers} worker threads
     ${config.deleteGenerated ? "Delete all generated content" : "Delete lock files only"}
+    ${Object.keys(config.superusers).length} superuser${Object.keys(config.superusers).length === 1 ? "" : "s"}
 `}`
 
 module.exports = {makeConfig, cronOptions, configSummary};

@@ -5163,9 +5163,9 @@
     "@testing-library/jest-dom" "^5.14.1"
     "@testing-library/react" "^12.0.0"
     "@testing-library/user-event" "^13.2.1"
-    "browser-fs-access" "^0.31.1"
     "crypto" "npm:crypto-browserify"
     "crypto-browserify" "^3.12.0"
+    "fs" "npm:crypto-browserify"
     "graphql" "^16.3.0"
     "proskomma-core" "^0.9.6"
     "react" "^18.0.0"
@@ -10876,6 +10876,13 @@
   dependencies:
     "inherits" "^2.0.1"
     "safe-buffer" "^5.0.1"
+
+"sha@^3.0.0":
+  "integrity" "sha512-DOYnM37cNsLNSGIG/zZWch5CKIRNoLdYUQTQlcgkRkoYIUwDYjqDyye16YcDZg/OPdcbUgTKMjc4SY6TB7ZAPw=="
+  "resolved" "https://registry.npmjs.org/sha/-/sha-3.0.0.tgz"
+  "version" "3.0.0"
+  dependencies:
+    "graceful-fs" "^4.1.2"
 
 "shebang-command@^2.0.0":
   "integrity" "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA=="
