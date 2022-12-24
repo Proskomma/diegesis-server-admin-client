@@ -5148,6 +5148,7 @@
     "path" "^0.12.7"
     "proskomma-core" "^0.9.3"
     "proskomma-utils" "^0.8.2"
+    "sha" "^3.0.0"
     "winston" "^3.7.2"
     "xmldom" "^0.6.0"
 
@@ -9967,6 +9968,16 @@
   "integrity" "sha512-Zn4KlM8xO/VnkaXoxbv4dWwOqcV4mtObUSRqwQJKv0UWkl7xiHVo5rKxH1lPgF5TitikjVpIrZL/DUCvheYrSw=="
   "resolved" "https://registry.npmjs.org/proskomma-json-tools/-/proskomma-json-tools-0.5.12.tgz"
   "version" "0.5.12"
+  dependencies:
+    "@babel/core" "^7.17.10"
+    "@babel/plugin-proposal-throw-expressions" "^7.18.6"
+    "ajv" "^8.11.0"
+    "deep-equal" "^2.0.5"
+
+"proskomma-json-tools@^0.6.3":
+  "integrity" "sha512-iC4RyB0f1e/VWY30fZR2zuxyOVzhC/QcL/C+aWsfm53jUDbISHASg0OimZc9G11LpWbdKpIoPGIxP0Du07RNeA=="
+  "resolved" "https://registry.npmjs.org/proskomma-json-tools/-/proskomma-json-tools-0.6.3.tgz"
+  "version" "0.6.3"
   dependencies:
     "@babel/core" "^7.17.10"
     "@babel/plugin-proposal-throw-expressions" "^7.18.6"

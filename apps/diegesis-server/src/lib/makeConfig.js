@@ -1,5 +1,4 @@
 const fse = require('fs-extra');
-const appRootPath = require("app-root-path");
 const path = require("path");
 const appRoot = path.resolve(".");
 
