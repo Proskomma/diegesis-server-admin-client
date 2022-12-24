@@ -6,6 +6,8 @@ const {ApolloServer} = require("apollo-server-express");
 const {mergeTypeDefs} = require('@graphql-tools/merge')
 const morgan = require('morgan');
 const winston = require('winston');
+const shajs = require('sha.js');
+const cookieParser = require('cookie-parser');
 const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
@@ -15,10 +17,13 @@ const appRoot = path.resolve(".");
 async function makeServer(config) {
     // Express
     const app = express();
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
     app.use(helmet({
         crossOriginEmbedderPolicy: !config.debug,
         contentSecurityPolicy: !config.debug,
     }));
+    app.use(cookieParser());
     if (config.useCors) {
         app.all('*', (req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
@@ -65,6 +70,35 @@ async function makeServer(config) {
             res.sendFile(path.resolve(appRoot, 'src', 'html', 'gql_form.xhtml'));
         });
     }
+
+    // Login
+    app.superusers = config.superusers;
+
+    app.get('/login', (req, res) => {
+        res.sendFile(path.resolve(appRoot, 'src', 'html', 'login.html'));
+    });
+
+    app.post('/auth', function(request, response) {
+        const failMsg = "Could not authenticate (bad username/password?)";
+        let username = request.body.username;
+        let password = request.body.password;
+        if (!username || !password) {
+            response.send('Please enter Username and Password!');
+        } else {
+            const superPass = app.superusers[username];
+            if (!superPass) {
+                response.send(failMsg);
+            } else {
+                const hash = shajs('sha256').update(`${username}${password}`).digest('hex');
+                if (hash !== superPass) {
+                    response.send(failMsg);
+                } else {
+                    response.cookie('diegesis-auth', shajs('sha256').update(hash).digest('hex'))
+                    response.redirect('/admin');
+                }
+            }
+        }
+    });
 
     // Maybe log access using Morgan
     if (config.logAccess) {

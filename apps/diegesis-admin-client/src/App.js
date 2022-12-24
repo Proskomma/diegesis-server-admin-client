@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo} from 'react';
+import Cookies from 'js-cookie';
 import {
     ApolloClient,
     ApolloProvider, gql,
@@ -18,6 +19,7 @@ import TabbedBody from './components/TabbedBody';
 import './App.css';
 
 function App() {
+    console.log(Cookies.get('diegesis-auth'));
     const [selectedOrgIndex, setSelectedOrgIndex] = useState(0);
     const [searchLang, setSearchLang] = useState('');
     const [searchText, setSearchText] = useState('');
