@@ -2,11 +2,10 @@ const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
-// const makeSuccinct = require('../../lib/makeDownloads');
 
 const appRoot = path.resolve(".");
 
-const makeResolvers = async (config) => {
+const makeResolvers = async config => {
     const orgHandlers = {};
     const orgsData = {};
     config.verbose && console.log("Diegesis Server");
@@ -273,6 +272,7 @@ const makeResolvers = async (config) => {
                 return ret.length;
             },
             catalogEntries: (org, args, context) => {
+                console.log(context.cookies);
                 return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {

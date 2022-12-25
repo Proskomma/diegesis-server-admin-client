@@ -197,6 +197,14 @@ async function makeServer(config) {
         ),
         resolvers,
         debug: config.debug,
+        context: ({req}) => {
+            return {
+                app: {
+                    
+                },
+                cookies: req.cookies || {}
+            };
+        }
     });
 
     // Maybe start cron
