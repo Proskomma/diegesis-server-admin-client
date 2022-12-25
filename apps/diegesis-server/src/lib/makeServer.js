@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const winston = require('winston');
 const shajs = require('sha.js');
 const cookieParser = require('cookie-parser');
+const { randomInt } = require('node:crypto');
 const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
 const doCron = require("./cron.js");
@@ -73,32 +74,67 @@ async function makeServer(config) {
 
     // Login
     app.superusers = config.superusers;
+    if (app.superusers.length > 0) {
+        app.sessionTimeoutInMins = config.sessionTimeoutInMins;
+        app.authSalt = shajs('sha256').update(randomInt(1000000, 9999999).toString()).digest('hex')
 
-    app.get('/login', (req, res) => {
-        res.sendFile(path.resolve(appRoot, 'src', 'html', 'login.html'));
-    });
+        app.get('/login', (req, res) => {
+            res.sendFile(path.resolve(appRoot, 'src', 'html', 'login.html'));
+        });
 
-    app.post('/auth', function(request, response) {
-        const failMsg = "Could not authenticate (bad username/password?)";
-        let username = request.body.username;
-        let password = request.body.password;
-        if (!username || !password) {
-            response.send('Please enter Username and Password!');
-        } else {
-            const superPass = app.superusers[username];
-            if (!superPass) {
-                response.send(failMsg);
+        app.post('/login-auth', function (request, response) {
+            const failMsg = "Could not authenticate (bad username/password?)";
+            let username = request.body.username;
+            let password = request.body.password;
+            if (!username || !password) {
+                response.send('Please include username and password!');
             } else {
-                const hash = shajs('sha256').update(`${username}${password}`).digest('hex');
-                if (hash !== superPass) {
+                const superPass = app.superusers[username];
+                if (!superPass) {
                     response.send(failMsg);
                 } else {
-                    response.cookie('diegesis-auth', shajs('sha256').update(hash).digest('hex'))
-                    response.redirect('/admin');
+                    const hash = shajs('sha256').update(`${username}${password}`).digest('hex');
+                    if (hash !== superPass) {
+                        response.send(failMsg);
+                    } else {
+                        const sessionCode = `${username}-${shajs('sha256').update(`${hash}-${app.authSalt}`).digest('hex')}`;
+                        response.cookie(
+                            'diegesis-auth',
+                            sessionCode,
+                            {
+                                expires: new Date(new Date().getTime() + app.sessionTimeoutInMins * 60 * 1000)
+                            }
+                        );
+                        response.redirect('/admin');
+                    }
                 }
             }
-        }
-    });
+        });
+
+        app.post('/session-auth', function (request, response) {
+            const failJson = {authenticated: false, msg: "Could not authenticate (bad session?)"};
+            let session = request.body.session;
+            if (!session) {
+                response.send({authenticated: false, msg: "Please include session!"});
+            } else {
+                // Get username and server-side hash for that user
+                const username = session.split('-')[0];
+                const superPass = app.superusers[username];
+                if (!superPass) {
+                    response.send(failJson);
+                } else {
+                    // Make sessionCode for this user using the server-side hash and salt
+                    const session2 = `${username}-${shajs('sha256').update(`${superPass}-${app.authSalt}`).digest('hex')}`;
+                    // Compare this new sessionCode with the one the client provided
+                    if (session2 !== session) {
+                        response.send(failJson);
+                    } else {
+                        response.send({authenticated: true, msg: "Success"});
+                    }
+                }
+            }
+        });
+    }
 
     // Maybe log access using Morgan
     if (config.logAccess) {

@@ -26,6 +26,7 @@ const defaultConfig = {
     redirectToRoot: [],
     deleteGenerated: false,
     nWorkers: 1,
+    sessionTimeoutInMins: 15,
 }
 
 const cronOptions = {
@@ -198,6 +199,16 @@ function makeConfig(providedConfig) {
     } else {
         config.superusers = [];
     }
+    if ('sessionTimeoutInMins' in providedConfig) {
+        if (
+            typeof providedConfig.sessionTimeoutInMins !== 'number' ||
+            providedConfig.sessionTimeoutInMins.toString().includes('.') ||
+            providedConfig.sessionTimeoutInMins < 1 ||
+            providedConfig.sessionTimeoutInMins > 16) {
+            croak(`ERROR: sessionTimeoutInMins should be an integer between 1 and 60, not '${providedConfig.sessionTimeoutInMins}'`);
+        }
+        config.sessionTimeoutInMins = providedConfig.sessionTimeoutInMins;
+    }
     if ('useCors' in providedConfig) {
         if (typeof providedConfig.useCors !== 'boolean') {
             croak(`ERROR: useCors should be boolean, not ${typeof providedConfig.useCors}`);
@@ -260,9 +271,10 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     CORS ${config.useCors ? "en" : "dis"}abled
     Mutations ${config.includeMutations ? "included" : "not included"}
     Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
-    ${config.nWorkers} worker threads
+    ${config.nWorkers} worker thread${config.nWorkers === 1 ? "" : "s"}
     ${config.deleteGenerated ? "Delete all generated content" : "Delete lock files only"}
     ${Object.keys(config.superusers).length} superuser${Object.keys(config.superusers).length === 1 ? "" : "s"}
+    ${Object.keys(config.superusers).length === 0 ? "" : `Session cookies expire after ${config.sessionTimeoutInMins} min`}
 `}`
 
 module.exports = {makeConfig, cronOptions, configSummary};
