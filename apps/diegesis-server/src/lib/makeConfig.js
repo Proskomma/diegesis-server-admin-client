@@ -32,7 +32,10 @@ const defaultConfig = {
 const cronOptions = {
     '1 min': '* * * * *',
     '5 min': '*/5 * * * *',
-    '15 min': '*/5 * * * *',
+    '10 min': '*/10 * * * *',
+    '15 min': '*/15 * * * *',
+    '20 min': '*/20 * * * *',
+    '30 min': '*/30 * * * *',
     '1 hr': '* * * *',
     '4 hr': '*/4 * * *',
     '8 hr': '*/8 * * *',
@@ -202,10 +205,8 @@ function makeConfig(providedConfig) {
     if ('sessionTimeoutInMins' in providedConfig) {
         if (
             typeof providedConfig.sessionTimeoutInMins !== 'number' ||
-            providedConfig.sessionTimeoutInMins.toString().includes('.') ||
-            providedConfig.sessionTimeoutInMins < 1 ||
-            providedConfig.sessionTimeoutInMins > 16) {
-            croak(`ERROR: sessionTimeoutInMins should be an integer between 1 and 60, not '${providedConfig.sessionTimeoutInMins}'`);
+            !cronOptions[`${providedConfig.sessionTimeoutInMins} min`]) {
+            croak(`ERROR: sessionTimeoutInMins should be 1, 5, 10, 15, 20 or 30, not '${providedConfig.sessionTimeoutInMins}'`);
         }
         config.sessionTimeoutInMins = providedConfig.sessionTimeoutInMins;
     }

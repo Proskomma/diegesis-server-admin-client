@@ -9,6 +9,7 @@
   "cronFrequency": "1 min",
   "verbose": true,
   "includeMutations": true,
+  "sessionTimeoutInMins": 1,
   "staticPaths": [
     {
       "path": "../diegesis-admin-client/build",

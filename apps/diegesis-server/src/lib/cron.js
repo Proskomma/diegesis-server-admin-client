@@ -3,8 +3,19 @@ const path = require("path");
 const fse = require('fs-extra');
 const {Worker} = require('node:worker_threads');
 const {cronOptions} = require("./makeConfig.js");
+const {randomInt} = require("node:crypto");
 
-function doCron(config) {
+function doSessionCron(app, frequency) {
+    cron.schedule(
+        cronOptions[frequency],
+        () => {
+            app.authSalts[0] = app.authSalts[1];
+            app.authSalts[1] = shajs('sha256').update(randomInt(1000000, 9999999).toString()).digest('hex');
+        }
+    )
+}
+
+function doRenderCron(config) {
     cron.schedule(
         cronOptions[config.cronFrequency],
         () => {
@@ -79,4 +90,4 @@ function doCron(config) {
     );
 }
 
-module.exports = doCron;
+module.exports = {doRenderCron, doSessionCron};

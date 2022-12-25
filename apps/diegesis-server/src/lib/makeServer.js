@@ -8,10 +8,10 @@ const morgan = require('morgan');
 const winston = require('winston');
 const shajs = require('sha.js');
 const cookieParser = require('cookie-parser');
-const { randomInt } = require('node:crypto');
+const {randomInt} = require('node:crypto');
 const makeResolvers = require("../graphql/resolvers/index.js");
 const {scalarSchema, querySchema, mutationSchema} = require("../graphql/schema/index.js");
-const doCron = require("./cron.js");
+const {doRenderCron, doSessionCron} = require("./cron.js");
 
 const appRoot = path.resolve(".");
 
@@ -19,7 +19,7 @@ async function makeServer(config) {
     // Express
     const app = express();
     app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+    app.use(express.urlencoded({extended: true}));
     app.use(helmet({
         crossOriginEmbedderPolicy: !config.debug,
         contentSecurityPolicy: !config.debug,
@@ -74,15 +74,19 @@ async function makeServer(config) {
 
     // Login
     app.superusers = config.superusers;
-    if (app.superusers.length > 0) {
+    if (Object.keys(app.superusers).length > 0) {
         app.sessionTimeoutInMins = config.sessionTimeoutInMins;
-        app.authSalt = shajs('sha256').update(randomInt(1000000, 9999999).toString()).digest('hex')
+        app.authSalts = [shajs('sha256').update(randomInt(1000000, 9999999).toString()).digest('hex')];
+        app.authSalts.push(app.authSalts[0]);  // Start with 2 identical salts
+
+        doSessionCron(app, `${config.sessionTimeoutInMins} min`);
 
         app.get('/login', (req, res) => {
-            res.sendFile(path.resolve(appRoot, 'src', 'html', 'login.html'));
+            const payload = fse.readFileSync(path.resolve(appRoot, 'src', 'html', 'login.html')).toString().replace('%redirect%', req.query.redirect || '/');
+            res.send(payload);
         });
 
-        app.post('/login-auth', function (request, response) {
+        app.post('/new-login-auth', function (request, response) {
             const failMsg = "Could not authenticate (bad username/password?)";
             let username = request.body.username;
             let password = request.body.password;
@@ -97,7 +101,7 @@ async function makeServer(config) {
                     if (hash !== superPass) {
                         response.send(failMsg);
                     } else {
-                        const sessionCode = `${username}-${shajs('sha256').update(`${hash}-${app.authSalt}`).digest('hex')}`;
+                        const sessionCode = `${username}-${shajs('sha256').update(`${hash}-${app.authSalts[app.authSalts.length - 1]}`).digest('hex')}`;
                         response.cookie(
                             'diegesis-auth',
                             sessionCode,
@@ -105,31 +109,38 @@ async function makeServer(config) {
                                 expires: new Date(new Date().getTime() + app.sessionTimeoutInMins * 60 * 1000)
                             }
                         );
-                        response.redirect('/admin');
+                        response.redirect(request.body.redirect || '/');
                     }
                 }
             }
         });
 
-        app.post('/session-auth', function (request, response) {
+        app.post('/session-auth', function (req, res) {
             const failJson = {authenticated: false, msg: "Could not authenticate (bad session?)"};
-            let session = request.body.session;
+            let session = req.body.session;
             if (!session) {
-                response.send({authenticated: false, msg: "Please include session!"});
+                res.send({authenticated: false, msg: "Please include session!"});
             } else {
                 // Get username and server-side hash for that user
                 const username = session.split('-')[0];
                 const superPass = app.superusers[username];
                 if (!superPass) {
-                    response.send(failJson);
+                    res.send(failJson);
                 } else {
-                    // Make sessionCode for this user using the server-side hash and salt
-                    const session2 = `${username}-${shajs('sha256').update(`${superPass}-${app.authSalt}`).digest('hex')}`;
-                    // Compare this new sessionCode with the one the client provided
-                    if (session2 !== session) {
-                        response.send(failJson);
+                    let matched = false;
+                    for (const salt of app.authSalts) {
+                        // Make sessionCode for this user using the server-side hash and salt
+                        const session2 = `${username}-${shajs('sha256').update(`${superPass}-${salt}`).digest('hex')}`;
+                        // Compare this new sessionCode with the one the client provided
+                        if (session2 === session) {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched) {
+                        res.send({authenticated: true, msg: "Success"});
                     } else {
-                        response.send({authenticated: true, msg: "Success"});
+                        res.send(failJson);
                     }
                 }
             }
@@ -190,7 +201,7 @@ async function makeServer(config) {
 
     // Maybe start cron
     if (config.cronFrequency !== 'never') {
-        doCron(config);
+        doRenderCron(config);
     }
 
     // Start server
