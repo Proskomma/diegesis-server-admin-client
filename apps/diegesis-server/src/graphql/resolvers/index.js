@@ -260,7 +260,12 @@ const makeResolvers = async config => {
             },
         },
         Org: {
-            nCatalogEntries: org => org.translations.length,
+            nCatalogEntries: (org, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for nCatalogEntries`);
+                }
+                return org.translations.length
+            },
             nLocalTranslations: (org, args, context) => {
                 let ret = localTranslations(org);
                 if (args.withUsfm) {
@@ -272,7 +277,9 @@ const makeResolvers = async config => {
                 return ret.length;
             },
             catalogEntries: (org, args, context) => {
-                console.log(context.cookies);
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for catalogEntries`);
+                }
                 return filteredCatalog(org, args, context, org.translations);
             },
             localTranslations: (org, args, context) => {
@@ -283,6 +290,9 @@ const makeResolvers = async config => {
                     localTranslations(org) || [])
             },
             catalogEntry: (org, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for catalogEntry`);
+                }
                 context.orgData = org;
                 context.orgHandler = orgHandlers[org.name];
                 return org.translations
@@ -433,7 +443,10 @@ const makeResolvers = async config => {
     };
     const mutationResolver = {
         Mutation: {
-            fetchUsfm: async (root, args) => {
+            fetchUsfm: async (root, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for fetchUsfm mutation`);
+                }
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;
@@ -454,7 +467,10 @@ const makeResolvers = async config => {
                     return false;
                 }
             },
-            deleteLocalTranslation: async (root, args) => {
+            deleteLocalTranslation: async (root, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for deleteLocalTranslation mutation`);
+                }
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;
@@ -476,7 +492,10 @@ const makeResolvers = async config => {
                 }
 
             },
-            fetchUsx: async (root, args) => {
+            fetchUsx: async (root, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for fetchUsx mutation`);
+                }
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;
@@ -497,7 +516,10 @@ const makeResolvers = async config => {
                     return false;
                 }
             },
-            makeSuccinct: async (root, args) => {
+            makeSuccinct: async (root, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for makeSuccinct mutation`);
+                }
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;
@@ -546,7 +568,10 @@ const makeResolvers = async config => {
                     return false;
                 }
             },
-            deleteSuccinctError: async (root, args) => {
+            deleteSuccinctError: async (root, args, context) => {
+                if (!context.auth || !context.auth.authenticated) {
+                    throw new Error(`No auth found for deleteSuccinctError mutation`);
+                }
                 const orgOb = orgsData[args.org];
                 if (!orgOb) {
                     return false;

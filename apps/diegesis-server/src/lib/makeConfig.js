@@ -200,7 +200,7 @@ function makeConfig(providedConfig) {
         }
         config.superusers = providedConfig.superusers;
     } else {
-        config.superusers = [];
+        config.superusers = {};
     }
     if ('sessionTimeoutInMins' in providedConfig) {
         if (
