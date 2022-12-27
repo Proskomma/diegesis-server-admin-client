@@ -2,6 +2,8 @@ import React, {useState, useEffect, useMemo} from 'react';
 import {
     createBrowserRouter,
     RouterProvider,
+    useRouteError,
+    Route
 } from "react-router-dom";
 import {
     ApolloClient,
@@ -51,18 +53,27 @@ function App() {
         []
     );
 
+    function ErrorBoundary() {
+        let error = useRouteError();
+        console.error(error);
+        return <div>An unexpected error has occurred: <i>{error.message}</i></div>;
+    }
+
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <HomePage />,
+            element: <HomePage/>,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/who",
-            element: <WhoPage />
+            element: <WhoPage/>,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/how",
-            element: <HowPage />
+            element: <HowPage/>,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/list",
@@ -75,25 +86,29 @@ function App() {
                 searchText={searchText}
                 setSearchText={setSearchText}
             />,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/entry/details/:source/:owner/:entryId/:revision",
-            element: <EntryDetailsPage />
+            element: <EntryDetailsPage/>,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/entry/browse/:source/:owner/:entryId/:revision",
-            element: <EntryBrowsePage />
+            element: <EntryBrowsePage/>,
+            errorElement: <ErrorBoundary/>
         },
         {
             path: "/entry/download/:source/:owner/:entryId/:revision",
-            element: <EntryDownloadPage />
+            element: <EntryDownloadPage/>,
+            errorElement: <ErrorBoundary/>
         }
     ]);
 
     return (<ApolloProvider client={client}>
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
-                <RouterProvider router={router} />
+                <RouterProvider router={router}/>
             </ThemeProvider>
         </ApolloProvider>
     );
