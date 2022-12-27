@@ -19,7 +19,7 @@ const defaultConfig = {
     logFormat: "combined",
     useCors: false,
     debug: false,
-    cronFrequency: 'never',
+    processFrequency: 'never',
     orgs: [], // Empty array means 'all',
     verbose: false,
     includeMutations: false,
@@ -27,6 +27,8 @@ const defaultConfig = {
     deleteGenerated: false,
     nWorkers: 1,
     sessionTimeoutInMins: 15,
+    staticPaths: [],
+    superusers: {},
 }
 
 const cronOptions = {
@@ -47,6 +49,11 @@ const cronOptions = {
 const logFormatOptions = ["combined", "common", "dev", "short", "tiny"];
 
 function makeConfig(providedConfig) {
+    for (const key of Object.keys(providedConfig)) {
+        if (!(key in defaultConfig)) {
+            croak(`Unknown top-level config file option '${key}'`);
+        }
+    }
     const config = defaultConfig;
     if (providedConfig.hostName) {
         if (
@@ -216,11 +223,11 @@ function makeConfig(providedConfig) {
         }
         config.useCors = providedConfig.useCors;
     }
-    if ('cronFrequency' in providedConfig) {
-        if (providedConfig.cronFrequency !== 'never' && !(providedConfig.cronFrequency in cronOptions)) {
-            croak(`ERROR: unknown cronFrequency option '${providedConfig.cronFrequency}' - should be one of never, ${Object.keys(cronOptions).join(', ')}`);
+    if ('processFrequency' in providedConfig) {
+        if (providedConfig.processFrequency !== 'never' && !(providedConfig.processFrequency in cronOptions)) {
+            croak(`ERROR: unknown processFrequency option '${providedConfig.processFrequency}' - should be one of never, ${Object.keys(cronOptions).join(', ')}`);
         }
-        config.cronFrequency = providedConfig.cronFrequency;
+        config.processFrequency = providedConfig.processFrequency;
     }
     if (providedConfig.nWorkers) {
         if (
@@ -271,7 +278,7 @@ const configSummary = config => `  Listening on ${config.hostName}:${config.port
     Access logging ${!config.logAccess ? "disabled" : `to ${config.accessLogPath || 'console'} in Morgan '${config.logFormat}' format`}
     CORS ${config.useCors ? "en" : "dis"}abled
     Mutations ${config.includeMutations ? "included" : "not included"}
-    Cron ${config.cronFrequency === 'never' ? "disabled" : `every ${config.cronFrequency}
+    Process new data ${config.processFrequency === 'never' ? "disabled" : `every ${config.processFrequency}
     ${config.nWorkers} worker thread${config.nWorkers === 1 ? "" : "s"}
     ${config.deleteGenerated ? "Delete all generated content" : "Delete lock files only"}
     ${Object.keys(config.superusers).length} superuser${Object.keys(config.superusers).length === 1 ? "" : "s"}

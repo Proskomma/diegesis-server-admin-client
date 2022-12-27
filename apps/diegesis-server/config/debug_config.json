@@ -6,7 +6,7 @@
   "logFormat": "dev",
   "useCors": true,
   "orgs": [],
-  "cronFrequency": "1 min",
+  "processFrequency": "1 min",
   "verbose": true,
   "includeMutations": true,
   "sessionTimeoutInMins": 1,

@@ -17,7 +17,7 @@ function doSessionCron(app, frequency) {
 
 function doRenderCron(config) {
     cron.schedule(
-        cronOptions[config.cronFrequency],
+        cronOptions[config.processFrequency],
         () => {
             let nLocked = 0;
             let maxTasks = config.nWorkers;

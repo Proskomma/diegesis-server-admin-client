@@ -229,7 +229,7 @@ async function makeServer(config) {
     });
 
     // Maybe start cron
-    if (config.cronFrequency !== 'never') {
+    if (config.processFrequency !== 'never') {
         doRenderCron(config);
     }
 
