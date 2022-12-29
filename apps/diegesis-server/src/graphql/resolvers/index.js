@@ -1,6 +1,7 @@
 const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
+const {ptBooks} = require('proskomma-utils');
 const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
 
 const appRoot = path.resolve(".");
@@ -317,7 +318,9 @@ const makeResolvers = async config => {
             usfmBookCodes: (trans, args, context) => {
                 const usfmDirPath = usfmDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usfmDirPath)) {
-                    return fse.readdirSync(usfmDirPath).map(p => p.split('.')[0]);
+                    return fse.readdirSync(usfmDirPath)
+                        .map(p => p.split('.')[0])
+                        .sort((a, b) => ptBooks[a].position - ptBooks[b].position);
                 } else {
                     return [];
                 }
@@ -354,7 +357,9 @@ const makeResolvers = async config => {
             usxBookCodes: (trans, args, context) => {
                 const usxDirPath = usxDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 if (fse.pathExistsSync(usxDirPath)) {
-                    return fse.readdirSync(usxDirPath).map(p => p.split('.')[0]);
+                    return fse.readdirSync(usxDirPath)
+                        .map(p => p.split('.')[0])
+                        .sort((a, b) => ptBooks[a].position - ptBooks[b].position);
                 } else {
                     return [];
                 }
