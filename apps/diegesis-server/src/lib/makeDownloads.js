@@ -1,4 +1,5 @@
 const {Proskomma} = require('proskomma-core');
+const {PerfRenderFromProskomma, transforms, mergeActions} = require('proskomma-json-tools');
 const path = require("path");
 const {
     transPath,
@@ -7,6 +8,7 @@ const {
     vrsPath,
     succinctErrorPath,
     perfDir,
+    simplePerfDir,
     sofriaDir,
     succinctPath,
     lockPath,
@@ -14,6 +16,65 @@ const {
 const fse = require('fs-extra');
 const {parentPort} = require("node:worker_threads");
 const appRoot = path.resolve(".");
+
+const localJustTheBibleActions = {
+    startMilestone: [
+        {
+            description: "Ignore startMilestone events",
+            test: () => true,
+            action: () => {
+            }
+        },
+    ],
+    endMilestone: [
+        {
+            description: "Ignore endMilestone events",
+            test: () => true,
+            action: () => {
+            }
+        },
+    ],
+    startWrapper: [
+        {
+            description: "Ignore startWrapper events",
+            test: () => true,
+            action: () => {
+            }
+        },
+    ],
+    endWrapper: [
+        {
+            description: "Ignore endWrapper events",
+            test: () => true,
+            action: () => {
+            }
+        },
+    ],
+    blockGraft: [
+        {
+            description: "Ignore blockGraft events, except for title (\\mt)",
+            test: (environment) => environment.context.sequences[0].block.subType !== 'title',
+            action: (environment) => {
+            }
+        },
+    ],
+    inlineGraft: [
+        {
+            description: "Ignore inlineGraft events",
+            test: () => true,
+            action: () => {
+            }
+        },
+    ],
+    mark: [
+        {
+            description: "Ignore mark events, except for chapter and verses",
+            test: ({context}) => !['chapter', 'verses'].includes(context.sequences[0].element.subType),
+            action: () => {
+            }
+        },
+    ]
+};
 
 function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) {
     try {
@@ -56,6 +117,13 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
         }
         for (const [bookCode, perf] of downloads.perf) {
             fse.writeFileSync(path.join(perfD, `${bookCode}.json`), JSON.stringify(JSON.parse(perf), null, 2));
+        }
+        const simplePerfD = simplePerfDir(dataPath, orgDir, owner, transId, revision);
+        if (!fse.pathExistsSync(simplePerfD)) {
+            fse.mkdir(simplePerfD);
+        }
+        for (const [bookCode, simplePerf] of downloads.simplePerf) {
+            fse.writeFileSync(path.join(simplePerfD, `${bookCode}.json`), JSON.stringify(JSON.parse(simplePerf), null, 2));
         }
         const sofriaD = sofriaDir(dataPath, orgDir, owner, transId, revision);
         if (!fse.pathExistsSync(sofriaD)) {
@@ -108,7 +176,9 @@ function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
     const ret = {
         succinct: null,
         perf: [],
+        simplePerf: [],
         sofria: [],
+        simpleSofria: []
     };
     let docSetId;
     try {
@@ -150,10 +220,12 @@ function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
     }
     const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({id: d.id, book: d.bookCode}));
     for (const doc of documents) {
+        let docResult = null;
         try {
-            let docResult = pk.gqlQuerySync(`{ document(id: """${doc.id}""") { bookCode: header(id:"bookCode") perf } }`).data.document;
+            docResult = pk.gqlQuerySync(`{ document(id: """${doc.id}""") { bookCode: header(id:"bookCode") perf } }`).data.document;
             ret.perf.push([docResult.bookCode, docResult.perf]);
         } catch (err) {
+            docResult = null;
             parentPort.postMessage({
                 generatedBy: 'cron',
                 context: {
@@ -164,6 +236,44 @@ function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
                 },
                 message: err.message,
             });
+        }
+        if (docResult) {
+            try {
+                const cl = new PerfRenderFromProskomma(
+                    {
+                        proskomma: pk,
+                        actions: mergeActions(
+                            [
+                                localJustTheBibleActions,
+                                transforms.perf2perf.identityActions
+                            ]
+                        ),
+                    },
+                );
+                const output = {};
+
+                cl.renderDocument(
+                    {
+                        docId: doc.id,
+                        config: {},
+                        output,
+                    },
+                );
+                const simplePerf = transforms.alignment.mergePerfText.code({perf: output.perf}).perf;
+                ret.simplePerf.push([docResult.bookCode, JSON.stringify(simplePerf)]);
+            } catch (err) {
+                docResult = null;
+                parentPort.postMessage({
+                    generatedBy: 'cron',
+                    context: {
+                        docSetId,
+                        doc: doc.id,
+                        book: doc.book,
+                        making: "simplePerf"
+                    },
+                    message: err.message,
+                });
+            }
         }
         try {
             const docResult = pk.gqlQuerySync(`{document(id: """${doc.id}""") { bookCode: header(id:"bookCode") sofria } }`).data.document;

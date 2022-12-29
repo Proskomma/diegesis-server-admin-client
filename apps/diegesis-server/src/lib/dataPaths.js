@@ -11,7 +11,7 @@ const orgPath =
 const transPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("transPath now requires 5 args");
+            throw new Error("transPath requires 5 args");
         }
         return path.resolve(
             dataPath,
@@ -36,7 +36,7 @@ const transParentPath =
 const usfmDir =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("usfmDir now requires 5 args");
+            throw new Error("usfmDir requires 5 args");
         }
        return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -47,7 +47,7 @@ const usfmDir =
 const usxDir =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("usxDir now requires 5 args");
+            throw new Error("usxDir requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -58,7 +58,7 @@ const usxDir =
 const perfDir =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("perfDir now requires 5 args");
+            throw new Error("perfDir requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -66,10 +66,21 @@ const perfDir =
         );
     }
 
+const simplePerfDir =
+    (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
+        if (!translationRevision) {
+            throw new Error("simplePerfDir requires 5 args");
+        }
+        return path.join(
+            transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
+            'simplePerfBooks'
+        );
+    }
+
 const sofriaDir =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("sofriaDir now requires 5 args");
+            throw new Error("sofriaDir requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -80,7 +91,7 @@ const sofriaDir =
 const succinctPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("succinctPath now requires 5 args");
+            throw new Error("succinctPath requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -91,7 +102,7 @@ const succinctPath =
 const succinctErrorPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("succinctErrorPath now requires 5 args");
+            throw new Error("succinctErrorPath requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -113,7 +124,7 @@ const lockPath =
 const vrsPath =
     (dataPath, translationDir, translationOwner, translationId, translationRevision) => {
         if (!translationRevision) {
-            throw new Error("vrsPath now requires 5 args");
+            throw new Error("vrsPath requires 5 args");
         }
         return path.join(
             transPath(dataPath, translationDir, translationOwner, translationId, translationRevision),
@@ -121,4 +132,17 @@ const vrsPath =
         );
     }
 
-module.exports = {orgPath, transPath, transParentPath, usfmDir, usxDir, perfDir, sofriaDir, succinctPath, succinctErrorPath, lockPath, vrsPath};
+module.exports = {
+    orgPath,
+    transPath,
+    transParentPath,
+    usfmDir,
+    usxDir,
+    perfDir,
+    simplePerfDir,
+    sofriaDir,
+    succinctPath,
+    succinctErrorPath,
+    lockPath,
+    vrsPath
+};
