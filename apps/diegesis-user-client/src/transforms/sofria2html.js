@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 const styles = {
     paras: {
@@ -12,6 +12,9 @@ const styles = {
         },
         "usfm:d": {
             fontStyle: "italic"
+        },
+        "usfm:f": {
+            fontSize: "x-small"
         },
         "usfm:hangingGraft": {},
         "usfm:imt": {
@@ -159,7 +162,10 @@ const styles = {
             fontStyle: "italic",
             fontSize: "large"
         },
-        "usfm:tr": {}
+        "usfm:tr": {},
+        "usfm:x": {
+            fontSize: "x-small"
+        }
     },
     marks: {
         default: {},
@@ -191,7 +197,15 @@ const styles = {
           fontWeight: "bold"
         },
         chapter: {},
+        "usfm:fl": {},
         "usfm:fm": {},
+        "usfm:fqa": {
+            fontStyle: "italic"
+        },
+        "usfm:fr": {
+            fontWeight: "bold"
+        },
+        "usfm:ft": {},
         "usfm:it": {
             fontStyle: "italic"
         },
@@ -209,15 +223,48 @@ const styles = {
         verses: {},
         "usfm:wj": {
             color: "#D00"
-        }
+        },
+        "usfm:xk": {},
+        "usfm:xo": {
+            fontWeight: "bold"
+        },
+        "usfm:xt": {}
     }
 };
+
+function InlineElement (props) {
+    const [display, setDisplay] = useState(false);
+    const toggleDisplay = () => setDisplay(!display);
+    if (display) {
+        return <span
+            style={{...props.style, marginRight: "1em"}}
+            onClick={toggleDisplay}
+        >
+            {props.children}
+        </span>
+    } else {
+        return <span
+            style={{verticalAlign: "super", fontSize: "smaller", fontWeight: "bold", marginRight: "1em", backgroundColor: "#CCC"}}
+            onClick={toggleDisplay}
+        >
+        {props.linkText}
+    </span>
+    }
+}
 
 const renderers = {
     text: text => text,
     chapter_label: number => <span style={getStyles('marks', "chapter_label")}>{number}</span>,
     verses_label: number => <span style={getStyles('marks', "verses_label")}>{number}</span>,
-    paragraph: (subType, content) => <p style={getStyles('paras', subType)}>{content}</p>,
+    paragraph: (subType, content) =>
+        ["usfm:f", "usfm:x"].includes(subType) ?
+            <InlineElement
+                style={getStyles('paras', subType)}
+                linkText={subType === "usfm:f" ? "+" : "*"}
+            >
+                {content}
+            </InlineElement> :
+            <p style={getStyles('paras', subType)}>{content}</p>,
     wrapper: (subType, content) => <span style={getStyles('wrappers', subType)}>{content}</span>,
     mergeParas: paras => paras,
 }
@@ -286,6 +333,28 @@ const sofria2WebActions = {
                         environment.workspace.currentSequence = cachedSequencePointer;
                     }
                     environment.workspace.currentSequence.blocks.push(graftRecord);
+                }
+            }
+        },
+    ],
+    inlineGraft: [
+        {
+            description: "identity",
+            test: ({context}) => context.sequences[0].element.subType !== "note_caller",
+            action: (environment) => {
+                const element = environment.context.sequences[0].element;
+                const graftRecord = {
+                    type: element.type,
+                };
+                if (element.sequence) {
+                    graftRecord.sequence = {};
+                    const cachedSequencePointer = environment.workspace.currentSequence;
+                    const cachedParaContentStack = [...environment.workspace.paraContentStack];
+                    environment.workspace.currentSequence = graftRecord.sequence;
+                    environment.context.renderer.renderSequence(environment);
+                    environment.workspace.paraContentStack = cachedParaContentStack;
+                    environment.workspace.currentSequence = cachedSequencePointer;
+                    // environment.workspace.paraContentStack[0].content.push(graftRecord);
                 }
             }
         },

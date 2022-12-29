@@ -3,7 +3,6 @@ import {
     createBrowserRouter,
     RouterProvider,
     useRouteError,
-    Route
 } from "react-router-dom";
 import {
     ApolloClient,
