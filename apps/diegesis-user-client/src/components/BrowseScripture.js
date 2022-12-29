@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Typography, Grid} from "@mui/material";
 
 import {SofriaRenderFromProskomma} from "proskomma-json-tools";
-import sofria2WebActions from '../transforms/sofria2html';
+import sofria2WebActions from '../renderer/sofria2html';
 import DocSelector from "./DocSelector";
 
 export default function BrowseScripture({pk}) {
@@ -60,6 +60,7 @@ export default function BrowseScripture({pk}) {
                 });
             } else {
                 setScriptureResult({query: scriptureQuery});
+                setDocId(scriptureQuery.data.docSets[0].documents[0].id);
             }
         },
         [docId]
