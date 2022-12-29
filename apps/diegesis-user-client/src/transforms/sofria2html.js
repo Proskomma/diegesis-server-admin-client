@@ -14,7 +14,7 @@ const styles = {
             fontStyle: "italic"
         },
         "usfm:f": {
-            fontSize: "x-small"
+            fontSize: "small"
         },
         "usfm:hangingGraft": {},
         "usfm:imt": {
@@ -164,7 +164,7 @@ const styles = {
         },
         "usfm:tr": {},
         "usfm:x": {
-            fontSize: "x-small"
+            fontSize: "small"
         }
     },
     marks: {
@@ -236,15 +236,28 @@ function InlineElement (props) {
     const [display, setDisplay] = useState(false);
     const toggleDisplay = () => setDisplay(!display);
     if (display) {
-        return <span
-            style={{...props.style, marginRight: "1em"}}
+        return <div
+            style={{
+                ...props.style,
+                padding: "0.5em",
+                backgroundColor: "#CCC",
+                marginTop: "1em",
+                marginBottom: "1em"
+            }}
             onClick={toggleDisplay}
         >
             {props.children}
-        </span>
+        </div>
     } else {
         return <span
-            style={{verticalAlign: "super", fontSize: "smaller", fontWeight: "bold", marginRight: "1em", backgroundColor: "#CCC"}}
+            style={{
+                verticalAlign: "super",
+                fontSize: "smaller",
+                fontWeight: "bold",
+                marginRight: "0.25em",
+                padding: "2px",
+                backgroundColor: "#CCC"
+            }}
             onClick={toggleDisplay}
         >
         {props.linkText}
@@ -350,11 +363,15 @@ const sofria2WebActions = {
                     graftRecord.sequence = {};
                     const cachedSequencePointer = environment.workspace.currentSequence;
                     const cachedParaContentStack = [...environment.workspace.paraContentStack];
+                    const cachedWebParas = environment.workspace.webParas;
+                    environment.workspace.webParas = [];
                     environment.workspace.currentSequence = graftRecord.sequence;
                     environment.context.renderer.renderSequence(environment);
+                    const sequencePseudoParas = environment.workspace.webParas;
+                    environment.workspace.webParas = cachedWebParas;
                     environment.workspace.paraContentStack = cachedParaContentStack;
+                    environment.workspace.paraContentStack[0].content.push(sequencePseudoParas);
                     environment.workspace.currentSequence = cachedSequencePointer;
-                    // environment.workspace.paraContentStack[0].content.push(graftRecord);
                 }
             }
         },
