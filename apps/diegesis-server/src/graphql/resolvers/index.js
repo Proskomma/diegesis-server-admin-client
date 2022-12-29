@@ -2,7 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const {GraphQLScalarType, Kind} = require('graphql');
 const {ptBooks} = require('proskomma-utils');
-const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, sofriaDir} = require('../../lib/dataPaths');
+const {transPath, transParentPath, usfmDir, usxDir, succinctPath, succinctErrorPath, vrsPath, perfDir, simplePerfDir, sofriaDir} = require('../../lib/dataPaths');
 
 const appRoot = path.resolve(".");
 
@@ -392,6 +392,19 @@ const makeResolvers = async config => {
             perfForBookCode: (trans, args, context) => {
                 const perfDirPath = perfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
                 const bookPath = path.join(perfDirPath, `${args.code}.json`);
+                if (fse.pathExistsSync(bookPath)) {
+                    return fse.readFileSync(bookPath).toString();
+                } else {
+                    return null;
+                }
+            },
+            hasSimplePerf: (trans, args, context) => {
+                const simplePerfDirPath = simplePerfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                return fse.pathExistsSync(simplePerfDirPath);
+            },
+            simplePerfForBookCode: (trans, args, context) => {
+                const simplePerfDirPath = simplePerfDir(config.dataPath, context.orgData.translationDir, trans.owner, trans.id, trans.revision);
+                const bookPath = path.join(simplePerfDirPath, `${args.code}.json`);
                 if (fse.pathExistsSync(bookPath)) {
                     return fse.readFileSync(bookPath).toString();
                 } else {

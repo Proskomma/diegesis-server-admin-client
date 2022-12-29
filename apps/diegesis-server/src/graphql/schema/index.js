@@ -159,6 +159,13 @@ const querySchema = gql`
             """The bookCode"""
             code: BookCode!
         ): String
+        """Is simplePERF available?"""
+        hasSimplePerf: Boolean!
+        """The simplePERF for this translation"""
+        simplePerfForBookCode(
+            """The bookCode"""
+            code: BookCode!
+        ): String
         """Is SOFRIA available?"""
         hasSofria: Boolean!
         """The SOFRIA for this translation"""
