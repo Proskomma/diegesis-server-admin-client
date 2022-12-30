@@ -7,8 +7,12 @@ import DocSelector from "./DocSelector";
 
 export default function BrowseScripture({pk}) {
 
-    const [docId, setDocId] = useState(null);
-    const [scriptureResult, setScriptureResult] = useState({});
+    const [scriptureData, setScriptureData] = useState({
+        docId: null,
+        menuQuery: null,
+        renderedDocId: null,
+        rendered: null,
+    });
 
     const docName = d => {
         return d.headers.filter(d => d.key === 'toc3')[0]?.value ||
@@ -20,20 +24,24 @@ export default function BrowseScripture({pk}) {
 
     useEffect(
         () => {
-            const scriptureQuery = pk.gqlQuerySync(
-                `{
+            let newDocId;
+            let menuQuery = scriptureData.menuQuery;
+            if (!scriptureData.docId) {
+                menuQuery = pk.gqlQuerySync(
+                    `{
                docSets {
                  documents(sortedBy:"paratext") {
                    id
                    headers { key value }
                  }
-                 doc: documents(ids:"""%docId%""") {
-                   mainBlocksText(normalizeSpace: true)
-                 }
                }
-            }`.replace(/%docId%/g, docId || "")
-            );
-            if (docId) {
+            }`
+                );
+                newDocId = menuQuery.data.docSets[0].documents[0].id;
+            } else {
+                newDocId = scriptureData.docId;
+            }
+            if (newDocId !== scriptureData.renderedDocId) {
                 const renderer = new SofriaRenderFromProskomma({
                     proskomma: pk,
                     actions: sofria2WebActions,
@@ -41,44 +49,44 @@ export default function BrowseScripture({pk}) {
 
                 const config = {};
                 const output = {};
-
                 try {
                     renderer.renderDocument(
                         {
-                            docId,
+                            docId: newDocId,
                             config,
                             output,
                         },
                     );
                 } catch (err) {
-                    console.log(err);
+                    console.log("Renderer", err);
                     throw err;
                 }
-                setScriptureResult({
-                    query: scriptureQuery,
+                setScriptureData({
+                    docId: newDocId,
+                    renderedDocId: newDocId,
+                    menuQuery,
                     rendered: output.paras
                 });
-            } else {
-                setScriptureResult({query: scriptureQuery});
-                setDocId(scriptureQuery.data.docSets[0].documents[0].id);
             }
         },
-        [docId]
+        [scriptureData]
     )
 
-    const docMenuItems = scriptureResult.query && scriptureResult.query.data && scriptureResult.query.data.docSets && scriptureResult.query.data.docSets[0].documents ?
-        scriptureResult.query.data.docSets[0].documents.map(d => ({id: d.id, label: docName(d)})) :
+    const docMenuItems = scriptureData.menuQuery && scriptureData.menuQuery.data && scriptureData.menuQuery.data.docSets && scriptureData.menuQuery.data.docSets[0].documents ?
+        scriptureData.menuQuery.data.docSets[0].documents.map(d => ({id: d.id, label: docName(d)})) :
         [];
+
+    const setDocId = newId => setScriptureData({... scriptureData, docId: newId})
 
     return (
         <Grid container>
             <Grid item xs={12}>
-                <DocSelector docs={docMenuItems} docId={docId} setDocId={setDocId}/>
+                <DocSelector docs={docMenuItems} docId={scriptureData.docId} setDocId={setDocId}/>
             </Grid>
             <Grid item xs={12}>
                 {
-                    scriptureResult.rendered ?
-                        <>{scriptureResult.rendered}</> :
+                    scriptureData.rendered ?
+                        <>{scriptureData.rendered}</> :
                         <Typography>Please select a document from the menu above</Typography>
                 }
             </Grid>
