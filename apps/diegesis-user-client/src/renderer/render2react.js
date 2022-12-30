@@ -217,7 +217,8 @@ const styles = {
         },
         "usfm:nd": {
             fontWeight: "bold",
-            fontSize: "smaller"
+            fontSize: "smaller",
+            textTransform: "uppercase"
         },
         "usfm:qs": {
             float: "right",
