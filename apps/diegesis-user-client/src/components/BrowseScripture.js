@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Typography, Grid, Switch, FormGroup, FormControlLabel} from "@mui/material";
+import {Typography, Grid, Switch, FormGroup, FormControlLabel, Box} from "@mui/material";
 
 import {SofriaRenderFromProskomma} from "proskomma-json-tools";
 import sofria2WebActions from '../renderer/sofria2web';
@@ -17,6 +17,7 @@ export default function BrowseScripture({pk}) {
         showHeadings: true,
         showFootnotes: true,
         showXrefs: true,
+        showParaStyles: true,
         showCharacterMarkup: true,
         showChapterLabels: true,
         showVersesLabels: true,
@@ -64,6 +65,7 @@ export default function BrowseScripture({pk}) {
                     showHeadings: scriptureData.showHeadings,
                     showFootnotes: scriptureData.showFootnotes,
                     showXrefs: scriptureData.showXrefs,
+                    showParaStyles: scriptureData.showParaStyles,
                     showCharacterMarkup: scriptureData.showCharacterMarkup,
                     showChapterLabels: scriptureData.showChapterLabels,
                     showVersesLabels: scriptureData.showVersesLabels
@@ -124,6 +126,11 @@ export default function BrowseScripture({pk}) {
         showXrefs: !scriptureData.showXrefs,
         updatedAtts: true
     });
+    const toggleParaStyles = () => setScriptureData({
+        ...scriptureData,
+        showParaStyles: !scriptureData.showParaStyles,
+        updatedAtts: true
+    });
     const toggleCharacterMarkup = () => setScriptureData({
         ...scriptureData,
         showCharacterMarkup: !scriptureData.showCharacterMarkup,
@@ -143,111 +150,124 @@ export default function BrowseScripture({pk}) {
     return (
         <Grid container>
             <Grid item xs={12} sm={6} md={4} lg={2}>
-                <FormGroup>
-                    <FormControlLabel
-                        control={<Switch
-                            checked={showSettings}
-                            color="primary"
-                            onChange={() => setShowSettings(!showSettings)}
-                            inputProps={{'aria-label': 'controlled'}}
-                            disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                        />}
-                        label="Settings"
-                    />
-                    {
-                        showSettings &&
-                        <>
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showTitles}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleTitles()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Titles"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showHeadings}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleHeadings()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Headings"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showFootnotes}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleFootnotes()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Footnotes"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showXrefs}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleXrefs()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Cross References"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showCharacterMarkup}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleCharacterMarkup()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Character Markup"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showChapterLabels}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleChapterLabels()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Chapter Labels"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showVersesLabels}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleVersesLabels()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Verse Labels"
-                            />
-                            <FormControlLabel
-                                control={<Switch
-                                    checked={scriptureData.showWordAtts}
-                                    color="secondary"
-                                    size="small"
-                                    onChange={() => toggleWordAtts()}
-                                    inputProps={{'aria-label': 'controlled'}}
-                                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                                />}
-                                label="Word Info"
-                            />
-                        </>
-                    }
-                </FormGroup>
+                <Box sx={{marginRight: "5px"}}>
+                    <FormGroup sx={{padding: "10px", backgroundColor: showSettings ? "#ccc" : "inherit"}}>
+                        <FormControlLabel
+                            control={<Switch
+                                checked={showSettings}
+                                color="primary"
+                                onChange={() => setShowSettings(!showSettings)}
+                                inputProps={{'aria-label': 'controlled'}}
+                                disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                            />}
+                            label="Settings"
+                        />
+                        {
+                            showSettings &&
+                            <>
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showTitles}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleTitles()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Titles"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showHeadings}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleHeadings()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Headings"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showFootnotes}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleFootnotes()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Footnotes"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showXrefs}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleXrefs()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Cross Refs"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showParaStyles}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleParaStyles()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Para Styles"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showCharacterMarkup}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleCharacterMarkup()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Char Styles"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showChapterLabels}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleChapterLabels()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Chapter N°s"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showVersesLabels}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleVersesLabels()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Verse N°s"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showWordAtts}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleWordAtts()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Word Info"
+                                />
+                            </>
+                        }
+                    </FormGroup>
+                </Box>
             </Grid>
             <Grid item xs={12} sm={6} md={8} lg={10}>
                 <DocSelector

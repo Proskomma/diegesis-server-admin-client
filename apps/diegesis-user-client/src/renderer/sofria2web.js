@@ -9,6 +9,7 @@ const defaultSettings = {
     showChapterLabels: true,
     showVersesLabels: true,
     showCharacterMarkup: true,
+    showParaStyles: true,
 }
 
 const sofria2WebActions = {
@@ -124,10 +125,12 @@ const sofria2WebActions = {
         {
             description: "Add completed para to webParas",
             test: () => true,
-            action: ({workspace}) => {
+            action: ({context, workspace}) => {
                 workspace.webParas.push(
                     renderers.paragraph(
-                        workspace.paraContentStack[0].subType,
+                        workspace.settings.showParaStyles || ['footnote', 'xref'].includes(context.sequences[0].type) ?
+                            workspace.paraContentStack[0].subType :
+                            "usfm:m",
                         workspace.paraContentStack[0].content,
                         workspace.footnoteNo,
                     )
