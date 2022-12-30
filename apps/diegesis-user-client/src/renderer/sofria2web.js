@@ -121,8 +121,28 @@ const sofria2WebActions = {
     ],
     startWrapper: [
         {
+            description: "Handle standard w attributes",
+            test: ({context}) => context.sequences[0].element.subType === "usfm:w",
+            action: ({context, workspace}) => {
+                const atts = context.sequences[0].element.atts;
+                const standardAtts = {};
+                for (const [key, value] of Object.entries(atts)) {
+                    if (["strong", "lemma", "gloss"].includes(key)) {
+                        standardAtts[key] = value;
+                    }
+                }
+                workspace.paraContentStack.unshift(
+                    {
+                        atts: standardAtts,
+                        content: []
+                    }
+                );
+                return false;
+            }
+        },
+        {
             description: "Push to paraContent Stack",
-            test: ({context}) => !["chapter", "verses", "usfm:w"].includes(context.sequences[0].element.subType),
+            test: ({context}) => !["chapter", "verses"].includes(context.sequences[0].element.subType),
             action: ({context, workspace, output}) => {
                 const pushed = {
                     subType: context.sequences[0].element.subType,
@@ -137,8 +157,18 @@ const sofria2WebActions = {
     ],
     endWrapper: [
         {
+            description: "Handle standard w attributes",
+            test: ({context}) => context.sequences[0].element.subType === "usfm:w",
+            action: ({context, workspace, output}) => {
+                const popped = workspace.paraContentStack.shift();
+                // console.log("endWrapper", popped, workspace.paraContentStack.length);
+                workspace.paraContentStack[0].content.push(renderers.wWrapper(popped.atts, popped.content));
+                return false;
+            }
+        },
+        {
             description: "Collapse one level of paraContent Stack",
-            test: ({context}) => !["chapter", "verses", "usfm:w"].includes(context.sequences[0].element.subType),
+            test: ({context}) => !["chapter", "verses"].includes(context.sequences[0].element.subType),
             action: ({context, workspace, output}) => {
                 const popped = workspace.paraContentStack.shift();
                 // console.log("endWrapper", popped, workspace.paraContentStack.length);

@@ -5,7 +5,7 @@ const styles = {
         default: {
             fontSize: "medium",
             marginTop: "0.5ex",
-            marginBottom: "0.5ex"
+            marginBottom: "0.5ex",
         },
         "usfm:b": {
             height: "1em"
@@ -243,7 +243,7 @@ const getStyles = (type, subType) => {
     return {...styles[type].default, ...styles[type][subType]};
 }
 
-function InlineElement (props) {
+function InlineElement(props) {
     const [display, setDisplay] = useState(false);
     const toggleDisplay = () => setDisplay(!display);
     if (display) {
@@ -291,6 +291,30 @@ const renderers = {
             </InlineElement> :
             <p style={getStyles('paras', subType)}>{content}</p>,
     wrapper: (subType, content) => <span style={getStyles('wrappers', subType)}>{content}</span>,
+    wWrapper: (atts, content) => Object.keys(atts).length === 0 ?
+        content :
+        <span
+            style={{
+                display: "inline-block",
+                verticalAlign: "top",
+                textAlign: "center"
+            }}
+        >
+        <div>{content}</div>
+            {
+                Object.entries(atts).map(
+                    a =>
+                        <div
+                            style={{
+                                fontSize: "xx-small",
+                                fontWeight: "bold"
+                            }}
+                        >
+                            {`${a[0]} = ${a[1]}`}
+                        </div>
+                )
+            }
+    </span>,
     mergeParas: paras => paras,
 }
 
