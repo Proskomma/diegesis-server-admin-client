@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Typography, Grid} from "@mui/material";
+import {Typography, Grid, Switch, FormGroup, FormControlLabel} from "@mui/material";
 
 import {SofriaRenderFromProskomma} from "proskomma-json-tools";
 import sofria2WebActions from '../renderer/sofria2web';
@@ -12,6 +12,8 @@ export default function BrowseScripture({pk}) {
         menuQuery: null,
         renderedDocId: null,
         rendered: null,
+        showWordAtts: false,
+        updatedAtts: false,
     });
 
     const docName = d => {
@@ -41,13 +43,15 @@ export default function BrowseScripture({pk}) {
             } else {
                 newDocId = scriptureData.docId;
             }
-            if (newDocId !== scriptureData.renderedDocId) {
+            if (newDocId !== scriptureData.renderedDocId || scriptureData.updatedAtts) {
                 const renderer = new SofriaRenderFromProskomma({
                     proskomma: pk,
                     actions: sofria2WebActions,
                 });
 
-                const config = {};
+                const config = {
+                    showWordAtts: scriptureData.showWordAtts
+                };
                 const output = {};
                 try {
                     renderer.renderDocument(
@@ -62,10 +66,12 @@ export default function BrowseScripture({pk}) {
                     throw err;
                 }
                 setScriptureData({
+                    ...scriptureData,
                     docId: newDocId,
                     renderedDocId: newDocId,
                     menuQuery,
-                    rendered: output.paras
+                    rendered: output.paras,
+                    updatedAtts: false,
                 });
             }
         },
@@ -76,18 +82,42 @@ export default function BrowseScripture({pk}) {
         scriptureData.menuQuery.data.docSets[0].documents.map(d => ({id: d.id, label: docName(d)})) :
         [];
 
-    const setDocId = newId => setScriptureData({... scriptureData, docId: newId})
+    const setDocId = newId => setScriptureData({...scriptureData, docId: newId});
+    const toggleWordAtts = () => setScriptureData({
+        ...scriptureData,
+        showWordAtts: !scriptureData.showWordAtts,
+        updatedAtts: true
+    });
 
     return (
         <Grid container>
-            <Grid item xs={12}>
-                <DocSelector docs={docMenuItems} docId={scriptureData.docId} setDocId={setDocId}/>
+            <Grid item xs={12} sm={6} md={4} lg={2}>
+                <DocSelector
+                    docs={docMenuItems}
+                    docId={scriptureData.docId}
+                    setDocId={setDocId}
+                    disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                />
+            </Grid>
+            <Grid item xs={12} sm={6} md={8} lg={10}>
+                <FormGroup>
+                    <FormControlLabel
+                        control={<Switch
+                            checked={scriptureData.showWordAtts}
+                            size="small"
+                            onChange={() => toggleWordAtts()}
+                            inputProps={{'aria-label': 'controlled'}}
+                            disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                        />}
+                        label="Word Info"
+                    />
+                </FormGroup>
             </Grid>
             <Grid item xs={12}>
                 {
-                    scriptureData.rendered ?
+                    scriptureData.rendered && scriptureData.docId === scriptureData.renderedDocId ?
                         <>{scriptureData.rendered}</> :
-                        <Typography>Please select a document from the menu above</Typography>
+                        <Typography>Loading...</Typography>
                 }
             </Grid>
         </Grid>

@@ -159,10 +159,13 @@ const sofria2WebActions = {
         {
             description: "Handle standard w attributes",
             test: ({context}) => context.sequences[0].element.subType === "usfm:w",
-            action: ({context, workspace, output}) => {
+            action: ({config, context, workspace, output}) => {
                 const popped = workspace.paraContentStack.shift();
                 // console.log("endWrapper", popped, workspace.paraContentStack.length);
-                workspace.paraContentStack[0].content.push(renderers.wWrapper(popped.atts, popped.content));
+                    workspace.paraContentStack[0].content.push(renderers.wWrapper(
+                        (config.showWordAtts ? popped.atts : {}),
+                        popped.content
+                    ));
                 return false;
             }
         },

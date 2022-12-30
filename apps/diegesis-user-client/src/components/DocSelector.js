@@ -1,6 +1,6 @@
 import { Select, MenuItem } from "@mui/material";
 
-export default function DocSelector({docs, docId, setDocId}) {
+export default function DocSelector({docs, docId, setDocId, disabled}) {
 
     return (
         <Select
@@ -11,6 +11,7 @@ export default function DocSelector({docs, docId, setDocId}) {
             color="primary"
             sx={{ marginRight: "1em", backgroundColor: "#FFF"}}
             onChange={(event) => setDocId(event.target.value)}
+            disabled={disabled}
         >
             <MenuItem
                 key={-1}
