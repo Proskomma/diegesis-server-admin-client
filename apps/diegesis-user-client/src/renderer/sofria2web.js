@@ -1,4 +1,4 @@
-import {renderers, styles} from './render2react';
+import {renderers} from './render2react';
 
 const sofria2WebActions = {
     startDocument: [
@@ -11,6 +11,7 @@ const sofria2WebActions = {
                 output.sofria.sequence = {};
                 workspace.currentSequence = output.sofria.sequence;
                 workspace.paraContentStack = [];
+                workspace.footnoteNo = 1;
             },
         }
     ],
@@ -29,6 +30,9 @@ const sofria2WebActions = {
             description: "identity",
             test: () => true,
             action: ({workspace}) => {
+                if (workspace.currentSequence.type === 'footnote') {
+                    workspace.footnoteNo++;
+                }
                 workspace.currentSequence = null;
             }
         },
@@ -108,7 +112,8 @@ const sofria2WebActions = {
                 workspace.webParas.push(
                     renderers.paragraph(
                         workspace.paraContentStack[0].subType,
-                        workspace.paraContentStack[0].content
+                        workspace.paraContentStack[0].content,
+                        workspace.footnoteNo,
                     )
                 );
             }

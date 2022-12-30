@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Typography, Grid} from "@mui/material";
 
 import {SofriaRenderFromProskomma} from "proskomma-json-tools";
-import sofria2WebActions from '../renderer/sofria2html';
+import sofria2WebActions from '../renderer/sofria2web';
 import DocSelector from "./DocSelector";
 
 export default function BrowseScripture({pk}) {

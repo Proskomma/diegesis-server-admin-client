@@ -281,11 +281,11 @@ const renderers = {
     text: text => text,
     chapter_label: number => <span style={getStyles('marks', "chapter_label")}>{number}</span>,
     verses_label: number => <span style={getStyles('marks', "verses_label")}>{number}</span>,
-    paragraph: (subType, content) =>
+    paragraph: (subType, content, footnoteNo) =>
         ["usfm:f", "usfm:x"].includes(subType) ?
             <InlineElement
                 style={getStyles('paras', subType)}
-                linkText={subType === "usfm:f" ? "*" : "x"}
+                linkText={subType === "usfm:f" ? `${footnoteNo}` : "*"}
             >
                 {content}
             </InlineElement> :
