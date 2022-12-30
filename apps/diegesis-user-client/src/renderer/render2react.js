@@ -162,6 +162,9 @@ const styles = {
             fontStyle: "italic",
             fontSize: "large"
         },
+        "usfm:sr": {
+            fontSize: "large"
+        },
         "usfm:tr": {},
         "usfm:x": {
             fontSize: "small"
@@ -199,6 +202,9 @@ const styles = {
         chapter: {},
         "usfm:fl": {},
         "usfm:fm": {},
+        "usfm:fq": {
+            fontStyle: "italic"
+        },
         "usfm:fqa": {
             fontStyle: "italic"
         },

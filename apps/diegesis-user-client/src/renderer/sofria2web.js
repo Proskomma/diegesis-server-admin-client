@@ -179,6 +179,43 @@ const sofria2WebActions = {
             }
         },
     ],
+    startMilestone: [
+        {
+            description: "Handle zaln word-like atts",
+            test: ({context}) => context.sequences[0].element.subType === "usfm:zaln",
+            action: ({context, workspace}) => {
+                const atts = context.sequences[0].element.atts;
+                const standardAtts = {};
+                for (const [key, value] of Object.entries(atts)) {
+                    if (["x-strong", "x-lemma", "x-morph", "x-content"].includes(key)) {
+                        standardAtts[key.split('-')[1]] = value;
+                    }
+                }
+                workspace.paraContentStack.unshift(
+                    {
+                        atts: standardAtts,
+                        content: []
+                    }
+                );
+                return false;
+            }
+        },
+    ],
+    endMilestone: [
+        {
+            description: "Handle zaln word-like atts",
+            test: ({context}) => context.sequences[0].element.subType === "usfm:zaln",
+            action: ({config, context, workspace}) => {
+                const popped = workspace.paraContentStack.shift();
+                // console.log("endWrapper", popped, workspace.paraContentStack.length);
+                workspace.paraContentStack[0].content.push(renderers.wWrapper(
+                    (config.showWordAtts ? popped.atts : {}),
+                    popped.content
+                ));
+                return false;
+            }
+        },
+    ],
     text: [
         {
             description: "Push text to para",
