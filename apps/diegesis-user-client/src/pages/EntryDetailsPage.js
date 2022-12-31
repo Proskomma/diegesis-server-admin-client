@@ -52,7 +52,7 @@ export default function EntryDetailsPage() {
         <Box style={{marginTop: "100px"}}>
             <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>
                 <Button>
-                    <RouterLink to="/list"><ArrowBack/></RouterLink></Button>
+                    <RouterLink to={`/entry/browse/${source}/${owner}/${entryId}/${revision}`} relative="path"><ArrowBack/></RouterLink></Button>
                 {translationInfo.title}
             </Typography>
             <Typography variant="h5" paragraph="true">Details</Typography>

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {Container, Typography, Box, Button} from "@mui/material";
 import {useParams, Link as RouterLink} from "react-router-dom";
-import {ArrowBack} from '@mui/icons-material';
+import {ArrowBack, Info, Download} from '@mui/icons-material';
 import {gql, useQuery} from "@apollo/client";
 import {Proskomma} from 'proskomma-core';
 import GqlError from "../components/GqlError";
@@ -39,10 +39,11 @@ export default function EntryBrowsePage() {
     );
 
     if (loading) {
-        return <Spinner/>
+        return <Spinner/>;
     }
+
     if (error) {
-        return <GqlError error={error}/>
+        return <GqlError error={error}/>;
     }
 
     const translationInfo = data.org.localTranslation;
@@ -70,17 +71,29 @@ export default function EntryBrowsePage() {
         },
     ]);
 
-    pk.loadSuccinctDocSet(JSON.parse(translationInfo.succinct));
+    if (translationInfo.succinct) {
+        pk.loadSuccinctDocSet(JSON.parse(translationInfo.succinct));
+    }
 
     return <Container fixed className="homepage">
         <Header selected="list"/>
         <Box style={{marginTop: "100px"}}>
             <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>
                 <Button>
-                    <RouterLink to="/list"><ArrowBack/></RouterLink></Button>
+                    <RouterLink to="/list"><ArrowBack/></RouterLink>
+                </Button>
                 {translationInfo.title}
+                <Button>
+                    <RouterLink to={`/entry/details/${source}/${owner}/${entryId}/${revision}`}><Info/></RouterLink>
+                </Button>
+                <Button>
+                    <RouterLink
+                        to={`/entry/download/${source}/${owner}/${entryId}/${revision}`}><Download/></RouterLink>
+                </Button>
             </Typography>
-            <BrowseScripture pk={pk}/>
+            {translationInfo.succinct && <BrowseScripture pk={pk}/>}
+            {!translationInfo.succinct &&
+            <Typography paragraph="true">Unable to render this translation at present: please try later</Typography>}
             <Footer/>
         </Box>
     </Container>;

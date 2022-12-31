@@ -24,6 +24,7 @@
         "/who",
         "/how",
         "/list",
+        "/blend",
         "/entry/*"
       ]
     }

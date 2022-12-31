@@ -6,7 +6,7 @@ import {gql, useQuery} from "@apollo/client";
 import GqlError from "./GqlError";
 import {Button, Typography, Grid} from "@mui/material";
 import Spinner from './Spinner';
-import {Download, Book, Info} from '@mui/icons-material';
+import {ArrowForward} from '@mui/icons-material';
 
 export default function ListView({searchOrg, searchLang, searchText}) {
 
@@ -44,30 +44,16 @@ export default function ListView({searchOrg, searchLang, searchText}) {
     function createData(localTranslation, orgId) {
         return {
             docSet: <>
-            <Typography variant="body2">{localTranslation.owner}@{orgId}</Typography>
+                <Typography variant="body2">{localTranslation.owner}@{orgId}</Typography>
                 <Typography sx={{fontWeight: 'bold'}}
                             variant="body1">{localTranslation.title} ({localTranslation.languageCode})</Typography>
-                <Typography variant="body2" sx={{fontStyle: "italic"}}>{localTranslation.id} revision {localTranslation.revision}</Typography>
+                <Typography variant="body2"
+                            sx={{fontStyle: "italic"}}>{localTranslation.id} revision {localTranslation.revision}</Typography>
             </>,
             actions: <Grid container sx={{"textAlign": "right"}}>
-                <Grid item xs={12} md={4}>
-                    <Button>
-                        <RouterLink to={`/entry/details/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Info/></RouterLink>
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Button disabled={!localTranslation.hasSuccinct}>
-                        {
-                            localTranslation.hasSuccinct ?
-                            <RouterLink to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Book/></RouterLink> :
-                                <Book/>
-                        }
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Button>
-                        <RouterLink to={`/entry/download/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><Download/></RouterLink>
-                    </Button>
+                <Grid item xs={12}>
+                    <RouterLink
+                        to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}><ArrowForward/></RouterLink>
                 </Grid>
             </Grid>
         };

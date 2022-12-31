@@ -3,7 +3,7 @@ import {Container, Typography, Box} from "@mui/material";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-export default function HomePage() {
+export default function HowPage() {
 
     return <Container fixed className="homepage">
         <Header selected="how"/>

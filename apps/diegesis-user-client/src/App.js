@@ -19,6 +19,7 @@ import HomePage from "./pages/HomePage";
 import WhoPage from "./pages/WhoPage";
 import HowPage from "./pages/HowPage";
 import ListPage from "./pages/ListPage";
+import BlendPage from "./pages/BlendPage";
 import EntryDetailsPage from "./pages/EntryDetailsPage";
 import EntryBrowsePage from "./pages/EntryBrowsePage";
 import EntryDownloadPage from "./pages/EntryDownloadPage";
@@ -85,6 +86,11 @@ function App() {
                 searchText={searchText}
                 setSearchText={setSearchText}
             />,
+            errorElement: <ErrorBoundary/>
+        },
+        {
+            path: "/blend",
+            element: <BlendPage />,
             errorElement: <ErrorBoundary/>
         },
         {
