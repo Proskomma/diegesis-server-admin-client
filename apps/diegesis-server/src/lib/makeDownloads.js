@@ -1,5 +1,6 @@
 const {Proskomma} = require('proskomma-core');
 const {PerfRenderFromProskomma, transforms, mergeActions} = require('proskomma-json-tools');
+const {ptBooks} = require('proskomma-utils');
 const path = require("path");
 const {
     transPath,
@@ -101,6 +102,7 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
         const downloads = makeDownloads(
             dataPath,
             org,
+            orgDir,
             metadata,
             contentType,
             fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
@@ -150,7 +152,7 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
     parentPort.postMessage({orgDir, owner, transId, revision, status: "done"});
 }
 
-function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
+function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsContent) {
     const pk = new Proskomma([
         {
             name: "source",
@@ -192,8 +194,36 @@ function makeDownloads(dataPath, org, metadata, docType, docs, vrsContent) {
             docType,
             docs,
         );
-        docSetId = pk.gqlQuerySync('{docSets { id } }').data.docSets[0].id;
+        const docSet = pk.gqlQuerySync('{docSets { id documents { bookCode: header(id: "bookCode") } } }').data.docSets[0];
+        docSetId = docSet.id;
+        const docSetBookCodes = docSet.documents.map(d => d.bookCode);
+        const docInfo = {
+            ot: 0,
+            nt: 0,
+            dc: 0
+        };
+        for (const bookCode of docSetBookCodes) {
+            for (const section of Object.keys(docInfo)) {
+                if (ptBooks[bookCode].categories.includes(section)) {
+                    docInfo[section]++;
+                }
+            }
+        }
+        const metadataPath = path.join(
+            transPath(
+                dataPath,
+                orgDir,
+                metadata.owner.replace(/\s/g, "__"),
+                metadata.id,
+                metadata.revision.replace(/\s/g,"__")
+            ),
+            'metadata.json'
+        );
+        const newMetadata = {...metadata, ...docInfo};
+        fse.writeJsonSync(metadataPath, newMetadata);
+
         let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}" "language:${metadata.languageCode}"`;
+        metadataTags += ` "nOT:${docInfo.ot}" "nNT:${docInfo.nt}" "nDC:${docInfo.dc}"`;
         if (metadata.textDirection) {
             metadataTags += ` "direction:${metadata.textDirection}"`;
         }

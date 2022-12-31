@@ -534,58 +534,6 @@ const makeResolvers = async config => {
                     return false;
                 }
             },
-            makeSuccinct: async (root, args, context) => {
-                if (!context.auth || !context.auth.authenticated) {
-                    throw new Error(`No auth found for makeSuccinct mutation`);
-                }
-                const orgOb = orgsData[args.org];
-                if (!orgOb) {
-                    return false;
-                }
-                const transOb = orgOb.translations.filter(t => t.id === args.translationId)[0];
-                if (!transOb) {
-                    return false;
-                }
-                try {
-                    const metadata = fse.readJsonSync(
-                        path.join(
-                            transPath(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision),
-                            'metadata.json'
-                        )
-                    );
-                    let contentDir = usfmDir(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
-                    let docType = 'usfm';
-                    if (!fse.pathExistsSync(contentDir)) {
-                        contentDir = usxDir(config.dataPath, orgOb.translationDir, transOb.owner, transOb.id, transOb.revision);
-                        docType = 'usx';
-                        if (!fse.pathExistsSync(contentDir)) {
-                            throw new Error(`Neither USFM nor USX directory exists for ${orgOb.name}/${transOb.id}`);
-                        }
-                    }
-                    let vrsContent = null;
-                    const vrsP = vrsPath(config.dataPath, orgOb.translationDir, transOb.id);
-                    if (fse.pathExistsSync(vrsP)) {
-                        vrsContent = fse.readFileSync(vrsP).toString();
-                    }
-                    /*
-                    const succinct = makeSuccinct(
-                        orgOb.name,
-                        metadata,
-                        docType,
-                        fse.readdirSync(contentDir).map(f => fse.readFileSync(path.join(contentDir, f)).toString()),
-                        vrsContent
-                    );
-                     */
-                    fse.writeJsonSync(
-                        succinctPath(config.dataPath, orgOb.translationDir, transOb.id),
-                        succinct,
-                    );
-                    return true;
-                } catch (err) {
-                    console.log(err);
-                    return false;
-                }
-            },
             deleteSuccinctError: async (root, args, context) => {
                 if (!context.auth || !context.auth.authenticated) {
                     throw new Error(`No auth found for deleteSuccinctError mutation`);

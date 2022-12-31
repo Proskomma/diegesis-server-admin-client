@@ -10,7 +10,7 @@
   "nWorkers": 2,
   "verbose": true,
   "includeMutations": true,
-  "sessionTimeoutInMins": 1,
+  "sessionTimeoutInMins": 10,
   "staticPaths": [
     {
       "path": "../diegesis-admin-client/build",

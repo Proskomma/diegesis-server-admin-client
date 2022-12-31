@@ -213,17 +213,6 @@ const mutationSchema = gql`
             """The id of the translation"""
             translationId: TranslationId!
         ) : Boolean!
-        """Makes succinct JSON from USFM or USX for the specified translation"""
-        makeSuccinct(
-            """The name of the organization"""
-            org: OrgName!
-            """The owner"""
-            owner: String!
-            """The id of the translation"""
-            id: TranslationId!
-            """The revision of the translation"""
-            revision: String!
-        ) : Boolean!
         """Deletes a succinct error, if present, which will allow succinct generation by the cron"""
         deleteSuccinctError(
             """The name of the organization"""
