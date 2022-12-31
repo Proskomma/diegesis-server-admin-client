@@ -3,7 +3,7 @@ import {Link as RouterLink} from 'react-router-dom';
 import {searchQuery} from '../lib/search';
 import {gql, useQuery} from "@apollo/client";
 import GqlError from "./GqlError";
-import {Button, Typography, Grid} from "@mui/material";
+import {Typography, Grid} from "@mui/material";
 import Spinner from './Spinner';
 
 export default function ListView({searchOrg, searchLang, searchText}) {
@@ -23,6 +23,9 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                 hasSuccinct
                 hasSuccinctError
                 hasVrs
+                nOT,
+                nNT,
+                nDC
             }
         }
     }`,
@@ -34,13 +37,24 @@ export default function ListView({searchOrg, searchLang, searchText}) {
         gql`${queryString}`,
     );
 
+
     function rowData(localTranslation, orgId) {
+        const canonStrings = [];
+        if (localTranslation.nOT && localTranslation.nOT > 0) {
+            canonStrings.push(`${localTranslation.nOT} OT`);
+        }
+        if (localTranslation.nNT && localTranslation.nNT > 0) {
+            canonStrings.push(`${localTranslation.nNT} NT`);
+        }
+        if (localTranslation.nDC && localTranslation.nDC > 0) {
+            canonStrings.push(`${localTranslation.nDC} DC`);
+        }
         return <Grid container xs={12} sx={{borderTop: "solid 1px #ccc", padding: "2px", marginBottom: "2px"}}>
             <Grid item xs={12} md={3}>
-                <Typography variant="body2">{orgId}</Typography>
-                <Typography variant="body2">{localTranslation.owner}</Typography>
+                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{orgId}</Typography>
+                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}</Typography>
             </Grid>
-            <Grid item xs={11} md={6}>
+            <Grid item xs={10} md={6}>
                 <RouterLink
                     to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}
                     style={{textDecoration: "none"}}> <Typography sx={{fontWeight: 'bold', textAlign: "center"}} variant="body1">
@@ -48,14 +62,15 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                 </Typography>
                 </RouterLink>
             </Grid>
-            <Grid item xs={1}>
-                <Typography variant="body2" sx={{textAlign: "right"}}>{localTranslation.languageCode}</Typography>
+            <Grid item xs={2} md={1}>
+                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
+                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={12} md={2}>
-                <Typography variant="body2" sx={{textAlign: "right"}}>
+                <Typography variant="body2" sx={{textAlign: "right", fontSize: "x-small"}}>
                     ID {localTranslation.id}
                 </Typography>
-                <Typography variant="body2" sx={{textAlign: "right"}}>
+                <Typography variant="body2" sx={{textAlign: "right", fontSize: "x-small"}}>
                     Rev {localTranslation.revision}
                 </Typography>
             </Grid>

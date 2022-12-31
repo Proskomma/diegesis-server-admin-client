@@ -185,6 +185,12 @@ const querySchema = gql`
         hasVrs: Boolean!
         """The VRS file for this translation"""
         vrs: String
+        """The number of OT books in this document"""
+        nOT: Int!
+        """The number of NT books in this document"""
+        nNT: Int!
+        """The number of DC books in this document"""
+        nDC: Int!
     }
     `;
 const mutationSchema = gql`

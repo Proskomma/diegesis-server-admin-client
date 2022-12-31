@@ -183,6 +183,7 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         simpleSofria: []
     };
     let docSetId;
+    let docInfo;
     try {
         pk.importDocuments(
             {
@@ -197,7 +198,7 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         const docSet = pk.gqlQuerySync('{docSets { id documents { bookCode: header(id: "bookCode") } } }').data.docSets[0];
         docSetId = docSet.id;
         const docSetBookCodes = docSet.documents.map(d => d.bookCode);
-        const docInfo = {
+        docInfo = {
             ot: 0,
             nt: 0,
             dc: 0
@@ -316,6 +317,31 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                     doc: doc.id,
                     book: doc.book,
                     making: "sofria"
+                },
+                message: err.message,
+            });
+        }
+        try {
+            const metadataPath = path.join(
+                transPath(
+                    dataPath,
+                    orgDir,
+                    metadata.owner.replace(/\s/g, "__"),
+                    metadata.id,
+                    metadata.revision.replace(/\s/g, "__")
+                ),
+                'metadata.json'
+            );
+            const newMetadata = {...metadata, ...docInfo};
+            fse.writeJsonSync(metadataPath, newMetadata);
+        } catch (err) {
+            parentPort.postMessage({
+                generatedBy: 'cron',
+                context: {
+                    docSetId,
+                    doc: doc.id,
+                    book: doc.book,
+                    making: "augmented metadata.json"
                 },
                 message: err.message,
             });

@@ -457,6 +457,9 @@ const makeResolvers = async config => {
                 }
                 return null;
             },
+            nOT: (trans) => trans.ot || 0,
+            nNT: (trans) => trans.nt || 0,
+            nDC: (trans) => trans.dc || 0,
         }
     };
     const mutationResolver = {
