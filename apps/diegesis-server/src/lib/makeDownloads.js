@@ -188,43 +188,57 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         pk.importDocuments(
             {
                 source: org,
-                owner: metadata.owner.replace(/\s/g, "__"),
-                project: metadata.abbreviation.replace(/\s/g, "__"),
-                revision: metadata.revision.replace(/\s/g, "__"),
+                owner: metadata.owner,
+                project: metadata.id,
+                revision: metadata.revision,
             },
             docType,
             docs,
         );
-        const docSet = pk.gqlQuerySync('{docSets { id documents { bookCode: header(id: "bookCode") } } }').data.docSets[0];
+        const docSet = pk.gqlQuerySync('{docSets { id documents { bookCode: header(id: "bookCode") sequences {type} } } }').data.docSets[0];
         docSetId = docSet.id;
         const docSetBookCodes = docSet.documents.map(d => d.bookCode);
         docInfo = {
-            ot: 0,
-            nt: 0,
-            dc: 0
+            nOT: 0,
+            nNT: 0,
+            nDC: 0
         };
         for (const bookCode of docSetBookCodes) {
-            for (const section of Object.keys(docInfo)) {
+            for (const section of ['ot', 'nt', 'dc']) {
                 if (ptBooks[bookCode].categories.includes(section)) {
-                    docInfo[section]++;
+                    docInfo[`n${section.toUpperCase()}`]++;
                 }
             }
         }
+        const sequenceTypes = new Set([]);
+        for (const sequences of docSet.documents.map(d => d.sequences)) {
+            for (const sequenceType of sequences.map(s => s.type)) {
+                sequenceTypes.add(sequenceType);
+            }
+        }
+        docInfo.hasIntroductions = sequenceTypes.has("introduction");
+        docInfo.hasHeadings = sequenceTypes.has("heading");
+        docInfo.hasFootnotes = sequenceTypes.has("footnote");
+        docInfo.hasXrefs = sequenceTypes.has("xref");
+
         const metadataPath = path.join(
             transPath(
                 dataPath,
                 orgDir,
-                metadata.owner.replace(/\s/g, "__"),
+                metadata.owner,
                 metadata.id,
-                metadata.revision.replace(/\s/g,"__")
+                metadata.revision
             ),
             'metadata.json'
         );
         const newMetadata = {...metadata, ...docInfo};
+        delete newMetadata.ot;
+        delete newMetadata.nt;
+        delete newMetadata.dc;
         fse.writeJsonSync(metadataPath, newMetadata);
 
         let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}" "language:${metadata.languageCode}"`;
-        metadataTags += ` "nOT:${docInfo.ot}" "nNT:${docInfo.nt}" "nDC:${docInfo.dc}"`;
+        metadataTags += ` "nOT:${docInfo.nOT}" "nNT:${docInfo.nNT}" "nDC:${docInfo.nDC}"`;
         if (metadata.textDirection) {
             metadataTags += ` "direction:${metadata.textDirection}"`;
         }
@@ -326,9 +340,9 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 transPath(
                     dataPath,
                     orgDir,
-                    metadata.owner.replace(/\s/g, "__"),
+                    metadata.owner,
                     metadata.id,
-                    metadata.revision.replace(/\s/g, "__")
+                    metadata.revision
                 ),
                 'metadata.json'
             );

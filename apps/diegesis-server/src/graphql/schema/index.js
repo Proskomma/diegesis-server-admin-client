@@ -191,6 +191,14 @@ const querySchema = gql`
         nNT: Int!
         """The number of DC books in this document"""
         nDC: Int!
+        """Does the translation have introductions?"""
+        hasIntroductions: Boolean!
+        """Does the translation have headings?"""
+        hasHeadings: Boolean!
+        """Does the translation have footnotes?"""
+        hasFootnotes: Boolean!
+        """Does the translation have Xrefs?"""
+        hasXrefs: Boolean!
     }
     `;
 const mutationSchema = gql`

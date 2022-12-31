@@ -457,9 +457,13 @@ const makeResolvers = async config => {
                 }
                 return null;
             },
-            nOT: (trans) => trans.ot || 0,
-            nNT: (trans) => trans.nt || 0,
-            nDC: (trans) => trans.dc || 0,
+            nOT: (trans) => trans.nOT || 0,
+            nNT: (trans) => trans.nNT || 0,
+            nDC: (trans) => trans.nDC || 0,
+            hasIntroductions: (trans) => trans.hasIntroductions || false,
+            hasHeadings: (trans) => trans.hasHeadings || false,
+            hasFootnotes: (trans) => trans.hasFootnotes || false,
+            hasXrefs: (trans) => trans.hasXrefs || false,
         }
     };
     const mutationResolver = {

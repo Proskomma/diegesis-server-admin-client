@@ -57,10 +57,12 @@ const fetchUsx = async (org, trans, config) => {
             .getElementsByTagName('abbreviation')['0']
             .childNodes[0].nodeValue;
     metadataRecord.owner =
-        metadataRoot.getElementsByTagName('agencies')['0']
-            .getElementsByTagName('rightsHolder')['0']
-            .getElementsByTagName('abbr')['0']
-            .childNodes[0].nodeValue || '???';
+        (
+            metadataRoot.getElementsByTagName('agencies')['0']
+                .getElementsByTagName('rightsHolder')['0']
+                .getElementsByTagName('abbr')['0']
+                .childNodes[0].nodeValue || '???')
+            .replace(/\s/g, "__");
     metadataRecord.copyright =
         metadataRoot.getElementsByTagName('copyright')['0']
             .getElementsByTagName('fullStatement')['0']

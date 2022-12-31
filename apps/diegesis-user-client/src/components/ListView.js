@@ -25,7 +25,11 @@ export default function ListView({searchOrg, searchLang, searchText}) {
                 hasVrs
                 nOT,
                 nNT,
-                nDC
+                nDC,
+                hasIntroductions,
+                hasHeadings,
+                hasFootnotes,
+                hasXrefs,
             }
         }
     }`,
@@ -49,22 +53,36 @@ export default function ListView({searchOrg, searchLang, searchText}) {
         if (localTranslation.nDC && localTranslation.nDC > 0) {
             canonStrings.push(`${localTranslation.nDC} DC`);
         }
+        const featureStrings = [];
+        if (localTranslation.hasIntroductions) {
+            featureStrings.push("Intros");
+        }
+        if (localTranslation.hasHeadings) {
+            featureStrings.push("Headings");
+        }
+        if (localTranslation.hasFootnotes) {
+            featureStrings.push("Footnotes");
+        }
+        if (localTranslation.hasXrefs) {
+            featureStrings.push("Xrefs");
+        }
         return <Grid container xs={12} sx={{borderTop: "solid 1px #ccc", padding: "2px", marginBottom: "2px"}}>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{orgId}</Typography>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}</Typography>
+                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
             </Grid>
             <Grid item xs={10} md={6}>
                 <RouterLink
-                    to={`/entry/browse/${orgId}/${localTranslation.owner}/${localTranslation.id}/${localTranslation.revision}`}
+                    to={`/entry/browse/${orgId}/${localTranslation.owner.replace(/\s/g, "__")}/${localTranslation.id}/${localTranslation.revision.replace(/\s/g, "__")}`}
                     style={{textDecoration: "none"}}> <Typography sx={{fontWeight: 'bold', textAlign: "center"}} variant="body1">
                     {localTranslation.title}
                 </Typography>
                 </RouterLink>
             </Grid>
-            <Grid item xs={2} md={1}>
-                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
+            <Grid item xs={2}>
                 <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
+                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{featureStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={12} md={2}>
                 <Typography variant="body2" sx={{textAlign: "right", fontSize: "x-small"}}>
