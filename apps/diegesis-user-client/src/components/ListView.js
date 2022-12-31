@@ -1,12 +1,12 @@
 import React from 'react';
+import {useQuery, gql} from "@apollo/client";
 import {Link as RouterLink} from 'react-router-dom';
-import {searchQuery} from '../lib/search';
-import {gql, useQuery} from "@apollo/client";
-import GqlError from "./GqlError";
 import {Typography, Grid} from "@mui/material";
+import {searchQuery} from '../lib/search';
+import GqlError from "./GqlError";
 import Spinner from './Spinner';
 
-export default function ListView({searchOrg, searchLang, searchText}) {
+export default function ListView({searchTerms}) {
 
     const queryString = searchQuery(
         `query localTranslations {
@@ -33,8 +33,7 @@ export default function ListView({searchOrg, searchLang, searchText}) {
             }
         }
     }`,
-        searchLang,
-        searchText
+        searchTerms
     );
 
     const {loading, error, data} = useQuery(
@@ -68,8 +67,7 @@ export default function ListView({searchOrg, searchLang, searchText}) {
         }
         return <Grid container xs={12} sx={{borderTop: "solid 1px #ccc", padding: "2px", marginBottom: "2px"}}>
             <Grid item xs={12} md={2}>
-                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{orgId}</Typography>
-                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}</Typography>
+                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}@{orgId}</Typography>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
             </Grid>
             <Grid item xs={10} md={6}>
@@ -102,7 +100,7 @@ export default function ListView({searchOrg, searchLang, searchText}) {
         return <GqlError error={error}/>
     }
     let rows = [];
-    const so = searchOrg.trim().toLowerCase();
+    const so = searchTerms.org.trim().toLowerCase();
     for (const orgData of data.orgs) {
         orgData.localTranslations.forEach(
             lt => {

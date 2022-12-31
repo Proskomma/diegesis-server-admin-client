@@ -1,35 +1,70 @@
+import React, {useState, useEffect, useMemo} from 'react';
+import {
+    ApolloClient,
+    gql,
+    InMemoryCache,
+} from "@apollo/client";
+import {Container, Box, Grid, TextField, Typography} from "@mui/material";
 import Header from "../components/Header";
 import ListView from "../components/ListView";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
-import {Container, Box, Toolbar, TextField, Typography} from "@mui/material";
 import OrgSelector from "../components/OrgSelector";
 
-export default function ListPage({
-                                     orgs,
-                                     searchOrg,
-                                     setSearchOrg,
-                                     searchLang,
-                                     setSearchLang,
-                                     searchText,
-                                     setSearchText
-                                 }) {
+export default function ListPage({}) {
+    const [searchOrg, setSearchOrg] = useState('all');
+    const [searchOwner, setSearchOwner] = useState('');
+    const [searchLang, setSearchLang] = useState('');
+    const [searchText, setSearchText] = useState('');
+    const [orgs, setOrgs] = useState([]);
+
+    const client = new ApolloClient(
+        {
+            uri: '/graphql',
+            cache: new InMemoryCache(),
+        }
+    );
+
+    const memoClient = useMemo(() => client);
+
+    // This piece runs once, when the page is rendered
+    useEffect(
+        () => {
+            const doOrgs = async () => {
+                const result = await memoClient.query({query: gql`{ orgs { id: name } }`});
+                setOrgs(result.data.orgs.map(o => o.id));
+            };
+            doOrgs();
+        },
+        []
+    );
+
     return <Container fixed className="listpage">
         <Header selected="list">
-            <Toolbar>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        width: 500,
-                        maxWidth: '100%',
-                    }}
-                >
+        </Header>
+        <Box style={{marginTop: "100px"}}>
+            <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>Resources</Typography>
+            <Grid container>
+                <Grid item xs={12} sm={6} md={3} sx={{paddingBottom: "15px"}}>
                     <OrgSelector
                         orgs={orgs}
                         searchOrg={searchOrg}
                         setSearchOrg={setSearchOrg}
-                        sx={{marginRight: "1em"}}
                     />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <TextField
+                        value={searchOwner}
+                        onChange={e => setSearchOwner(e.target.value)}
+                        label="Owner"
+                        size="small"
+                        id="searchOwner"
+                        variant="filled"
+                        color="primary"
+                        sx={{display: 'flex', marginLeft: "1em"}}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
                     <TextField
                         value={searchLang}
                         onChange={e => setSearchLang(e.target.value)}
@@ -38,8 +73,10 @@ export default function ListPage({
                         id="searchLanguage"
                         variant="filled"
                         color="primary"
-                        sx={{marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
+                        sx={{display: 'flex', marginLeft: "1em"}}
                     />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
                     <TextField
                         value={searchText}
                         onChange={e => setSearchText(e.target.value)}
@@ -48,15 +85,19 @@ export default function ListPage({
                         id="searchTitle"
                         variant="filled"
                         color="primary"
-                        sx={{marginRight: "1em", backgroundColor: "#FFF", display: 'flex'}}
+                        sx={{display: 'flex', marginLeft: "1em"}}
                     />
-                </Box>
-            </Toolbar>
-        </Header>
-        <Box id="body" style={{marginTop: "150px"}}>
-            <Typography variant="h4" paragraph="true" sx={{mt: "20px"}}>Resources</Typography>
+                </Grid>
+            </Grid>
+        </Box>
+        <Box>
             {orgs.length > 0 ?
-                <ListView searchOrg={searchOrg} searchLang={searchLang} searchText={searchText}/>
+                <ListView searchTerms={{
+                    org: searchOrg,
+                    owner: searchOwner,
+                    lang: searchLang,
+                    text: searchText
+                }}/>
                 :
                 <Spinner/>
             }

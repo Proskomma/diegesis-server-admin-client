@@ -1,14 +1,10 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React from 'react';
 import {
     createBrowserRouter,
     RouterProvider,
     useRouteError,
 } from "react-router-dom";
-import {
-    ApolloClient,
-    ApolloProvider, gql,
-    InMemoryCache,
-} from "@apollo/client";
+import {ApolloProvider, ApolloClient, InMemoryCache} from "@apollo/client";
 import {
     createTheme,
     CssBaseline,
@@ -25,10 +21,6 @@ import EntryBrowsePage from "./pages/EntryBrowsePage";
 import EntryDownloadPage from "./pages/EntryDownloadPage";
 
 function App() {
-    const [searchOrg, setSearchOrg] = useState('all');
-    const [searchLang, setSearchLang] = useState('');
-    const [searchText, setSearchText] = useState('');
-    const [orgs, setOrgs] = useState([]);
 
     const theme = createTheme({});
 
@@ -37,20 +29,6 @@ function App() {
             uri: '/graphql',
             cache: new InMemoryCache(),
         }
-    );
-
-    const memoClient = useMemo(() => client);
-
-    // This piece runs once, when the page is rendered
-    useEffect(
-        () => {
-            const doOrgs = async () => {
-                const result = await memoClient.query({query: gql`{ orgs { id: name } }`});
-                setOrgs(result.data.orgs.map(o => o.id));
-            };
-            doOrgs();
-        },
-        []
     );
 
     function ErrorBoundary() {
@@ -77,15 +55,7 @@ function App() {
         },
         {
             path: "/list",
-            element: <ListPage
-                orgs={orgs}
-                searchOrg={searchOrg}
-                setSearchOrg={setSearchOrg}
-                searchLang={searchLang}
-                setSearchLang={setSearchLang}
-                searchText={searchText}
-                setSearchText={setSearchText}
-            />,
+            element: <ListPage/>,
             errorElement: <ErrorBoundary/>
         },
         {

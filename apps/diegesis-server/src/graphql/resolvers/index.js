@@ -163,6 +163,14 @@ const makeResolvers = async config => {
         if (args.withId) {
             ret = ret.filter(t => args.withId.includes(t.id));
         }
+        if (args.withOwner) {
+            ret = ret.filter(
+                t =>
+                    args.withOwner.filter(
+                        ow => t.owner.toLowerCase().includes(ow.toLowerCase())
+                    ).length > 0
+            )
+        }
         if (args.withLanguageCode) {
             ret = ret.filter(t => args.withLanguageCode.includes(t.languageCode));
         }

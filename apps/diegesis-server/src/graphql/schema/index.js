@@ -69,6 +69,8 @@ const querySchema = gql`
             withSuccinct: Boolean
             """Filter according to presence or absence of succinct generation error"""
             withSuccinctError: Boolean
+            """Filter by owners"""
+            withOwner: [String!]
             """Filter by language codes"""
             withLanguageCode: [String!]
             """Filter by text matches in title"""
