@@ -325,7 +325,7 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 'metadata.json'
             );
             const newMetadata = {...metadata, stats: ret.stats};
-            for (const toDelete of ["ot", "nt", "dc", "hasIntroductions", "hasHeadings", "hasFootnotes", "hasXrefs"]) {
+            for (const toDelete of ["ot", "nt", "dc", "nOT", "nNT", "nDC", "hasIntroductions", "hasHeadings", "hasFootnotes", "hasXrefs"]) {
                 delete newMetadata[toDelete];
             }
             fse.writeFileSync(metadataPath, JSON.stringify(newMetadata, null, 2));

@@ -193,14 +193,28 @@ const querySchema = gql`
         nNT: Int!
         """The number of DC books in this document"""
         nDC: Int!
-        """Does the translation have introductions?"""
-        hasIntroductions: Boolean!
-        """Does the translation have headings?"""
-        hasHeadings: Boolean!
-        """Does the translation have footnotes?"""
-        hasFootnotes: Boolean!
-        """Does the translation have Xrefs?"""
-        hasXrefs: Boolean!
+        """The number of introductions in this document"""
+        nIntroductions: Int!
+        """The number of xrefs in this document"""
+        nXrefs: Int!
+        """The number of footnotes in this document"""
+        nFootnotes: Int!
+        """The number of headings in this document"""
+        nHeadings: Int!
+        """The number of strong markup in this document"""
+        nStrong: Int!
+        """The number of lemma markup in this document"""
+        nLemma: Int!
+        """The number of gloss markup in this document"""
+        nGloss: Int!
+        """The number of content markup in this document"""
+        nContent: Int!
+        """The number of occurrences markup in this document"""
+        nOccurrences: Int!
+        """The number of chapters in this document"""
+        nChapters: Int!
+        """The number of verses in this document"""
+        nVerses: Int!
     }
     `;
 const mutationSchema = gql`

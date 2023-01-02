@@ -26,10 +26,17 @@ export default function ListView({searchTerms}) {
                 nOT,
                 nNT,
                 nDC,
-                hasIntroductions,
-                hasHeadings,
-                hasFootnotes,
-                hasXrefs,
+                nIntroductions,
+                nHeadings,
+                nFootnotes,
+                nXrefs,
+                nStrong,
+                nLemma,
+                nGloss,
+                nContent,
+                nOccurrences,
+                nChapters,
+                nVerses
             }
         }
     }`,
@@ -53,22 +60,38 @@ export default function ListView({searchTerms}) {
             canonStrings.push(`${localTranslation.nDC} DC`);
         }
         const featureStrings = [];
-        if (localTranslation.hasIntroductions) {
+        if (localTranslation.nIntroductions > 0) {
             featureStrings.push("Intros");
         }
-        if (localTranslation.hasHeadings) {
+        if (localTranslation.nHeadings > 0) {
             featureStrings.push("Headings");
         }
-        if (localTranslation.hasFootnotes) {
+        if (localTranslation.nFootnotes > 0) {
             featureStrings.push("Footnotes");
         }
-        if (localTranslation.hasXrefs) {
+        if (localTranslation.nXrefs > 0) {
             featureStrings.push("Xrefs");
+        }
+        if (localTranslation.nStrong > 0) {
+            featureStrings.push("Strong");
+        }
+        if (localTranslation.nLemma > 0) {
+            featureStrings.push("Lemma");
+        }
+        if (localTranslation.nGloss > 0) {
+            featureStrings.push("Gloss");
+        }
+        if (localTranslation.nContent > 0) {
+            featureStrings.push("Content");
+        }
+        if (localTranslation.nOccurrences > 0) {
+            featureStrings.push("Occurrences");
         }
         return <Grid container xs={12} sx={{borderTop: "solid 1px #ccc", padding: "2px", marginBottom: "2px"}}>
             <Grid item xs={12} md={2}>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}@{orgId}</Typography>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
+                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={10} md={6}>
                 <RouterLink
@@ -79,7 +102,6 @@ export default function ListView({searchTerms}) {
                 </RouterLink>
             </Grid>
             <Grid item xs={2}>
-                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
                 <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{featureStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={12} md={2}>

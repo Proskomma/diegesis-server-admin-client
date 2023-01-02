@@ -465,13 +465,20 @@ const makeResolvers = async config => {
                 }
                 return null;
             },
-            nOT: (trans) => trans.nOT || 0,
-            nNT: (trans) => trans.nNT || 0,
-            nDC: (trans) => trans.nDC || 0,
-            hasIntroductions: (trans) => trans.hasIntroductions || false,
-            hasHeadings: (trans) => trans.hasHeadings || false,
-            hasFootnotes: (trans) => trans.hasFootnotes || false,
-            hasXrefs: (trans) => trans.hasXrefs || false,
+            nOT: (trans) => trans.stats?.nOT || 0,
+            nNT: (trans) => trans.stats?.nNT || 0,
+            nDC: (trans) => trans.stats?.nDC || 0,
+            nIntroductions: (trans) => trans.stats?.nIntroductions || 0,
+            nXrefs: (trans) => trans.stats?.nXrefs || 0,
+            nFootnotes: (trans) => trans.stats?.nFootnotes || 0,
+            nHeadings: (trans) => trans.stats?.nHeadings || 0,
+            nStrong: (trans) => trans.stats?.nStrong || 0,
+            nLemma: (trans) => trans.stats?.nLemma || 0,
+            nGloss: (trans) => trans.stats?.nGloss || 0,
+            nContent: (trans) => trans.stats?.nContent || 0,
+            nOccurrences: (trans) => trans.stats?.nOccurrences || 0,
+            nChapters: (trans) => trans.stats?.nChapters || 0,
+            nVerses: (trans) => trans.stats?.nVerses || 0,
         }
     };
     const mutationResolver = {
