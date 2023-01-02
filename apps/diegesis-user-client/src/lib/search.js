@@ -10,7 +10,7 @@ function searchClause(searchTerms) {
 }
 
 function searchQuery(query, searchTerms) {
-    const trimmed = Object.entries(searchTerms).filter(kv => kv[0] !== 'org').map(kv => kv[1].trim());
+    const trimmed = Object.entries(searchTerms).filter(kv => kv[0] !== 'org' && kv[0] !== 'features').map(kv => kv[1].trim());
    return query.replace(
            '%searchClause%',
            trimmed.filter(fl => fl.length > 0).length > 0  ?

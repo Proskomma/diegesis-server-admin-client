@@ -91,7 +91,6 @@ export default function ListView({searchTerms}) {
             <Grid item xs={12} md={2}>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.owner}@{orgId}</Typography>
                 <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{localTranslation.languageCode}</Typography>
-                <Typography variant="body2" sx={{fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={10} md={6}>
                 <RouterLink
@@ -102,6 +101,7 @@ export default function ListView({searchTerms}) {
                 </RouterLink>
             </Grid>
             <Grid item xs={2}>
+                <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{canonStrings.join(', ')}</Typography>
                 <Typography variant="body2" sx={{textAlign: "right", fontWeight: "bold", fontSize: "x-small"}}>{featureStrings.join(', ')}</Typography>
             </Grid>
             <Grid item xs={12} md={2}>

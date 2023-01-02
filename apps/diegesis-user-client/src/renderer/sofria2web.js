@@ -59,7 +59,8 @@ const sofria2WebActions = {
                 if (
                     currentBlock.subType !== "remark" &&
                     !(["title", "endTitle"].includes(currentBlock.subType) && !environment.workspace.settings.showTitles) &&
-                    !(["heading"].includes(currentBlock.subType) && !environment.workspace.settings.showHeadings)
+                    !(["heading"].includes(currentBlock.subType) && !environment.workspace.settings.showHeadings) &&
+                    !(["introduction"].includes(currentBlock.subType) && !environment.workspace.settings.showIntroductions)
                 ) {
                     const graftRecord = {
                         type: currentBlock.type,

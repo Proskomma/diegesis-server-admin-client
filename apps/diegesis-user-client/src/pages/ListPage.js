@@ -4,7 +4,7 @@ import {
     gql,
     InMemoryCache,
 } from "@apollo/client";
-import {Container, Box, Grid, TextField, Typography} from "@mui/material";
+import {Container, Box, Grid, TextField, Typography, Checkbox, FormGroup, FormControlLabel} from "@mui/material";
 import Header from "../components/Header";
 import ListView from "../components/ListView";
 import Spinner from "../components/Spinner";
@@ -17,6 +17,17 @@ export default function ListPage({}) {
     const [searchLang, setSearchLang] = useState('');
     const [searchText, setSearchText] = useState('');
     const [orgs, setOrgs] = useState([]);
+    const [features, setFeatures] = useState({
+        introductions: false,
+        headings: false,
+        footnotes: false,
+        xrefs: false,
+        strong: false,
+        lemma: false,
+        gloss: false,
+        content: false,
+        occurrences: false
+    });
 
     const client = new ApolloClient(
         {
@@ -88,15 +99,53 @@ export default function ListPage({}) {
                         sx={{display: 'flex', marginLeft: "1em"}}
                     />
                 </Grid>
+                {
+                    [
+                        ["Intro", "introductions"],
+                        ["Heading", "headings"],
+                        ["Footnote", "footnotes"],
+                        ["Xref", "xrefs"],
+                        ["Strong", "strong"],
+                        ["Lemma", "lemma"],
+                        ["Gloss", "gloss"],
+                        ["Content", "content"],
+                        ["Occurrence", "occurrences"],
+                    ].map(
+                        i =>
+                            <Grid item xs={6} sm={4} md={1}>
+                                <FormGroup>
+                                    <FormControlLabel
+                                        labelPlacement="bottom"
+                                        control={
+                                            <Checkbox
+                                                checked={features[i[1]]}
+                                                size="small"
+                                                color="primary"
+                                                onChange={
+                                                    () => {
+                                                        const nf = {...features};
+                                                        nf[i[1]] = !nf[i[1]];
+                                                        setFeatures(nf);
+                                                    }
+                                                }
+                                            />
+                                        }
+                                        label={i[0]}
+                                    />
+                                </FormGroup>
+                            </Grid>
+                    )
+                }
             </Grid>
         </Box>
-        <Box>
+        <Box style={{marginTop: "20px"}}>
             {orgs.length > 0 ?
                 <ListView searchTerms={{
                     org: searchOrg,
                     owner: searchOwner,
                     lang: searchLang,
-                    text: searchText
+                    text: searchText,
+                    features: features,
                 }}/>
                 :
                 <Spinner/>

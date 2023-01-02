@@ -15,6 +15,7 @@ export default function BrowseScripture({pk}) {
         showWordAtts: false,
         showTitles: true,
         showHeadings: true,
+        showIntroductions: true,
         showFootnotes: true,
         showXrefs: true,
         showParaStyles: true,
@@ -63,6 +64,7 @@ export default function BrowseScripture({pk}) {
                     showWordAtts: scriptureData.showWordAtts,
                     showTitles: scriptureData.showTitles,
                     showHeadings: scriptureData.showHeadings,
+                    showIntroductions: scriptureData.showIntroductions,
                     showFootnotes: scriptureData.showFootnotes,
                     showXrefs: scriptureData.showXrefs,
                     showParaStyles: scriptureData.showParaStyles,
@@ -114,6 +116,11 @@ export default function BrowseScripture({pk}) {
     const toggleHeadings = () => setScriptureData({
         ...scriptureData,
         showHeadings: !scriptureData.showHeadings,
+        updatedAtts: true
+    });
+    const toggleIntroductions = () => setScriptureData({
+        ...scriptureData,
+        showIntroductions: !scriptureData.showIntroductions,
         updatedAtts: true
     });
     const toggleFootnotes = () => setScriptureData({
@@ -186,6 +193,17 @@ export default function BrowseScripture({pk}) {
                                         disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
                                     />}
                                     label="Headings"
+                                />
+                                <FormControlLabel
+                                    control={<Switch
+                                        checked={scriptureData.showIntroductions}
+                                        color="secondary"
+                                        size="small"
+                                        onChange={() => toggleIntroductions()}
+                                        inputProps={{'aria-label': 'controlled'}}
+                                        disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
+                                    />}
+                                    label="Introductions"
                                 />
                                 <FormControlLabel
                                     control={<Switch
