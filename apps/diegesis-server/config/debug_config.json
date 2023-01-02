@@ -7,7 +7,7 @@
   "useCors": true,
   "orgs": [],
   "processFrequency": "1 min",
-  "nWorkers": 2,
+  "nWorkers": 8,
   "verbose": true,
   "includeMutations": true,
   "sessionTimeoutInMins": 10,

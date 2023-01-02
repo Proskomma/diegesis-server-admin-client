@@ -57,27 +57,6 @@ function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) 
             fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
             return;
         }
-        const perfD = perfDir(dataPath, orgDir, owner, transId, revision);
-        if (!fse.pathExistsSync(perfD)) {
-            fse.mkdir(perfD);
-        }
-        for (const [bookCode, perf] of downloads.perf) {
-            fse.writeFileSync(path.join(perfD, `${bookCode}.json`), JSON.stringify(JSON.parse(perf), null, 2));
-        }
-        const simplePerfD = simplePerfDir(dataPath, orgDir, owner, transId, revision);
-        if (!fse.pathExistsSync(simplePerfD)) {
-            fse.mkdir(simplePerfD);
-        }
-        for (const [bookCode, simplePerf] of downloads.simplePerf) {
-            fse.writeFileSync(path.join(simplePerfD, `${bookCode}.json`), JSON.stringify(JSON.parse(simplePerf), null, 2));
-        }
-        const sofriaD = sofriaDir(dataPath, orgDir, owner, transId, revision);
-        if (!fse.pathExistsSync(sofriaD)) {
-            fse.mkdir(sofriaD);
-        }
-        for (const [bookCode, sofria] of downloads.sofria) {
-            fse.writeFileSync(path.join(sofriaD, `${bookCode}.json`), JSON.stringify(JSON.parse(sofria), null, 2));
-        }
         fse.writeJsonSync(succinctPath(dataPath, orgDir, owner, transId, revision), downloads.succinct);
     } catch (err) {
         const succinctError = {
@@ -144,7 +123,6 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         }
     };
     let docSetId;
-    let docInfo;
     try {
         pk.importDocuments(
             {
@@ -185,18 +163,17 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         if (vrsContent) {
             pk.gqlQuerySync(`mutation { setVerseMapping(docSetId: "${docSetId}" vrsSource: """${vrsContent}""")}`);
         }
-        ret.succinct = pk.serializeSuccinct(docSetId);
     } catch (err) {
         ret.succinctError = {
             generatedBy: 'cron',
             context: {
                 docSetId: docSetId || "???",
-                making: "succinct",
+                making: "populatePk",
             },
             message: err.message
         };
         parentPort.postMessage(ret.succinctError);
-        fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
+        fse.remove(lockPath(dataPath, orgDir, metadata.owner, metadata.id, metadata.revision));
         return;
     }
     const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({
@@ -207,7 +184,11 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         let docResult = null;
         try {
             docResult = pk.gqlQuerySync(`{ document(id: """${doc.id}""") { bookCode: header(id:"bookCode") perf } }`).data.document;
-            ret.perf.push([docResult.bookCode, docResult.perf]);
+            const perfD = perfDir(dataPath, orgDir, metadata.owner, metadata.id, metadata.revision);
+            if (!fse.pathExistsSync(perfD)) {
+                fse.mkdirSync(perfD);
+            }
+            fse.writeFileSync(path.join(perfD, `${doc.book}.json`), JSON.stringify(JSON.parse(docResult.perf), null, 2));
         } catch (err) {
             docResult = null;
             parentPort.postMessage({
@@ -244,7 +225,11 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                     },
                 );
                 const simplePerf = transforms.alignment.mergePerfText.code({perf: output.perf}).perf;
-                ret.simplePerf.push([docResult.bookCode, JSON.stringify(simplePerf)]);
+                const simplePerfD = simplePerfDir(dataPath, orgDir, metadata.owner, metadata.id, metadata.revision);
+                if (!fse.pathExistsSync(simplePerfD)) {
+                    fse.mkdirSync(simplePerfD);
+                }
+                fse.writeFileSync(path.join(simplePerfD, `${doc.book}.json`), JSON.stringify(simplePerf, null, 2));
             } catch (err) {
                 docResult = null;
                 parentPort.postMessage({
@@ -293,7 +278,11 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         }
         try {
             const docResult = pk.gqlQuerySync(`{document(id: """${doc.id}""") { bookCode: header(id:"bookCode") sofria } }`).data.document;
-            ret.sofria.push([docResult.bookCode, docResult.sofria]);
+            const sofriaD = sofriaDir(dataPath, orgDir, metadata.owner, metadata.id, metadata.revision);
+            if (!fse.pathExistsSync(sofriaD)) {
+                fse.mkdirSync(sofriaD);
+            }
+            fse.writeFileSync(path.join(sofriaD, `${doc.book}.json`), JSON.stringify(JSON.parse(docResult.sofria), null, 2));
         } catch (err) {
             parentPort.postMessage({
                 generatedBy: 'cron',
@@ -308,7 +297,7 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         }
     }
     try {
-        for (const [book, bookStats] of Object.entries(ret.stats.documents)) {
+        for (const bookStats of Object.values(ret.stats.documents)) {
             for (const stat of [
                 "nChapters",
                 "nVerses",
@@ -340,6 +329,21 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 delete newMetadata[toDelete];
             }
             fse.writeFileSync(metadataPath, JSON.stringify(newMetadata, null, 2));
+        }
+        try {
+            ret.succinct = pk.serializeSuccinct(docSetId);
+        } catch (err) {
+            ret.succinctError = {
+                generatedBy: 'cron',
+                context: {
+                    docSetId: docSetId || "???",
+                    making: "succinct",
+                },
+                message: err.message
+            };
+            parentPort.postMessage(ret.succinctError);
+            fse.remove(lockPath(dataPath, orgDir, metadata.owner, metadata.id, metadata.revision));
+            return;
         }
     } catch
         (err) {

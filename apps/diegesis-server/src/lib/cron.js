@@ -20,19 +20,12 @@ function doRenderCron(config) {
         cronOptions[config.processFrequency],
         () => {
             let nLocked = 0;
-            let maxTasks = config.nWorkers;
             let taskSpecs = [];
             try {
                 for (const orgDir of fse.readdirSync(path.resolve(config.dataPath))) {
-                    if (taskSpecs.length > maxTasks) {
-                        break;
-                    }
                     const transDir = path.resolve(config.dataPath, orgDir);
                     if (fse.pathExistsSync(transDir) && fse.lstatSync(transDir).isDirectory()) {
                         for (const ownerTranslationId of fse.readdirSync(transDir)) {
-                            if (taskSpecs.length > maxTasks) {
-                                break;
-                            }
                             for (const revision of fse.readdirSync(path.join(transDir, ownerTranslationId))) {
                                 if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinctError.json'))) {
                                     continue;
@@ -44,15 +37,9 @@ function doRenderCron(config) {
                                 if (!fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'succinct.json'))) {
                                     const [owner, translationId] = ownerTranslationId.split("--");
                                     if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usfmBooks'))) {
-                                        if (taskSpecs.length >= maxTasks) {
-                                            break;
-                                        }
                                         taskSpecs.push([orgDir, owner, translationId, revision, 'usfm']);
                                     }
                                     if (fse.pathExistsSync(path.join(transDir, ownerTranslationId, revision, 'usxBooks'))) {
-                                        if (taskSpecs.length >= maxTasks) {
-                                            break;
-                                        }
                                         taskSpecs.push([orgDir, owner, translationId, revision, 'usx']);
                                     }
                                 }
@@ -70,7 +57,13 @@ function doRenderCron(config) {
                 return;
             }
             try {
-                for (const taskSpec of taskSpecs.slice(0, (taskSpecs.length - nLocked))) {
+                for (
+                    const taskSpec of taskSpecs
+                    .map(value => ({ value, sort: Math.random() }))
+                    .sort((a, b) => a.sort - b.sort)
+                    .map(({ value }) => value)
+                    .slice(0, Math.max(config.nWorkers - nLocked, 0))
+                    ) {
                     if (config.verbose) {
                         config.incidentLogger.info({
                             context: {running: "cronTask"},
