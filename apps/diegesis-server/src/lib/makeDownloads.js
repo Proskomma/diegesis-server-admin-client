@@ -2,6 +2,8 @@ const {Proskomma} = require('proskomma-core');
 const {PerfRenderFromProskomma, transforms, mergeActions} = require('proskomma-json-tools');
 const {ptBooks} = require('proskomma-utils');
 const path = require("path");
+const fse = require('fs-extra');
+const {parentPort} = require("node:worker_threads");
 const {
     transPath,
     usfmDir,
@@ -14,68 +16,10 @@ const {
     succinctPath,
     lockPath,
 } = require("./dataPaths.js");
-const fse = require('fs-extra');
-const {parentPort} = require("node:worker_threads");
-const appRoot = path.resolve(".");
+const documentStatsActions = require("./documentStatsActions");
+const localJustTheBibleActions = require("./localJustTheBibleActions");
 
-const localJustTheBibleActions = {
-    startMilestone: [
-        {
-            description: "Ignore startMilestone events",
-            test: () => true,
-            action: () => {
-            }
-        },
-    ],
-    endMilestone: [
-        {
-            description: "Ignore endMilestone events",
-            test: () => true,
-            action: () => {
-            }
-        },
-    ],
-    startWrapper: [
-        {
-            description: "Ignore startWrapper events",
-            test: () => true,
-            action: () => {
-            }
-        },
-    ],
-    endWrapper: [
-        {
-            description: "Ignore endWrapper events",
-            test: () => true,
-            action: () => {
-            }
-        },
-    ],
-    blockGraft: [
-        {
-            description: "Ignore blockGraft events, except for title (\\mt)",
-            test: (environment) => environment.context.sequences[0].block.subType !== 'title',
-            action: (environment) => {
-            }
-        },
-    ],
-    inlineGraft: [
-        {
-            description: "Ignore inlineGraft events",
-            test: () => true,
-            action: () => {
-            }
-        },
-    ],
-    mark: [
-        {
-            description: "Ignore mark events, except for chapter and verses",
-            test: ({context}) => !['chapter', 'verses'].includes(context.sequences[0].element.subType),
-            action: () => {
-            }
-        },
-    ]
-};
+const appRoot = path.resolve(".");
 
 function doDownloads({dataPath, orgDir, owner, transId, revision, contentType}) {
     try {
@@ -180,7 +124,24 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         perf: [],
         simplePerf: [],
         sofria: [],
-        simpleSofria: []
+        stats: {
+            nOT: 0,
+            nNT: 0,
+            nDC: 0,
+            nChapters: 0,
+            nVerses: 0,
+            nIntroductions: 0,
+            nHeadings: 0,
+            nFootnotes: 0,
+            nXrefs: 0,
+            nStrong: 0,
+            nLemma: 0,
+            nGloss: 0,
+            nContent: 0,
+            nMorph: 0,
+            nOccurrences: 0,
+            documents: {}
+        }
     };
     let docSetId;
     let docInfo;
@@ -198,15 +159,10 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         const docSet = pk.gqlQuerySync('{docSets { id documents { bookCode: header(id: "bookCode") sequences {type} } } }').data.docSets[0];
         docSetId = docSet.id;
         const docSetBookCodes = docSet.documents.map(d => d.bookCode);
-        docInfo = {
-            nOT: 0,
-            nNT: 0,
-            nDC: 0
-        };
         for (const bookCode of docSetBookCodes) {
             for (const section of ['ot', 'nt', 'dc']) {
                 if (ptBooks[bookCode].categories.includes(section)) {
-                    docInfo[`n${section.toUpperCase()}`]++;
+                    ret.stats[`n${section.toUpperCase()}`]++;
                 }
             }
         }
@@ -216,29 +172,9 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 sequenceTypes.add(sequenceType);
             }
         }
-        docInfo.hasIntroductions = sequenceTypes.has("introduction");
-        docInfo.hasHeadings = sequenceTypes.has("heading");
-        docInfo.hasFootnotes = sequenceTypes.has("footnote");
-        docInfo.hasXrefs = sequenceTypes.has("xref");
-
-        const metadataPath = path.join(
-            transPath(
-                dataPath,
-                orgDir,
-                metadata.owner,
-                metadata.id,
-                metadata.revision
-            ),
-            'metadata.json'
-        );
-        const newMetadata = {...metadata, ...docInfo};
-        delete newMetadata.ot;
-        delete newMetadata.nt;
-        delete newMetadata.dc;
-        fse.writeJsonSync(metadataPath, newMetadata);
 
         let metadataTags = `"title:${metadata.title}" "copyright:${metadata.copyright}" "language:${metadata.languageCode}"`;
-        metadataTags += ` "nOT:${docInfo.nOT}" "nNT:${docInfo.nNT}" "nDC:${docInfo.nDC}"`;
+        metadataTags += ` "nOT:${ret.stats.nOT}" "nNT:${ret.stats.nNT}" "nDC:${ret.stats.nDC}"`;
         if (metadata.textDirection) {
             metadataTags += ` "direction:${metadata.textDirection}"`;
         }
@@ -263,7 +199,10 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
         fse.remove(lockPath(dataPath, orgDir, owner, transId, revision));
         return;
     }
-    const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({id: d.id, book: d.bookCode}));
+    const documents = pk.gqlQuerySync(`{docSet(id: """${docSetId}""") {documents { id bookCode: header(id:"bookCode")} } }`).data.docSet.documents.map(d => ({
+        id: d.id,
+        book: d.bookCode
+    }));
     for (const doc of documents) {
         let docResult = null;
         try {
@@ -320,6 +259,38 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 });
             }
         }
+        if (docResult) {
+            try {
+                const cl = new PerfRenderFromProskomma(
+                    {
+                        proskomma: pk,
+                        actions: documentStatsActions,
+                    },
+                );
+                const output = {};
+
+                cl.renderDocument(
+                    {
+                        docId: doc.id,
+                        config: {},
+                        output,
+                    },
+                );
+                ret.stats.documents[doc.book] = output;
+            } catch (err) {
+                docResult = null;
+                parentPort.postMessage({
+                    generatedBy: 'cron',
+                    context: {
+                        docSetId,
+                        doc: doc.id,
+                        book: doc.book,
+                        making: "stats"
+                    },
+                    message: err.message,
+                });
+            }
+        }
         try {
             const docResult = pk.gqlQuerySync(`{document(id: """${doc.id}""") { bookCode: header(id:"bookCode") sofria } }`).data.document;
             ret.sofria.push([docResult.bookCode, docResult.sofria]);
@@ -335,7 +306,25 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 message: err.message,
             });
         }
-        try {
+    }
+    try {
+        for (const [book, bookStats] of Object.entries(ret.stats.documents)) {
+            for (const stat of [
+                "nChapters",
+                "nVerses",
+                "nIntroductions",
+                "nHeadings",
+                "nFootnotes",
+                "nXrefs",
+                "nStrong",
+                "nLemma",
+                "nGloss",
+                "nContent",
+                "nMorph",
+                "nOccurrences",
+            ]) {
+                ret.stats[stat] += bookStats[stat];
+            }
             const metadataPath = path.join(
                 transPath(
                     dataPath,
@@ -346,20 +335,22 @@ function makeDownloads(dataPath, org, orgDir, metadata, docType, docs, vrsConten
                 ),
                 'metadata.json'
             );
-            const newMetadata = {...metadata, ...docInfo};
-            fse.writeJsonSync(metadataPath, newMetadata);
-        } catch (err) {
-            parentPort.postMessage({
-                generatedBy: 'cron',
-                context: {
-                    docSetId,
-                    doc: doc.id,
-                    book: doc.book,
-                    making: "augmented metadata.json"
-                },
-                message: err.message,
-            });
+            const newMetadata = {...metadata, stats: ret.stats};
+            for (const toDelete of ["ot", "nt", "dc", "hasIntroductions", "hasHeadings", "hasFootnotes", "hasXrefs"]) {
+                delete newMetadata[toDelete];
+            }
+            fse.writeFileSync(metadataPath, JSON.stringify(newMetadata, null, 2));
         }
+    } catch
+        (err) {
+        parentPort.postMessage({
+            generatedBy: 'cron',
+            context: {
+                docSetId,
+                making: "augmented metadata.json"
+            },
+            message: err.message,
+        });
     }
     return ret;
 }
