@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {Typography, Grid, Switch, FormGroup, FormControlLabel, Box} from "@mui/material";
-
+import {Typography, Grid, Switch, FormGroup, FormControlLabel, Box, Button} from "@mui/material";
+import {Tune} from '@mui/icons-material';
 import {SofriaRenderFromProskomma} from "proskomma-json-tools";
 import sofria2WebActions from '../renderer/sofria2web';
 import DocSelector from "./DocSelector";
@@ -159,16 +159,11 @@ export default function BrowseScripture({pk}) {
             <Grid item xs={12} sm={6} md={4} lg={2}>
                 <Box sx={{marginRight: "5px"}}>
                     <FormGroup sx={{padding: "10px", backgroundColor: showSettings ? "#ccc" : "inherit"}}>
-                        <FormControlLabel
-                            control={<Switch
-                                checked={showSettings}
-                                color="primary"
-                                onChange={() => setShowSettings(!showSettings)}
-                                inputProps={{'aria-label': 'controlled'}}
-                                disabled={!scriptureData.rendered || scriptureData.docId !== scriptureData.renderedDocId || scriptureData.updatedAtts}
-                            />}
-                            label="Settings"
-                        />
+                        <Button
+                            onClick={() => setShowSettings(!showSettings)}
+                        >
+                            <Tune />
+                        </Button>
                         {
                             showSettings &&
                             <>

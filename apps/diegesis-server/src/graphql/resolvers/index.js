@@ -252,6 +252,18 @@ const makeResolvers = async config => {
         }
     }
 
+    const hasAllFeatures = (trans, features) => {
+        let ret = true;
+        for (const f of features) {
+            const fField = `n${f.substring(0, 1).toUpperCase()}${f.substring(1)}`;
+            if (!trans.stats[fField]) {
+                ret = false;
+                break;
+            }
+        }
+        return ret;
+    }
+
     const scalarResolvers = {
         OrgName: orgNameScalar,
         TranslationId: translationIdScalar,
@@ -297,6 +309,7 @@ const makeResolvers = async config => {
                     args,
                     context,
                     localTranslations(org) || [])
+                    .filter(t => hasAllFeatures(t, args.withFeatures || []));
             },
             catalogEntry: (org, args, context) => {
                 if (!context.auth || !context.auth.authenticated) {
